@@ -1,0 +1,16 @@
+.slot-cell {
+  flex-shrink: 0;
+  width: var(--slot-width);
+  min-width: var(--slot-width);
+  height: var(--row-height-current, var(--row-height));
+  border-right: 1px solid var(--board-border);
+  border-bottom: 1px solid var(--board-border); 
+  transition: background var(--board-transition-fast);
+}
+.slot-cell--milestone {
+  border-right-color: var(--board-border-2);
+}
+.slot-cell--overloaded {
+  background: var(--board-overload-bg);
+  border-top: 2px solid var(--board-overload-border);
+}

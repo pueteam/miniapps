@@ -1,0 +1,364 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@600;700&display=swap');
+
+/* ── Brand palette ─────────────────────────── */
+:root {
+  --color-brand-blue-900: #004f87;
+  --color-brand-blue-800: #0a5b95;
+  --color-brand-blue-700: #1e6bad;
+  --color-brand-pink-600: #d10053;
+  --color-brand-pink-500: #e5005a;
+
+  --color-neutral-white: #ffffff;
+  --color-neutral-25: #f9fafb;
+  --color-neutral-50: #f3f4f6;
+  --color-neutral-100: #e8eaed;
+  --color-neutral-200: #d2d6db;
+  --color-neutral-300: #c8cdd3;
+  --color-neutral-500: #8a9099;
+  --color-neutral-700: #4a4f57;
+  --color-neutral-900: #1b1f26;
+  --color-background-soft: #f7f7f5;
+  --color-background-default: #ffffff;
+
+
+  /* ── Semantic page tokens ─────────────────── */
+  --color-bg-page: var(--color-background-default);
+  --color-bg-surface: var(--color-background-default);
+  --color-bg-subtle: var(--color-background-soft);
+
+  --color-text-primary: var(--color-brand-blue-900);
+  --color-text-secondary: var(--color-neutral-700);
+  --color-text-muted: var(--color-neutral-500);
+
+  --color-border-subtle: var(--color-neutral-100);
+  --color-border-default: var(--color-neutral-300);
+
+  --color-accent-primary: var(--color-brand-blue-900);
+  --color-accent-hover: var(--color-brand-blue-800);
+  --color-accent-active: var(--color-brand-blue-700);
+
+  /* ── Typography ───────────────────────────── */
+  --font-display: 'Sora', system-ui, sans-serif; /* headings, hero */
+  --font-body: 'Manrope', system-ui, sans-serif; /* body copy, UI  */
+  --font-primary: 'Manrope', 'Inter', sans-serif;
+  --font-alternate: 'Sora', 'Inter', sans-serif;
+  --font-ui: 'Inter', sans-serif;
+  
+  /* ── Spacing scale ────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Radii ────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* ── Shadows ──────────────────────────────── */
+  --shadow-subtle:
+    0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-soft:
+    0 4px 12px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.06);
+  --shadow-lifted:
+    0 8px 24px rgba(0, 79, 135, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+
+  /* ── Component tokens ─────────────────────── */
+  --button-height: 44px;
+  --input-height: 44px;
+  --card-radius: var(--radius-md);
+  --card-padding: var(--space-6);
+
+  /* ── Transitions ──────────────────────────── */
+  --transition-fast: 120ms ease;
+  --transition-normal: 220ms ease;
+}
+
+/* ── Reset ─────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* ── Base body ─────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
+}
+
+/* ── Page shell ────────────────────────────── */
+.app-shell {
+  /* max-width: 1080px; */
+  margin: 0 auto;
+  padding: var(--space-10) clamp(var(--space-4), 4vw, var(--space-12));
+}
+
+.app-shell__header {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+  position: relative;
+  padding-right: calc(var(--space-12) + 56px);
+}
+
+.app-shell__header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.app-shell__header p {
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  max-width: 56ch;
+}
+
+/* ── Card ──────────────────────────────────── */
+.card {
+  display: grid;
+  gap: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  box-shadow: var(--shadow-subtle);
+  overflow: auto;
+}
+
+.card h2 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.card p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Button ────────────────────────────────── */
+button.btn,
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--button-height);
+  padding: 0 var(--space-5);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-primary);
+  color: var(--color-neutral-white);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+button.btn:hover,
+a.btn:hover {
+  background: var(--color-accent-hover);
+  box-shadow: 0 4px 12px rgba(0, 79, 135, 0.25);
+  transform: translateY(-1px);
+}
+
+button.btn:active,
+a.btn:active {
+  background: var(--color-accent-active);
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+button.install-btn,
+a.install-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  width: 48px;
+  height: 48px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--color-accent-primary);
+  color: var(--color-neutral-white);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 79, 135, 0.28);
+  animation: install-beacon 3s ease-out 1.2s infinite;
+  transition:
+    width 0.32s cubic-bezier(0.34, 1.4, 0.64, 1),
+    gap 0.28s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+@keyframes install-beacon {
+  0%, 100% {
+    box-shadow: 0 2px 10px rgba(0, 79, 135, 0.28), 0 0 0 0 rgba(0, 79, 135, 0.32);
+  }
+  55% {
+    box-shadow: 0 2px 10px rgba(0, 79, 135, 0.28), 0 0 0 9px rgba(0, 79, 135, 0);
+  }
+}
+
+button.install-btn:hover,
+a.install-btn:hover {
+  width: 136px;
+  gap: 8px;
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 79, 135, 0.32);
+  animation: none;
+}
+
+button.install-btn:active,
+a.install-btn:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 2px 8px rgba(0, 79, 135, 0.22);
+  background: var(--color-accent-active);
+}
+
+.install-btn__icon {
+  flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+button.install-btn:hover .install-btn__icon,
+a.install-btn:hover .install-btn__icon {
+  transform: translateY(1.5px);
+}
+
+.install-btn__label {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-width 0.28s ease 0.04s,
+    opacity 0.18s ease 0.1s;
+}
+
+button.install-btn:hover .install-btn__label,
+a.install-btn:hover .install-btn__label {
+  max-width: 90px;
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .app-shell__header {
+    padding-right: 64px;
+  }
+
+  button.install-btn,
+  a.install-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .install-btn__icon {
+    font-size: 1.15rem;
+  }
+}
+
+/* ── Input / Textarea ──────────────────────── */
+input,
+textarea,
+select {
+  width: 100%;
+  /* min-height: var(--input-height); */
+  /* padding: 0 var(--space-4); */
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px rgba(0, 79, 135, 0.12);
+}
+
+textarea {
+  padding-block: var(--space-3);
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Thin scrollbars — track is invisible, thumb uses board border token */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--board-border-2, #cbd0d8) transparent;
+}
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--board-border-2, #cbd0d8);
+  border-radius: 3px;
+}

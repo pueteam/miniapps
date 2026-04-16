@@ -1,0 +1,8 @@
+.scheduler-pane { height: 100%; overflow: auto; position: relative; scrollbar-width: thin; scrollbar-color: var(--board-border-2) transparent; }
+.scheduler-pane::-webkit-scrollbar { width: 5px; height: 5px; }
+.scheduler-pane::-webkit-scrollbar-thumb { background: var(--board-border-2); border-radius: 3px; }
+.scheduler-pane__header { display: flex; position: sticky; top: 0; z-index: 10; background: var(--board-surface); }
+.scheduler-pane__corner { position: sticky; left: 0; z-index: 20; width: var(--row-header-width); min-width: var(--row-header-width); height: var(--header-slot-height); background: var(--board-surface); border-right: 2px solid var(--board-border-2); border-bottom: 2px solid var(--board-border-2); display: flex; align-items: center; padding: 0 var(--board-space-lg); flex-shrink: 0; }
+.scheduler-pane__corner-label { font-family: var(--board-font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.8px; color: var(--board-text-3); }
+.scheduler-pane__body { display: flex; flex-direction: column; position: relative; }
+.scheduler-pane__empty { padding: 48px var(--board-space-lg); color: var(--board-text-3); font-size: 14px; text-align: center; }

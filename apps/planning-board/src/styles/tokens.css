@@ -1,0 +1,161 @@
+/* ─────────────────────────────────────────────
+   tokens.css — Board tokens aligned with build
+   This file exposes both the app-level tokens
+   (--color-*, --font-*, --spacing-*, --radius-*)
+   and the board-scoped tokens (--board-*) for
+   backward compatibility with component CSS.
+───────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  /* ── Global (build) tokens — used by shared base.css ── */
+  --breakpoint-mobile: 375px;
+  --breakpoint-tablet: 768px;
+
+  --topbar-height: 52px;
+  --toolbar-height: 44px;
+  --statsbar-height: 34px;
+  --row-header-width: 230px;
+  --row-height: 64px;
+  --slot-width: 52px;
+  --bar-height: 32px;
+  --bar-track-height: 4px;
+  --header-slot-height: 42px;
+  --avatar-size: 34px;
+  --avatar-radius: 8px;
+  --resize-handle-width: 9px;
+
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8f9fb;
+  --color-surface-3: #eef0f4;
+
+  --color-border: #e2e5ea;
+  --color-border-2: #cbd0d8;
+
+  --color-text: #1a1d23;
+  --color-text-2: #5a6172;
+  --color-text-3: #9aa0ad;
+
+  --color-accent: #4f6ef7;
+  --color-accent-2: #7089f9;
+  --color-accent-glow: rgba(79, 110, 247, 0.12);
+  --color-selected-bg: rgba(79, 110, 247, 0.06);
+
+  --color-overload-bg: rgba(220, 53, 69, 0.08);
+  --color-overload-border: #dc3545;
+  --color-danger: #dc3545;
+  --color-danger-hover: #bb2d3b;
+
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-brand: var(--font-body);
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+
+  /* --radius-sm: 4px;
+  --radius-md: 7px;
+  --radius-bar: 7px; */
+
+  --transition-fast: 0.12s ease;
+  --transition-normal: 0.2s ease;
+
+  /* Backwards-compatible board tokens (used by existing components) */
+  --board-bg: var(--color-bg);
+  --board-surface: var(--color-surface);
+  --board-surface-2: var(--color-surface-2);
+  --board-surface-3: var(--color-surface-3);
+
+  --board-border: var(--color-border);
+  --board-border-2: var(--color-border-2);
+
+  --board-text: var(--color-text);
+  --board-text-2: var(--color-text-2);
+  --board-text-3: var(--color-text-3);
+
+  --board-accent: var(--color-accent);
+  --board-accent-2: var(--color-accent-2);
+  --board-accent-glow: rgba(79, 110, 247, 0.14);
+  --board-selected-bg: rgba(79, 110, 247, 0.07);
+
+  --board-overload-bg: var(--color-overload-bg);
+  --board-overload-border: var(--color-overload-border);
+  --board-danger: var(--color-danger);
+  --board-danger-hover: var(--color-danger-hover);
+
+  --board-font-ui: var(--font-body);
+  --board-font-mono: var(--font-mono);
+  --board-font-brand: var(--board-font-ui);
+
+  --board-space-xs: var(--spacing-xs);
+  --board-space-sm: var(--spacing-sm);
+  --board-space-md: var(--spacing-md);
+  --board-space-lg: var(--spacing-lg);
+  --board-space-xl: 24px;
+
+  --board-radius-sm: var(--radius-sm);
+  --board-radius-md: var(--radius-md);
+  --board-radius-bar: var(--radius-bar);
+
+  --board-transition-fast: var(--transition-fast);
+  --board-transition-normal: var(--transition-normal);
+
+  --board-shadow-bar: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --board-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --board-shadow-popup:
+    0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Control tokens: buttons, inputs, sliders, cards, messages */
+:root {
+  --button-height: 44px;
+  --input-height: 44px;
+  --card-radius: var(--radius-md);
+  --card-padding: 24px;
+
+  --btn-bg: var(--color-accent);
+  --btn-bg-hover: var(--color-accent-2);
+  --btn-bg-active: var(--color-accent-2);
+  --btn-text: #ffffff;
+
+  --input-bg: var(--color-surface);
+  --input-border: var(--color-border-2);
+  --input-focus: var(--color-accent);
+
+  --slider-track: var(--color-border-2);
+  --slider-thumb: var(--color-accent);
+
+  --msg-bg-info: var(--color-surface-2);
+  --msg-bg-warning: var(--color-overload-bg);
+  --msg-bg-danger: rgba(220, 53, 69, 0.08);
+
+  --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lifted: 0 8px 24px rgba(0, 79, 135, 0.12);
+
+  /* compatibility for controls that rely on unprefixed names */
+  --accent-color: var(--color-accent);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --topbar-height: 48px;
+    --toolbar-height: 88px;
+    --statsbar-height: 40px;
+    --row-header-width: 200px;
+  }
+}
+
+@media (max-width: 375px) {
+  :root {
+    --topbar-height: 72px;
+    --toolbar-height: 118px;
+    --statsbar-height: 44px;
+    --row-header-width: 168px;
+    --spacing-lg: 12px;
+  }
+}

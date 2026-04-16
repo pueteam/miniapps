@@ -1,0 +1,48 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  height: var(--topbar-height);
+  padding: 0 var(--board-space-lg);
+  background: var(--board-surface);
+  border-bottom: 1px solid var(--board-border-2);
+  gap: var(--board-space-md);
+  flex-shrink: 0;
+  z-index: 200;
+}
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--board-font-brand);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--board-text);
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+.topbar__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--board-accent);
+  box-shadow:
+    0 0 10px var(--board-accent),
+    0 0 20px var(--board-accent-glow);
+  animation: pip-pulse 2.5s ease-in-out infinite;
+}
+@keyframes pip-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 6px var(--board-accent),
+      0 0 14px var(--board-accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 12px var(--board-accent),
+      0 0 28px var(--board-accent-glow);
+  }
+}
+.topbar__spacer {
+  flex: 1;
+}

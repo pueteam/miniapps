@@ -1,0 +1,33 @@
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript, Preact, Vite, Vitest
+  Linting: ESLint + TypeScript ESLint
+  Type checking: tsc --noEmit
+  Testing: Vitest with @testing-library/preact
+  Database: IndexedDB via Dexie
+  Drag & drop: d3-drag, d3-selection
+  UI: Floating UI for positioning
+
+  ## App-specific context
+  - Planning board application for task/visual planning
+  - Uses PUEDATA base visual system (tokens, semantic typography, spacing, radius)
+  - PWA-enabled
+  - Drag-and-drop task positioning on a canvas board
+
+  ## Relevant specs
+  specs:
+    - home-brand-foundation (PUEDATA visual system)
+    - miniapp-scaffold-brand-foundation (scaffold styles)
+    - pwa-install-ui (PWA install UI)
+    - app-config.spec (app.config.json contract)
+    - apps-registry.spec (home registry integration)
+    - pwa-conventions.spec (PWA conventions)
+    - slug-rules.spec (slug validation)
+    - useLocalStorage.spec (local persistence hook)
+
+rules:
+  proposal:
+    - Keep proposals under 500 words
+  tasks:
+    - Break tasks into chunks of max 2 hours

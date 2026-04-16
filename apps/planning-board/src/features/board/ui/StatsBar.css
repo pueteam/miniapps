@@ -1,0 +1,5 @@
+.stats-bar { display: flex; align-items: center; gap: 22px; height: var(--statsbar-height); padding: 0 var(--board-space-lg); background: var(--board-surface); border-top: 1px solid var(--board-border-2); flex-shrink: 0; z-index: 10; overflow: hidden; }
+.stats-bar__stat { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--board-text-3); white-space: nowrap; }
+.stats-bar__dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.stats-bar__stat b { color: var(--board-text-2); font-weight: 600; }
+.stats-bar__meta { margin-left: auto; font-family: var(--board-font-mono); font-size: 9.5px; color: var(--board-text-3); letter-spacing: 0.3px; white-space: nowrap; }

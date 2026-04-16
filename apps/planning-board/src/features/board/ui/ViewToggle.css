@@ -1,0 +1,4 @@
+.view-toggle { display: flex; background: var(--board-bg); border: 1px solid var(--board-border-2); border-radius: var(--board-radius-md); padding: 3px; gap: 2px; }
+.view-toggle__btn { height: 24px; padding: 0 10px; border-radius: var(--board-radius-sm); border: none; background: transparent; color: var(--board-text-3); font-family: var(--board-font-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.8px; cursor: pointer; transition: background var(--board-transition-fast), color var(--board-transition-fast); }
+.view-toggle__btn--active { background: var(--board-surface-3); color: var(--board-text); }
+.view-toggle__btn:not(.view-toggle__btn--active):hover { color: var(--board-text-2); }

@@ -1,0 +1,96 @@
+/* ─────────────────────────────────────────────
+   reset.css — Global reset
+   Structural reset + scrollbar skin (uses
+   --board-border-2 for thumb, resolved at
+   render time from tokens.css).
+───────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+/* body {
+  line-height: 1.5;
+  font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+  font-size: 14px;
+  color: var(--color-text, #1a1d23);
+  background: var(--color-bg, #f4f5f7);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+} */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  /* max-width: 100%; */
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Normalize control defaults (matches build output) */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* Thin scrollbars — track is invisible, thumb uses board border token */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--board-border-2, #cbd0d8) transparent;
+}
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--board-border-2, #cbd0d8);
+  border-radius: 3px;
+}

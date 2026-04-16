@@ -1,0 +1,23 @@
+import Dexie, { type Table } from 'dexie';
+import type { Profile, Assignment } from '../domain/types';
+import { generateInitials, getProfileColor } from '../domain/color';
+
+class PlanningDB extends Dexie {
+  profiles!: Table<Profile, string>;
+  assignments!: Table<Assignment, string>;
+
+  constructor(name = 'resplanner') {
+    super(name);
+    this.version(1).stores({ profiles: 'id', assignments: 'id, profileId' });
+    this.version(2).stores({ profiles: 'id', assignments: 'id, profileId' }).upgrade(async (tx) => {
+      let index = 0;
+      await tx.table('profiles').toCollection().modify((profile: Partial<Profile>) => {
+        profile.color ??= getProfileColor(index);
+        profile.initials ??= generateInitials(profile.name ?? '');
+        index += 1;
+      });
+    });
+  }
+}
+
+export const db = new PlanningDB();

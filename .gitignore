@@ -1,0 +1,76 @@
+# Node modules
+node_modules
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+dist-pages/
+dev-dist/
+build/
+out/
+out-tsc/
+
+# Tool caches and artifacts
+.cache/
+.next/
+.vite/
+.svelte-kit/
+.nuxt/
+.vercel/
+.eslintcache
+.pnpm-store/
+.pnp
+.pnp.js
+.turbo/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.*.local
+.env.local
+.local
+
+# IDEs and editor folders
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.history/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# TypeScript
+*.tsbuildinfo
+
+# Tests / coverage
+coverage/
+.vitest/
+jest/
+
+# Temporary
+tmp/
+temp/
+node-repl-history
+
+# Misc
+*.tgz
+
+# AI
+.agents/
+.opencode/
+.github/skills/
+.github/prompts/
+changes/
+skills-lock.json

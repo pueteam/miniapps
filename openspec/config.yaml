@@ -1,0 +1,24 @@
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript, React, Vite, PWA, GitHub Pages
+  Monorepo structure: apps/ (miniapps), tooling/ (CLI), scripts/ (automation)
+  Package manager: pnpm
+  Deployment: GitHub Pages (static build)
+  
+  Conventions:
+  - Miniapp names: kebab-case (e.g., "home", "notes", "planning-board")
+  - Reserved names: "home", "shared", "config"
+  - app.config.json: shared contract for miniapp metadata
+  - PWA and router flags in config drive generated artifacts
+  - Styles: semantic token vocabulary (page-background, surface-background, etc.)
+  - Install UI: baseline included only for pwa: true
+
+rules:
+  proposal:
+    - Keep proposals under 800 words
+    - Always include "Evidence" section with file paths
+    - Reference specs by name in requirements
+  tasks:
+    - Break into independent implementation units
+    - Group related changes

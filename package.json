@@ -1,0 +1,17 @@
+{
+  "name": "miniapps",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "new:miniapp": "node tooling/create-miniapp/src/cli.js",
+    "validate:miniapps": "node scripts/validate-miniapps.mjs",
+    "generate:home": "node scripts/generate-home-registry.mjs",
+    "build:pages": "node scripts/build-pages.mjs",
+    "preview:pages": "node scripts/preview-pages.mjs",
+    "check": "pnpm validate:miniapps",
+    "test:scripts": "node --test scripts/tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}

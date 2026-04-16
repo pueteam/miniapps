@@ -1,0 +1,15 @@
+/* ─────────────────────────────────────────────
+   index.css — Planning Board entry point
+
+   Import order matters:
+   1. base     — page identity & brand tokens
+   2. reset    — structural baseline + scrollbar
+   3. tokens   — board-specific tokens (override
+                 or extend where needed)
+
+   Any component stylesheets import AFTER this.
+───────────────────────────────────────────── */
+
+@import '../../../../styles/base.css';
+@import './reset.css';
+@import './tokens.css';

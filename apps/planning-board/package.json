@@ -1,0 +1,42 @@
+{
+  "name": "@miniapps/planning-board",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.7.6",
+    "@preact/signals": "^2.9.0",
+    "d3-drag": "^3.0.0",
+    "d3-selection": "^3.0.0",
+    "dexie": "^4.4.2",
+    "nanoid": "^5.1.7",
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "@testing-library/preact": "^3.2.4",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-selection": "^3.0.11",
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "eslint": "^10.2.0",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "^17.4.0",
+    "jsdom": "^29.0.1",
+    "ts-unused-exports": "^11.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.8",
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^4.1.2"
+  }
+}

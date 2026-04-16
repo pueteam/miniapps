@@ -1,0 +1,24 @@
+.slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--slot-width);
+  min-width: var(--slot-width);
+  height: var(--header-slot-height);
+  font-family: var(--board-font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--board-text-3);
+  background: var(--board-surface);
+  border-right: 1px solid var(--board-border);
+  border-bottom: 2px solid var(--board-border-2);
+  letter-spacing: 0.2px;
+  user-select: none;
+  flex-shrink: 0;
+  position: relative;
+  transition: color var(--board-transition-fast);
+}
+.slot-header--milestone {
+  color: var(--board-text-2);
+}
+/* .slot-header--current { color: var(--board-accent); background: var(--board-accent-glow); } */

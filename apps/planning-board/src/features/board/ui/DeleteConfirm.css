@@ -1,0 +1,6 @@
+.delete-confirm { display: flex; align-items: center; gap: var(--board-space-xs); font-size: 11.5px; white-space: nowrap; width: 100%; }
+.delete-confirm__text { color: var(--board-text-2); font-size: 11px; }
+.delete-confirm__yes { padding: 2px var(--board-space-sm); background: var(--board-danger); color: #fff; border-radius: var(--board-radius-sm); font-size: 11px; font-weight: 500; transition: background var(--board-transition-fast); }
+.delete-confirm__yes:hover { background: var(--board-danger-hover); }
+.delete-confirm__no { padding: 2px var(--board-space-sm); background: transparent; border: 1px solid var(--board-border-2); border-radius: var(--board-radius-sm); font-size: 11px; color: var(--board-text-2); transition: background var(--board-transition-fast); }
+.delete-confirm__no:hover { background: var(--board-surface-3); }

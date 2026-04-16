@@ -1,0 +1,55 @@
+/* .app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+} */
+
+/* .app-shell__header {
+  padding: 8px 16px;
+  background: var(--board-surface);
+  border-bottom: 1px solid var(--board-border-2);
+  margin: 0;
+} */
+
+/* .app-shell > main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+} */
+
+/* .app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--board-bg);
+} */
+
+.app__topbar {
+  flex: 0 0 var(--topbar-height);
+}
+.app__toolbar {
+  flex: 0 0 var(--toolbar-height);
+}
+.app__scheduler {
+  flex: 1 1 0;
+  min-height: 0;
+}
+.app__statsbar {
+  flex: 0 0 var(--statsbar-height);
+}
+
+@media (max-width: 768px) {
+  .app__toolbar {
+    flex: 0 0 auto;
+  }
+  .app__statsbar {
+    flex: 0 0 auto;
+  }
+}
