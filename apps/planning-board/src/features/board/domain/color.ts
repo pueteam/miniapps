@@ -16,17 +16,17 @@ export function getProfileColor(index: number): string {
 
 export function generateInitials(name: string): string {
   const trimmed = name.trim();
-  if (!trimmed) return '??';
+  if (!trimmed) return '???';
   const words = trimmed.split(/\s+/);
   if (words.length >= 2) {
-    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+    return `${words[0][0]}${words[1][0]}${words[2]?.[0] || ''}`.toUpperCase();
   }
-  return trimmed.slice(0, 2).toUpperCase();
+  return trimmed.slice(0, 3).toUpperCase();
 }
 
 export function normalizeInitials(value: string, fallbackName: string): string {
   const trimmed = value.trim();
-  if (trimmed) return trimmed.slice(0, 2).toUpperCase();
+  if (trimmed) return trimmed.slice(0, 3).toUpperCase();
   return generateInitials(fallbackName);
 }
 

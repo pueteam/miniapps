@@ -50,7 +50,7 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
         <div
           className="profile-row__select"
         >
-          <div className="profile-row__avatar" style={{ background: profile.color }}>{profile.initials}</div>
+          <div className="profile-row__avatar" data-len={profile.initials.length} style={{ background: profile.color }}>{profile.initials}</div>
           <div className="profile-row__identity">
             <span className="profile-row__name">{profile.name}</span>
             {category && <span className="profile-row__category">{category}</span>}

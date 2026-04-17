@@ -43,6 +43,11 @@
   letter-spacing: 0.5px;
   color: var(--color-neutral-white);
   flex-shrink: 0;
+  overflow: hidden;
+}
+.profile-row__avatar[data-len='3'] {
+  font-size: 9px;
+  letter-spacing: 0.2px;
 }
 .profile-row:hover .profile-row__header {
   background: var(--board-surface-2);
