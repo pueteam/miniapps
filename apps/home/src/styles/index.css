@@ -1,22 +1,7 @@
-@import "../../../../styles/base.css";
-
-:root {
-  --color-bg-page: var(--color-background-soft);
-  --color-bg-surface: var(--color-background-default);
-  --color-text-primary: var(--color-brand-blue-900);
-  --color-text-secondary: var(--color-neutral-700);
-  --color-text-muted: var(--color-neutral-500);
-  --color-border-subtle: var(--color-neutral-100);
-  --color-border-default: var(--color-neutral-300);
-  --color-accent-primary: var(--color-brand-blue-900);
-  --color-accent-hover: var(--color-brand-blue-800);
-
-  --card-radius: var(--radius-md);
-  --card-padding: var(--space-6);
-}
+@import '../../../../styles/base.css';
 
 body {
-  background: var(--color-bg-page);
+  background: var(--color-bg-subtle);
 }
 
 .home-layout {
@@ -40,7 +25,7 @@ body {
 
 .hero p {
   margin: 0;
-  max-width: 60ch;
+  max-width: 120ch;
   color: var(--color-text-secondary);
   font-size: 1.125rem;
   line-height: 1.55;
@@ -64,7 +49,10 @@ body {
   text-decoration: none;
   color: inherit;
   box-shadow: var(--shadow-subtle);
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .app-card:hover {

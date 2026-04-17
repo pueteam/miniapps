@@ -1,3 +1,25 @@
-.export-btn { height: 32px; padding: 0 13px; background: var(--board-accent); border: 1px solid var(--board-accent-2); border-radius: var(--board-radius-md); color: #fff; font-size: 12.5px; font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap; box-shadow: 0 0 14px var(--board-accent-glow); transition: background var(--board-transition-fast), opacity var(--board-transition-fast); }
-.export-btn:hover:not(:disabled) { background: var(--board-accent-2); }
-.export-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.export-btn {
+  height: 32px;
+  padding: 0 13px;
+  background: var(--board-accent);
+  border: 1px solid var(--board-accent-2);
+  border-radius: var(--board-radius-md);
+  color: var(--color-neutral-white);
+  font-size: 12.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  box-shadow: 0 0 14px var(--board-accent-glow);
+  transition:
+    background var(--board-transition-fast),
+    opacity var(--board-transition-fast);
+}
+.export-btn:hover:not(:disabled) {
+  background: var(--board-accent-2);
+}
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

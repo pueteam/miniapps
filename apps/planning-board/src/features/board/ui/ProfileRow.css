@@ -16,7 +16,7 @@
   padding: 0 14px;
   background: var(--board-surface);
   border-right: 2px solid var(--board-border-2);
-  border-bottom: 1px solid var(--board-border); 
+  border-bottom: 1px solid var(--board-border);
   gap: 11px;
   overflow: hidden;
   transition: background var(--board-transition-fast);
@@ -32,7 +32,7 @@
   font-weight: 800;
   font-size: 11px;
   letter-spacing: 0.5px;
-  color: #fff;
+  color: var(--color-neutral-white);
   flex-shrink: 0;
 }
 .profile-row:hover .profile-row__header {

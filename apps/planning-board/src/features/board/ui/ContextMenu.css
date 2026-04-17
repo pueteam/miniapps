@@ -1,11 +1,45 @@
 .context-menu {
-  position: fixed; z-index: 9500; background: var(--board-surface); border: 1px solid var(--board-border-2);
-  border-radius: var(--board-radius-md); padding: 4px; min-width: 168px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
-  opacity: 0; transform: scale(0.95); transition: opacity 0.12s ease, transform 0.12s ease; pointer-events: none;
+  position: fixed;
+  z-index: 9500;
+  background: var(--board-surface);
+  border: 1px solid var(--board-border-2);
+  border-radius: var(--board-radius-md);
+  padding: 4px;
+  min-width: 168px;
+  box-shadow: var(--board-shadow-overlay);
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity var(--board-transition-fast),
+    transform var(--board-transition-fast);
+  pointer-events: none;
 }
-.context-menu--visible { opacity: 1; transform: scale(1); pointer-events: all; }
-.context-menu__action { height: 32px; border-radius: var(--board-radius-sm); display: flex; align-items: center; padding: 0 10px; gap: 8px; font-size: 12.5px; cursor: pointer; color: var(--board-text-2); transition: background var(--board-transition-fast), color var(--board-transition-fast); }
-.context-menu__action:hover { background: var(--board-surface-3); color: var(--board-text); }
-.context-menu__action--danger { color: var(--board-danger); }
-.context-menu__action--danger:hover { background: rgba(220,53,69,0.08); }
+.context-menu--visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+}
+.context-menu__action {
+  height: 32px;
+  border-radius: var(--board-radius-sm);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  font-size: 12.5px;
+  cursor: pointer;
+  color: var(--board-text-2);
+  transition:
+    background var(--board-transition-fast),
+    color var(--board-transition-fast);
+}
+.context-menu__action:hover {
+  background: var(--board-surface-3);
+  color: var(--board-text);
+}
+.context-menu__action--danger {
+  color: var(--board-danger);
+}
+.context-menu__action--danger:hover {
+  background: var(--board-overload-bg);
+}

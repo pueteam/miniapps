@@ -1,15 +1,13 @@
 /* ─────────────────────────────────────────────
-   tokens.css — Board tokens aligned with build
-   This file exposes both the app-level tokens
-   (--color-*, --font-*, --spacing-*, --radius-*)
-   and the board-scoped tokens (--board-*) for
-   backward compatibility with component CSS.
+  tokens.css — Board tokens mapped to shared base tokens
+  base.css is imported first in index.css, so this file only
+  adapts board aliases and keeps board-specific dimensions.
 ───────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* ── Global (build) tokens — used by shared base.css ── */
+  /* ── Board layout primitives (board-specific) ── */
   --breakpoint-mobile: 375px;
   --breakpoint-tablet: 768px;
 
@@ -26,43 +24,33 @@
   --avatar-radius: 8px;
   --resize-handle-width: 9px;
 
-  --color-bg: #f4f5f7;
-  --color-surface: #ffffff;
-  --color-surface-2: #f8f9fb;
-  --color-surface-3: #eef0f4;
+  /* ── App-level aliases mapped to shared base.css ── */
+  --color-bg: var(--color-bg-subtle);
+  --color-surface: var(--color-bg-surface);
+  --color-surface-2: var(--color-neutral-25);
+  --color-surface-3: var(--color-neutral-50);
 
-  --color-border: #e2e5ea;
-  --color-border-2: #cbd0d8;
+  --color-border: var(--color-border-subtle);
+  --color-border-2: var(--color-border-default);
 
-  --color-text: #1a1d23;
-  --color-text-2: #5a6172;
-  --color-text-3: #9aa0ad;
+  --color-text: var(--color-text-primary);
+  --color-text-2: var(--color-text-secondary);
+  --color-text-3: var(--color-text-muted);
 
-  --color-accent: #4f6ef7;
-  --color-accent-2: #7089f9;
-  --color-accent-glow: rgba(79, 110, 247, 0.12);
-  --color-selected-bg: rgba(79, 110, 247, 0.06);
+  --color-accent: var(--color-accent-primary);
+  --color-accent-2: var(--color-accent-hover);
+  --color-accent-glow: rgba(0, 79, 135, 0.12);
+  --color-selected-bg: rgba(0, 79, 135, 0.08);
 
   --color-overload-bg: rgba(220, 53, 69, 0.08);
   --color-overload-border: #dc3545;
   --color-danger: #dc3545;
   --color-danger-hover: #bb2d3b;
 
-  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --font-brand: var(--font-body);
+  --font-brand: var(--font-display);
 
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 12px;
-  --spacing-lg: 16px;
-
-  /* --radius-sm: 4px;
-  --radius-md: 7px;
-  --radius-bar: 7px; */
-
-  --transition-fast: 0.12s ease;
-  --transition-normal: 0.2s ease;
+  --radius-bar: 7px;
 
   /* Backwards-compatible board tokens (used by existing components) */
   --board-bg: var(--color-bg);
@@ -79,8 +67,8 @@
 
   --board-accent: var(--color-accent);
   --board-accent-2: var(--color-accent-2);
-  --board-accent-glow: rgba(79, 110, 247, 0.14);
-  --board-selected-bg: rgba(79, 110, 247, 0.07);
+  --board-accent-glow: var(--color-accent-glow);
+  --board-selected-bg: var(--color-selected-bg);
 
   --board-overload-bg: var(--color-overload-bg);
   --board-overload-border: var(--color-overload-border);
@@ -91,10 +79,10 @@
   --board-font-mono: var(--font-mono);
   --board-font-brand: var(--board-font-ui);
 
-  --board-space-xs: var(--spacing-xs);
-  --board-space-sm: var(--spacing-sm);
-  --board-space-md: var(--spacing-md);
-  --board-space-lg: var(--spacing-lg);
+  --board-space-xs: var(--space-1);
+  --board-space-sm: var(--space-2);
+  --board-space-md: var(--space-3);
+  --board-space-lg: var(--space-4);
   --board-space-xl: 24px;
 
   --board-radius-sm: var(--radius-sm);
@@ -102,25 +90,26 @@
   --board-radius-bar: var(--radius-bar);
 
   --board-transition-fast: var(--transition-fast);
+  --board-transition-medium: 150ms ease;
   --board-transition-normal: var(--transition-normal);
+  --board-transition-slow: 300ms ease;
 
   --board-shadow-bar: 0 1px 3px rgba(0, 0, 0, 0.08);
   --board-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --board-shadow-overlay:
+    0 8px 32px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --board-shadow-overlay-lg:
+    0 12px 40px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
   --board-shadow-popup:
     0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
-}
 
-/* Control tokens: buttons, inputs, sliders, cards, messages */
-:root {
-  --button-height: 44px;
-  --input-height: 44px;
-  --card-radius: var(--radius-md);
-  --card-padding: 24px;
+  --board-danger-border-soft: rgba(220, 53, 69, 0.35);
 
+  /* Control tokens: buttons, inputs, sliders, cards, messages */
   --btn-bg: var(--color-accent);
   --btn-bg-hover: var(--color-accent-2);
   --btn-bg-active: var(--color-accent-2);
-  --btn-text: #ffffff;
+  --btn-text: var(--color-neutral-white);
 
   --input-bg: var(--color-surface);
   --input-border: var(--color-border-2);
@@ -131,11 +120,7 @@
 
   --msg-bg-info: var(--color-surface-2);
   --msg-bg-warning: var(--color-overload-bg);
-  --msg-bg-danger: rgba(220, 53, 69, 0.08);
-
-  --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.06);
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lifted: 0 8px 24px rgba(0, 79, 135, 0.12);
+  --msg-bg-danger: var(--color-overload-bg);
 
   /* compatibility for controls that rely on unprefixed names */
   --accent-color: var(--color-accent);
@@ -156,6 +141,6 @@
     --toolbar-height: 118px;
     --statsbar-height: 44px;
     --row-header-width: 168px;
-    --spacing-lg: 12px;
+    --board-space-lg: 12px;
   }
 }
