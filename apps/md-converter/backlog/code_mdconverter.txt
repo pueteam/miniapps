@@ -1,0 +1,379 @@
+<context>
+<project_tree>
+c:\Users\Pablo\puedata\proyectos\puedata\miniapps
+├─ apps\md-converter\app.config.json 
+├─ apps\md-converter\backlog\code_pandoc.txt 
+├─ apps\md-converter\index.html 
+├─ apps\md-converter\package.json 
+├─ apps\md-converter\public\pandoc.wasm 
+├─ apps\md-converter\src\app\App.tsx 
+├─ apps\md-converter\src\app\registerSW.ts 
+├─ apps\md-converter\src\components\AppShell.tsx 
+├─ apps\md-converter\src\components\InstallButton.tsx 
+├─ apps\md-converter\src\features\.gitkeep 
+├─ apps\md-converter\src\hooks\useLocalStorage.ts 
+├─ apps\md-converter\src\lib\constants.ts 
+├─ apps\md-converter\src\main.tsx 
+├─ apps\md-converter\src\styles\index.css 
+├─ apps\md-converter\src\workers\pandoc.worker.ts 
+├─ apps\md-converter\tsconfig.json 
+├─ apps\md-converter\vite.config.ts 
+</project_tree>
+<project_files>
+<file name="App.tsx" path="/apps/md-converter/src/app/App.tsx">
+import { useEffect } from 'preact/hooks';
+import { registerSW } from './registerSW';
+import { AppShell } from '../components/AppShell';
+
+export function App() {
+  useEffect(() => {
+    registerSW();
+  }, []);
+
+  return (
+    <AppShell>
+      <section class="card">
+        <h2>MDconvertix</h2>
+        <p>Plantilla base generada correctamente. Implementa aquí la lógica de la miniapp.</p>
+      </section>
+    </AppShell>
+  );
+}
+</file>
+<file name="registerSW.ts" path="/apps/md-converter/src/app/registerSW.ts">
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+interface InstallState {
+  canInstall: boolean;
+  isInstalled: boolean;
+}
+
+let installPrompt: BeforeInstallPromptEvent | null = null;
+let installed = false;
+let hasRegistered = false;
+const listeners = new Set<() => void>();
+
+function notify() {
+  for (const listener of listeners) listener();
+}
+
+export function registerSW(): void {
+  if (hasRegistered) return;
+  hasRegistered = true;
+
+  window.addEventListener('beforeinstallprompt', (event: Event) => {
+    event.preventDefault();
+    installPrompt = event as BeforeInstallPromptEvent;
+    notify();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installed = true;
+    installPrompt = null;
+    notify();
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, {
+        scope: import.meta.env.BASE_URL
+      }).catch((error) => {
+        console.error('[registerSW] service worker registration failed', error);
+      });
+    }, { once: true });
+  }
+}
+
+export function getInstallState(): InstallState {
+  return {
+    canInstall: installPrompt !== null,
+    isInstalled: installed
+  };
+}
+
+export function subscribeInstallState(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+export function triggerInstall(): void {
+  const prompt = installPrompt;
+  if (!prompt) return;
+
+  prompt.prompt();
+  void prompt.userChoice.then(() => {
+    installPrompt = null;
+    notify();
+  });
+}
+</file>
+<file name="AppShell.tsx" path="/apps/md-converter/src/components/AppShell.tsx">
+import type { ComponentChildren } from 'preact';
+import { InstallButton } from './InstallButton';
+
+export function AppShell(props: { children: ComponentChildren }) {
+  return (
+    <div class="app-shell">
+      <header class="app-shell__header">
+        <div>
+          <h1>MDconvertix</h1>
+          <p>Convert Markdown files to DOCX, EPUB, HTML</p>
+        </div>
+        <InstallButton />
+      </header>
+      <main>{props.children}</main>
+    </div>
+  );
+}
+</file>
+<file name="InstallButton.tsx" path="/apps/md-converter/src/components/InstallButton.tsx">
+import { useEffect, useState } from 'preact/hooks';
+import { getInstallState, subscribeInstallState, triggerInstall } from '../app/registerSW';
+
+export function InstallButton() {
+  const [installState, setInstallState] = useState(() => getInstallState());
+
+  useEffect(() => subscribeInstallState(() => {
+    setInstallState(getInstallState());
+  }), []);
+
+  if (!installState.canInstall || installState.isInstalled) return null;
+
+  return (
+    <button type="button" class="install-btn" onClick={triggerInstall} aria-label="Instalar app" title="Instalar app">
+      <svg class="install-btn__icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+        <path d="M10 3v9.5M6 9l4 4 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 15.5h12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+      </svg>
+      <span class="install-btn__label" aria-hidden="true">Instalar</span>
+    </button>
+  );
+}
+</file>
+<file name=".gitkeep" path="/apps/md-converter/src/features/.gitkeep">
+
+</file>
+<file name="useLocalStorage.ts" path="/apps/md-converter/src/hooks/useLocalStorage.ts">
+import { useEffect, useState } from 'preact/hooks';
+
+export function useLocalStorage<T>(key: string, initialValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as T) : initialValue;
+    } catch {
+      return initialValue;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue] as const;
+}
+</file>
+<file name="constants.ts" path="/apps/md-converter/src/lib/constants.ts">
+export const APP_NAME = 'md-converter';
+export const STORAGE_PREFIX = 'miniapps:md-converter:';
+</file>
+<file name="index.css" path="/apps/md-converter/src/styles/index.css">
+/* Shared base identity (imported) */
+@import "../../../../styles/base.css";
+
+:root {
+  /* App accent token (customizable) */
+  --app-accent: #004F87;
+
+  /* App semantic tokens (local mapping) */
+  --color-bg-page: var(--color-background-default);
+  --color-bg-surface: var(--color-background-default);
+  --color-text-primary: var(--color-brand-blue-900);
+  --color-text-secondary: var(--color-neutral-700);
+  --color-text-muted: var(--color-neutral-500);
+  --color-border-subtle: var(--color-neutral-100);
+  --color-border-default: var(--color-neutral-300);
+  --color-accent-primary: var(--app-accent);
+  --color-accent-hover: var(--app-accent);
+
+  --card-radius: var(--radius-md);
+  --card-padding: var(--space-6);
+  --button-height-md: 48px;
+  --button-radius: var(--radius-pill);
+  --input-height: 48px;
+  --input-radius: var(--radius-md);
+}
+</file>
+<file name="pandoc.worker.ts" path="/apps/md-converter/src/workers/pandoc.worker.ts">
+/// <reference lib="webworker" />
+
+import { runPandoc } from "../lib/pandocRunner";
+import type { WorkerJobInput, WorkerJobResult } from "../lib/types";
+
+type WorkerRequest = {
+  id: string;
+  type: "run";
+  payload: WorkerJobInput;
+};
+
+type WorkerSuccess = {
+  id: string;
+  type: "success";
+  payload: WorkerJobResult;
+};
+
+type WorkerFailure = {
+  id: string;
+  type: "error";
+  error: string;
+};
+
+self.addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
+  const { id, payload } = event.data;
+
+  try {
+    const result = await runPandoc(payload);
+    const response: WorkerSuccess = {
+      id,
+      type: "success",
+      payload: result
+    };
+
+    self.postMessage(response, [result.epubBytes.buffer]);
+  } catch (error) {
+    const response: WorkerFailure = {
+      id,
+      type: "error",
+      error: error instanceof Error ? error.message : String(error)
+    };
+
+    self.postMessage(response);
+  }
+});
+</file>
+<file name="main.tsx" path="/apps/md-converter/src/main.tsx">
+import { render } from 'preact';
+import { App } from './app/App';
+import './styles/index.css';
+
+render(<App />, document.getElementById('app')!);
+</file>
+<file name="app.config.json" path="/apps/md-converter/app.config.json">
+{
+  "name": "md-converter",
+  "title": "MDconvertix",
+  "description": "Convert Markdown files to DOCX, EPUB, HTML",
+  "listed": false,
+  "pwa": true,
+  "router": false,
+  "themeColor": "#004F87",
+  "backgroundColor": "#FFFFFF",
+  "category": "utilities"
+}
+</file>
+<file name="index.html" path="/apps/md-converter/index.html">
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MDconvertix</title>
+    <meta name="theme-color" content="#004F87" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+<file name="package.json" path="/apps/md-converter/package.json">
+{
+  "name": "@miniapps/md-converter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0",
+    "vite-plugin-pwa": "^1.0.0"
+  }
+}
+</file>
+<file name="tsconfig.json" path="/apps/md-converter/tsconfig.json">
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": [
+    "src",
+    "vite.config.ts"
+  ]
+}
+</file>
+<file name="vite.config.ts" path="/apps/md-converter/vite.config.ts">
+import { defineConfig } from 'vite';
+import preact from '@preact/preset-vite';
+import { VitePWA } from 'vite-plugin-pwa';
+import appConfig from './app.config.json';
+
+function getPagesBase() {
+  const repo = process.env.GITHUB_REPOSITORY?.split('/')?.[1] || process.env.VITE_REPO_NAME || '';
+    return repo ? `/${repo}/${appConfig.name}/` : `/${appConfig.name}/`;
+}
+
+const base = getPagesBase();
+
+export default defineConfig({
+  base,
+  plugins: [
+    preact(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['pwa-192.png', 'pwa-512.png', 'pwa-maskable-512.png'],
+      manifest: {
+        id: base,
+        name: appConfig.title,
+        short_name: appConfig.title,
+        start_url: base,
+        scope: base,
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: appConfig.backgroundColor,
+        theme_color: appConfig.themeColor,
+        description: appConfig.description,
+        icons: [
+          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+        ],
+        screenshots: [
+          { src: 'screenshots/desktop.png', sizes: '1280x720', type: 'image/png', form_factor: 'wide' },
+          { src: 'screenshots/mobile.png', sizes: '390x844', type: 'image/png' }
+        ],
+        categories: ['utilities'],
+        lang: 'es'
+      },
+      workbox: {
+        navigateFallback: 'index.html'
+      }
+    })
+  ]
+});
+</file>
+</project_files>
+</context>

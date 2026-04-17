@@ -1,0 +1,2242 @@
+<context>
+<project_tree>
+c:\Users\Pablo\puedata\proyectos\DEV\WEB\pandoc-wasm-epub-app-refactored\pandoc-wasm-epub-app
+├─ .gitignore 
+├─ README.md 
+├─ epub.css 
+├─ index.html 
+├─ package.json 
+├─ pnpm-workspace.yaml 
+├─ public\pandoc.wasm 
+├─ src\app.tsx 
+├─ src\lib\download.ts 
+├─ src\lib\epubMetadata.ts 
+├─ src\lib\pandocRunner.ts 
+├─ src\lib\types.ts 
+├─ src\lib\workerClient.ts 
+├─ src\main.tsx 
+├─ src\styles.css 
+├─ src\vite-env.d.ts 
+├─ src\workers\pandoc.worker.ts 
+├─ test\pandocRunner.test.ts 
+├─ tsconfig.json 
+├─ vite.config.ts 
+</project_tree>
+<project_files>
+<file name="download.ts" path="/src/lib/download.ts">
+export function downloadBlob(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.rel = "noopener";
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+}
+
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+</file>
+<file name="epubMetadata.ts" path="/src/lib/epubMetadata.ts">
+export type MetadataInput = {
+  title: string;
+  author: string;
+  lang: string;
+  publisher: string;
+  rights: string;
+  description: string;
+};
+
+function normalizeScalar(value: string): string {
+  return value.replace(/\r\n/g, "\n").trim();
+}
+
+function quote(value: string): string {
+  return JSON.stringify(normalizeScalar(value));
+}
+
+function block(value: string): string {
+  const normalized = normalizeScalar(value);
+  if (!normalized.includes("\n")) {
+    return quote(normalized);
+  }
+
+  const body = normalized
+    .split("\n")
+    .map((line) => `  ${line}`)
+    .join("\n");
+
+  return `|\n${body}`;
+}
+
+export function buildMetadataYaml(input: MetadataInput): string {
+  const lines: string[] = ["---"];
+
+  if (input.title.trim()) lines.push(`title: ${quote(input.title)}`);
+  if (input.author.trim()) lines.push(`author: ${quote(input.author)}`);
+  if (input.lang.trim()) lines.push(`lang: ${quote(input.lang)}`);
+  if (input.publisher.trim()) lines.push(`publisher: ${quote(input.publisher)}`);
+  if (input.rights.trim()) lines.push(`rights: ${quote(input.rights)}`);
+  if (input.description.trim()) lines.push(`description: ${block(input.description)}`);
+
+  lines.push("...");
+  lines.push("");
+  return lines.join("\n");
+}
+</file>
+<file name="pandocRunner.ts" path="/src/lib/pandocRunner.ts">
+import {
+  ConsoleStdout,
+  Fd,
+  File,
+  type Inode,
+  PreopenDirectory,
+  WASI,
+  WASIProcExit
+} from "@bjorn3/browser_wasi_shim";
+import type { BinaryInput, WorkerJobInput, WorkerJobResult } from "./types";
+
+const encoder = new TextEncoder();
+const outputArgIndex = -3;
+
+class NullStdin extends Fd {
+  fd_read(): { ret: number; data: Uint8Array } {
+    return { ret: 0, data: new Uint8Array() };
+  }
+}
+
+function createLineCollector(target: string[]): ConsoleStdout {
+  return ConsoleStdout.lineBuffered((message) => {
+    target.push(message);
+  });
+}
+
+export function sanitizeFilename(name: string): string {
+  const sanitized = name.replace(/[^a-zA-Z0-9._-]+/g, "_");
+  return sanitized || "file";
+}
+
+export async function loadWasmBytes(inputBytes?: Uint8Array | null): Promise<Uint8Array> {
+  if (inputBytes && inputBytes.byteLength > 0) {
+    return inputBytes;
+  }
+
+  const response = await fetch("/pandoc.wasm");
+  if (!response.ok) {
+    throw new Error("No se pudo cargar /pandoc.wasm.");
+  }
+
+  return new Uint8Array(await response.arrayBuffer());
+}
+
+export function buildArgs(payload: WorkerJobInput, cover?: BinaryInput | null): string[] {
+  const args = [
+    "pandoc",
+    "--from=markdown",
+    "--to=epub3",
+    "--standalone",
+    "--metadata-file=metadata.yaml",
+    "--resource-path=.",
+    "--css=epub.css",
+    `--toc-depth=${Math.max(1, Math.min(6, payload.tocDepth))}`,
+    `--split-level=${Math.max(1, Math.min(6, payload.splitLevel))}`,
+    "-o",
+    "book.epub",
+    "book.md"
+  ];
+
+  if (payload.toc) {
+    args.splice(args.length + outputArgIndex, 0, "--toc");
+  }
+
+  if (cover) {
+    args.splice(args.length + outputArgIndex, 0, `--epub-cover-image=${sanitizeFilename(cover.name)}`);
+  }
+
+  return args;
+}
+
+export function buildPreopenDirectory(payload: WorkerJobInput): PreopenDirectory {
+  const contents = new Map<string, Inode>([
+    ["book.md", new File(encoder.encode(payload.markdown))],
+    ["epub.css", new File(encoder.encode(payload.css))],
+    ["metadata.yaml", new File(encoder.encode(payload.metadataYaml))],
+    ["book.epub", new File(new Uint8Array())]
+  ]);
+
+  if (payload.cover) {
+    contents.set(
+      sanitizeFilename(payload.cover.name),
+      new File(payload.cover.bytes)
+    );
+  }
+
+  return new PreopenDirectory("/", contents);
+}
+
+export async function runPandoc(payload: WorkerJobInput): Promise<WorkerJobResult> {
+  const stdout: string[] = [];
+  const stderr: string[] = [];
+  const root = buildPreopenDirectory(payload);
+  const args = buildArgs(payload, payload.cover);
+
+  const wasmBytes = new Uint8Array(await loadWasmBytes(payload.wasmBytes));
+  const module = await WebAssembly.compile(wasmBytes);
+  const wasi = new WASI(args, [], [
+    new NullStdin(),
+    createLineCollector(stdout),
+    createLineCollector(stderr),
+    root
+  ]);
+
+  const instance = await WebAssembly.instantiate(module, {
+    wasi_snapshot_preview1: wasi.wasiImport
+  });
+
+  try {
+    wasi.start(instance as WebAssembly.Instance & {
+      exports: WebAssembly.Exports & {
+        memory: WebAssembly.Memory;
+        _start: () => unknown;
+      };
+    });
+  } catch (error) {
+    if (!(error instanceof WASIProcExit)) {
+      throw error;
+    }
+
+    if (error.code !== 0) {
+      const details = stderr.filter(Boolean).join("\n") || stdout.filter(Boolean).join("\n");
+      throw new Error(details || `pandoc finalizó con código ${error.code}.`);
+    }
+  }
+
+  const outputNode = root.dir.contents.get("book.epub");
+  if (!(outputNode instanceof File) || outputNode.data.byteLength === 0) {
+    const details = stderr.filter(Boolean).join("\n") || stdout.filter(Boolean).join("\n");
+    throw new Error(details || "Pandoc no generó el archivo EPUB.");
+  }
+
+  return {
+    epubBytes: outputNode.data,
+    logs: [stdout.join("\n"), stderr.join("\n")].filter(Boolean).join("\n")
+  };
+}
+</file>
+<file name="types.ts" path="/src/lib/types.ts">
+export type BinaryInput = {
+  name: string;
+  bytes: Uint8Array;
+};
+
+export type WorkerJobInput = {
+  markdown: string;
+  css: string;
+  metadataYaml: string;
+  toc: boolean;
+  tocDepth: number;
+  splitLevel: number;
+  cover?: BinaryInput | null;
+  wasmBytes?: Uint8Array | null;
+};
+
+export type WorkerJobResult = {
+  epubBytes: Uint8Array;
+  logs: string;
+};
+</file>
+<file name="workerClient.ts" path="/src/lib/workerClient.ts">
+import type { WorkerJobInput, WorkerJobResult } from "./types";
+
+type WorkerRequest = {
+  id: string;
+  type: "run";
+  payload: WorkerJobInput;
+};
+
+type WorkerSuccess = {
+  id: string;
+  type: "success";
+  payload: WorkerJobResult;
+};
+
+type WorkerFailure = {
+  id: string;
+  type: "error";
+  error: string;
+};
+
+type WorkerResponse = WorkerSuccess | WorkerFailure;
+
+let worker: Worker | null = null;
+
+function getWorker(): Worker {
+  if (worker) {
+    return worker;
+  }
+
+  worker = new Worker(new URL("../workers/pandoc.worker.ts", import.meta.url), {
+    type: "module"
+  });
+
+  return worker;
+}
+
+export function runPandocInWorker(input: WorkerJobInput): Promise<WorkerJobResult> {
+  const instance = getWorker();
+  const id = crypto.randomUUID();
+
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      instance.removeEventListener("message", onMessage);
+      instance.removeEventListener("error", onError);
+    };
+
+    const onMessage = (event: MessageEvent<WorkerResponse>) => {
+      if (!event.data || event.data.id !== id) {
+        return;
+      }
+
+      cleanup();
+
+      if (event.data.type === "success") {
+        resolve(event.data.payload);
+        return;
+      }
+
+      reject(new Error(event.data.error));
+    };
+
+    const onError = (event: ErrorEvent) => {
+      cleanup();
+      reject(new Error(event.message || "Fallo del worker de pandoc."));
+    };
+
+    instance.addEventListener("message", onMessage);
+    instance.addEventListener("error", onError);
+
+    const transferables: Transferable[] = [];
+    if (input.cover?.bytes) {
+      transferables.push(input.cover.bytes.buffer);
+    }
+    if (input.wasmBytes) {
+      transferables.push(input.wasmBytes.buffer);
+    }
+
+    const request: WorkerRequest = {
+      id,
+      type: "run",
+      payload: input
+    };
+
+    instance.postMessage(request, transferables);
+  });
+}
+</file>
+<file name="pandoc.worker.ts" path="/src/workers/pandoc.worker.ts">
+/// <reference lib="webworker" />
+
+import { runPandoc } from "../lib/pandocRunner";
+import type { WorkerJobInput, WorkerJobResult } from "../lib/types";
+
+type WorkerRequest = {
+  id: string;
+  type: "run";
+  payload: WorkerJobInput;
+};
+
+type WorkerSuccess = {
+  id: string;
+  type: "success";
+  payload: WorkerJobResult;
+};
+
+type WorkerFailure = {
+  id: string;
+  type: "error";
+  error: string;
+};
+
+self.addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
+  const { id, payload } = event.data;
+
+  try {
+    const result = await runPandoc(payload);
+    const response: WorkerSuccess = {
+      id,
+      type: "success",
+      payload: result
+    };
+
+    self.postMessage(response, [result.epubBytes.buffer]);
+  } catch (error) {
+    const response: WorkerFailure = {
+      id,
+      type: "error",
+      error: error instanceof Error ? error.message : String(error)
+    };
+
+    self.postMessage(response);
+  }
+});
+</file>
+<file name="app.tsx" path="/src/app.tsx">
+import { useMemo, useState } from "preact/hooks";
+import { buildMetadataYaml } from "./lib/epubMetadata";
+import { downloadBlob, slugify } from "./lib/download";
+import { runPandocInWorker } from "./lib/workerClient";
+import type { BinaryInput } from "./lib/types";
+
+const sampleMarkdown = `# Capítulo 1
+
+Este libro se genera completamente en el navegador con **pandoc.wasm**.
+
+## Qué incluye
+
+- Entrada en Markdown
+- Salida EPUB3
+- TOC opcional
+- CSS específico para EPUB
+- Metadatos en YAML
+
+> La conversión ocurre en un worker para no bloquear la interfaz.
+
+# Capítulo 2
+
+## Código
+
+\`\`\`ts
+console.log("Hola, EPUB");
+\`\`\`
+
+## Imagen
+
+Si añades una portada, se insertará mediante \`--epub-cover-image\`.
+`;
+
+const sampleCss = `html, body {
+  font-family: serif;
+  line-height: 1.55;
+}
+
+h1, h2, h3 {
+  font-family: system-ui, sans-serif;
+}
+
+code, pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+blockquote {
+  border-left: 0.25rem solid #999;
+  margin-left: 0;
+  padding-left: 1rem;
+  color: #444;
+}
+`;
+
+async function toBinaryInput(file: File | null): Promise<BinaryInput | null> {
+  if (!file) return null;
+  return {
+    name: file.name,
+    bytes: new Uint8Array(await file.arrayBuffer())
+  };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+// ── Icon components ─────────────────────────────────────────────
+function IconMetadata() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1.5" y="1.5" width="13" height="13" rx="2" />
+      <line x1="4.5" y1="5.5" x2="11.5" y2="5.5" />
+      <line x1="4.5" y1="8" x2="9" y2="8" />
+      <line x1="4.5" y1="10.5" x2="10" y2="10.5" />
+    </svg>
+  );
+}
+
+function IconMarkdown() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="2.5" width="14" height="11" rx="2" />
+      <path d="M4 10V6l2 2 2-2v4" />
+      <path d="M11 10V6" />
+      <path d="M9.5 8.5L11 10l1.5-1.5" />
+    </svg>
+  );
+}
+
+function IconCss() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 2l1 11 5 1.5L13 13l1-11H2z" />
+      <path d="M5.5 6.5h5" />
+      <path d="M5.5 9.5h3.5" />
+    </svg>
+  );
+}
+
+function IconYaml() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 2h6l3 3v9H4V2z" />
+      <path d="M10 2v3h3" />
+      <path d="M6 8l2 2-2 2" />
+      <path d="M10 12H8.5" />
+    </svg>
+  );
+}
+
+function IconStatus() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="6.5" />
+      <path d="M8 5v3.5l2 1.5" />
+    </svg>
+  );
+}
+
+function IconDownload() {
+  return (
+    <svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 2v9" />
+      <path d="M5.5 8l3.5 3.5L12.5 8" />
+      <path d="M2 14h14" />
+    </svg>
+  );
+}
+
+function IconLoading() {
+  return (
+    <svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="9" cy="9" r="7" stroke-dasharray="22 22" stroke-dashoffset="0" style="transform-origin:50% 50%;animation:spin 0.75s linear infinite;" />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </svg>
+  );
+}
+
+// ── Main component ───────────────────────────────────────────────
+export function App() {
+  const [title, setTitle] = useState("Mi libro");
+  const [author, setAuthor] = useState("Autor/a");
+  const [lang, setLang] = useState("es-ES");
+  const [publisher, setPublisher] = useState("");
+  const [rights, setRights] = useState("");
+  const [description, setDescription] = useState("");
+  const [toc, setToc] = useState(true);
+  const [tocDepth, setTocDepth] = useState(3);
+  const [splitLevel, setSplitLevel] = useState(1);
+  const [markdown, setMarkdown] = useState(sampleMarkdown);
+  const [css, setCss] = useState(sampleCss);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [wasmFile, setWasmFile] = useState<File | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [logs, setLogs] = useState("Sin mensajes todavía.");
+  const [error, setError] = useState("");
+  const [statusState, setStatusState] = useState<"idle" | "running" | "success" | "error">("idle");
+
+  const metadataYaml = useMemo(
+    () => buildMetadataYaml({ title, author, lang, publisher, rights, description }),
+    [author, description, lang, publisher, rights, title]
+  );
+
+  const statusLabel = {
+    idle: "En espera",
+    running: "Generando EPUB…",
+    success: "EPUB generado correctamente",
+    error: "Error en la conversión"
+  }[statusState];
+
+  async function handleGenerate() {
+    setIsRunning(true);
+    setError("");
+    setStatusState("running");
+    setLogs("Iniciando conversión con pandoc.wasm…");
+
+    try {
+      const [cover, wasmOverride] = await Promise.all([
+        toBinaryInput(coverFile),
+        toBinaryInput(wasmFile)
+      ]);
+
+      const result = await runPandocInWorker({
+        markdown,
+        css,
+        metadataYaml,
+        toc,
+        tocDepth,
+        splitLevel,
+        cover,
+        wasmBytes: wasmOverride?.bytes ?? null
+      });
+
+      const filename = `${slugify(title) || "book"}.epub`;
+      downloadBlob(
+        new Blob([new Uint8Array(result.epubBytes)], { type: "application/epub+zip" }),
+        filename
+      );
+      setLogs(result.logs || `EPUB generado correctamente → ${filename}`);
+      setStatusState("success");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error desconocido al generar el EPUB.";
+      setError(msg);
+      setLogs("La conversión ha fallado. Revisa los errores anteriores.");
+      setStatusState("error");
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
+  return (
+    <main class="page">
+
+      {/* ── Hero ─────────────────────────────────────────── */}
+      <header class="hero">
+        <div class="hero-meta">
+          {/* <p class="eyebrow">pandoc.wasm · Preact · Vite · Web Worker</p> */}
+          <h1>Markdown → EPUB</h1>
+          <p class="hero-sub">Conversión local en el navegador. Sin servidor. Sin backend.</p>
+        </div>
+
+        <button
+          class="btn-primary"
+          disabled={isRunning}
+          onClick={handleGenerate}
+          aria-label={isRunning ? "Generando EPUB, por favor espera" : "Generar y descargar EPUB"}
+        >
+          {isRunning ? <IconLoading /> : <IconDownload />}
+          {isRunning ? "Generando…" : "Descargar EPUB"}
+        </button>
+      </header>
+
+      {/* ── Grid ─────────────────────────────────────────── */}
+      <section class="grid">
+
+        {/* — Metadatos — */}
+        <article class="panel">
+          <div class="panel-header">
+            <div class="panel-icon"><IconMetadata /></div>
+            <h2>Metadatos del libro</h2>
+          </div>
+
+          <div class="field-group-title">Identificación</div>
+
+          <label>
+            <span>Título</span>
+            <input
+              type="text"
+              value={title}
+              onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
+              placeholder="Título del libro"
+              aria-label="Título del libro"
+            />
+          </label>
+
+          <label>
+            <span>Autor / Autora</span>
+            <input
+              type="text"
+              value={author}
+              onInput={(e) => setAuthor((e.target as HTMLInputElement).value)}
+              placeholder="Nombre del autor"
+              aria-label="Nombre del autor"
+            />
+          </label>
+
+          <div class="row">
+            <label>
+              <span>Idioma (BCP 47)</span>
+              <input
+                type="text"
+                value={lang}
+                onInput={(e) => setLang((e.target as HTMLInputElement).value)}
+                placeholder="es-ES"
+                aria-label="Código de idioma BCP 47"
+              />
+            </label>
+
+            <label>
+              <span>Split level</span>
+              <input
+                type="number"
+                min="1"
+                max="6"
+                value={splitLevel}
+                onInput={(e) => {
+                  const next = Number((e.target as HTMLInputElement).value || "1");
+                  setSplitLevel(clamp(Number.isFinite(next) ? next : 1, 1, 6));
+                }}
+                aria-label="Nivel de división EPUB (1–6)"
+              />
+            </label>
+          </div>
+
+          <div class="divider" />
+          <div class="field-group-title" style="margin-top:4px">Tabla de contenidos</div>
+
+          <label>
+            <span>Profundidad del TOC</span>
+            <input
+              type="number"
+              min="1"
+              max="6"
+              value={tocDepth}
+              onInput={(e) => {
+                const next = Number((e.target as HTMLInputElement).value || "3");
+                setTocDepth(clamp(Number.isFinite(next) ? next : 3, 1, 6));
+              }}
+              aria-label="Profundidad de la tabla de contenidos (1–6)"
+            />
+          </label>
+
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              checked={toc}
+              onChange={(e) => setToc((e.target as HTMLInputElement).checked)}
+              aria-label="Incluir tabla de contenidos en el EPUB"
+            />
+            <span>Incluir tabla de contenidos</span>
+          </label>
+
+          <div class="divider" />
+          <div class="field-group-title" style="margin-top:4px">Detalles opcionales</div>
+
+          <label>
+            <span>Editorial</span>
+            <input
+              type="text"
+              value={publisher}
+              onInput={(e) => setPublisher((e.target as HTMLInputElement).value)}
+              placeholder="Nombre de la editorial"
+            />
+          </label>
+
+          <label>
+            <span>Derechos</span>
+            <input
+              type="text"
+              value={rights}
+              onInput={(e) => setRights((e.target as HTMLInputElement).value)}
+              placeholder="© 2025 Autor/a"
+            />
+          </label>
+
+          <label>
+            <span>Descripción</span>
+            <textarea
+              rows={3}
+              value={description}
+              onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
+              placeholder="Breve descripción del libro…"
+              aria-label="Descripción del libro"
+            />
+          </label>
+
+          <div class="divider" />
+          <div class="field-group-title" style="margin-top:4px">Archivos</div>
+
+          <label>
+            <span>Portada</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCoverFile((e.target as HTMLInputElement).files?.[0] ?? null)}
+              aria-label="Imagen de portada del EPUB"
+            />
+          </label>
+
+          <label style="margin-bottom:0">
+            <span>pandoc.wasm (opcional)</span>
+            <input
+              type="file"
+              accept=".wasm,application/wasm"
+              onChange={(e) => setWasmFile((e.target as HTMLInputElement).files?.[0] ?? null)}
+              aria-label="Binario pandoc.wasm alternativo"
+            />
+          </label>
+        </article>
+
+        {/* — Markdown — */}
+        <article class="panel">
+          <div class="panel-header">
+            <div class="panel-icon"><IconMarkdown /></div>
+            <h2>Contenido Markdown</h2>
+          </div>
+          <label style="flex:1;margin-bottom:0">
+            <span class="visually-hidden">Editor de Markdown</span>
+            <textarea
+              class="editor"
+              value={markdown}
+              onInput={(e) => setMarkdown((e.target as HTMLTextAreaElement).value)}
+              aria-label="Editor de contenido Markdown"
+              spellcheck={false}
+            />
+          </label>
+        </article>
+
+        {/* — CSS — */}
+        <article class="panel">
+          <div class="panel-header">
+            <div class="panel-icon"><IconCss /></div>
+            <h2>CSS del EPUB</h2>
+          </div>
+          <label style="flex:1;margin-bottom:0">
+            <span class="visually-hidden">Editor de CSS</span>
+            <textarea
+              class="editor"
+              value={css}
+              onInput={(e) => setCss((e.target as HTMLTextAreaElement).value)}
+              aria-label="Editor de CSS para el EPUB"
+              spellcheck={false}
+            />
+          </label>
+        </article>
+
+        {/* — YAML — */}
+        <article class="panel">
+          <div class="panel-header">
+            <div class="panel-icon"><IconYaml /></div>
+            <h2>Vista previa de metadatos</h2>
+            <span class="badge" style="margin-left:auto">YAML</span>
+          </div>
+          <pre class="code-block">{metadataYaml}</pre>
+        </article>
+
+        {/* — Estado — */}
+        <article class="panel wide">
+          <div class="panel-header">
+            <div class="panel-icon"><IconStatus /></div>
+            <h2>Estado de la conversión</h2>
+          </div>
+
+          <div class="status-bar">
+            <div class={`status-dot ${statusState === "running" ? "running" : statusState === "success" ? "success" : statusState === "error" ? "error" : ""}`} />
+            <span class="status-text">{statusLabel}</span>
+          </div>
+
+          {/* <p class="hint">
+            El repositorio incluye <code>public/pandoc.wasm</code>. El campo de subida solo sirve para
+            reemplazar ese binario durante la sesión actual, sin afectar al archivo en disco.
+          </p> */}
+
+          {error && (
+            <div class="error-banner" role="alert" aria-live="assertive">
+              <span class="error-banner-text">{error}</span>
+            </div>
+          )}
+
+          <pre class="logs-block" aria-live="polite" aria-label="Registro de salida de pandoc">{logs}</pre>
+        </article>
+
+      </section>
+    </main>
+  );
+}
+</file>
+<file name="main.tsx" path="/src/main.tsx">
+import { render } from "preact";
+import { App } from "./app";
+import "./styles.css";
+
+render(<App />, document.getElementById("app")!);
+</file>
+<file name="styles.css" path="/src/styles.css">
+/* ============================================================
+   styles.css — pandoc-wasm EPUB app
+   Design system: enterprise / consultive / light base
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500&display=swap");
+
+/* ── Design Tokens ──────────────────────────────────────────── */
+:root {
+  /* Color — brand */
+  --blue-900: #004f87;
+  --blue-800: #0a5b95;
+  --blue-700: #1e5b92;
+  --pink-600: #d10053;
+  --pink-500: #e5005a;
+
+  /* Color — neutral */
+  --white: #ffffff;
+  --neutral-25: #f8f8f8;
+  --neutral-50: #f3f4f6;
+  --neutral-100: #e8eaed;
+  --neutral-300: #c8cdd3;
+  --neutral-500: #8a9099;
+  --neutral-700: #4a4f57;
+  --neutral-900: #1b1f26;
+
+  /* Background */
+  --bg-soft: #f7f7f5;
+  --bg-default: #ffffff;
+
+  /* Text */
+  --text-primary: #004f87;
+  --text-secondary: #4a4f57;
+  --text-muted: #8a9099;
+  --text-body: #1b1f26;
+
+  /* Border */
+  --border-subtle: #e8eaed;
+  --border-default: #c8cdd3;
+
+  /* State */
+  --state-success: #10b981;
+  --state-error: #f43f5e;
+
+  /* Shadow */
+  --shadow-subtle: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur-default: 160ms;
+  --dur-enter: 200ms;
+  --ease: ease;
+  --ease-smooth: ease-in-out;
+
+  /* Typography */
+  --font-primary: "Manrope", "Inter", sans-serif;
+  --font-ui: "Inter", sans-serif;
+}
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-body);
+  background-color: var(--bg-soft);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code,
+pre,
+input,
+textarea,
+button,
+select {
+  font-family: var(--font-ui);
+}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 48px 80px;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    padding: 32px 24px 64px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 24px 20px 48px;
+  }
+}
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 48px;
+  padding-bottom: 40px;
+  border-bottom: 1.5px solid var(--border-subtle);
+}
+
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--pink-600);
+}
+
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  background: var(--pink-600);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.hero h1 {
+  font-family: var(--font-primary);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--blue-900);
+  letter-spacing: -0.02em;
+}
+
+.hero-sub {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Button ─────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--blue-900);
+  background: var(--blue-900);
+  color: var(--white);
+  font-family: var(--font-primary);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-default) var(--ease),
+    border-color var(--dur-default) var(--ease),
+    box-shadow var(--dur-default) var(--ease),
+    transform var(--dur-fast) var(--ease);
+  flex-shrink: 0;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--blue-800);
+  border-color: var(--blue-800);
+  box-shadow: 0 4px 16px rgba(0, 79, 135, 0.28);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
+}
+
+/* ── Grid ───────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+/* ── Panel ──────────────────────────────────────────────────── */
+.panel {
+  grid-column: span 6;
+  background: var(--bg-default);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: box-shadow var(--dur-enter) var(--ease);
+}
+
+.panel:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.panel.wide {
+  grid-column: 1 / -1;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.panel-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 79, 135, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue-900);
+  flex-shrink: 0;
+}
+
+.panel-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.panel h2 {
+  font-family: var(--font-primary);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Form Controls ──────────────────────────────────────────── */
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+label:last-child {
+  margin-bottom: 0;
+}
+
+label > span,
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  background: var(--bg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-body);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  outline: none;
+  transition:
+    border-color var(--dur-default) var(--ease),
+    box-shadow var(--dur-default) var(--ease);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+textarea {
+  height: auto;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--blue-700);
+  box-shadow: 0 0 0 3px rgba(0, 79, 135, 0.1);
+}
+
+input[type="text"]:hover:not(:focus),
+input[type="number"]:hover:not(:focus),
+textarea:hover:not(:focus) {
+  border-color: var(--neutral-500);
+}
+
+input[type="file"] {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 10px 14px;
+  background: var(--neutral-25);
+  border: 1.5px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur-default) var(--ease), background var(--dur-default) var(--ease);
+}
+
+input[type="file"]:hover {
+  border-color: var(--blue-700);
+  background: rgba(0, 79, 135, 0.03);
+}
+
+/* ── Checkbox ───────────────────────────────────────────────── */
+label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+  cursor: pointer;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--neutral-25);
+  transition: background var(--dur-default) var(--ease), border-color var(--dur-default) var(--ease);
+  user-select: none;
+}
+
+label.checkbox:hover {
+  background: rgba(0, 79, 135, 0.04);
+  border-color: var(--blue-700);
+}
+
+label.checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border-default);
+  background: var(--white);
+  cursor: pointer;
+  accent-color: var(--blue-900);
+  transition: accent-color var(--dur-default) var(--ease);
+}
+
+label.checkbox > span {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+}
+
+/* ── Row layout ─────────────────────────────────────────────── */
+.row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 140px;
+}
+
+/* ── Field group ─────────────────────────────────────────────── */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.field-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ── Code / Pre ─────────────────────────────────────────────── */
+.code-block {
+  background: var(--neutral-25);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  min-height: 120px;
+  flex: 1;
+}
+
+/* ── Editor textarea ────────────────────────────────────────── */
+.editor {
+  min-height: 400px;
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  resize: vertical;
+  background: var(--neutral-25);
+  border-color: var(--border-subtle);
+  color: var(--neutral-900);
+}
+
+.editor:focus {
+  background: var(--white);
+}
+
+/* ── Status / Logs ──────────────────────────────────────────── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 79, 135, 0.05);
+  border: 1px solid rgba(0, 79, 135, 0.1);
+  margin-bottom: 16px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--neutral-300);
+  flex-shrink: 0;
+  transition: background var(--dur-enter) var(--ease);
+}
+
+.status-dot.running {
+  background: var(--blue-800);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.status-dot.error {
+  background: var(--state-error);
+}
+
+.status-dot.success {
+  background: var(--state-success);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.status-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.logs-block {
+  background: var(--neutral-25);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  min-height: 96px;
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  padding: 12px 14px;
+  background: rgba(0, 79, 135, 0.04);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--blue-900);
+  margin-bottom: 16px;
+}
+
+.hint code {
+  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-size: 12px;
+  background: rgba(0, 79, 135, 0.08);
+  color: var(--blue-800);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(244, 63, 94, 0.06);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+}
+
+.error-banner-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #c0142c;
+  line-height: 1.5;
+}
+
+/* ── Tag / badge ────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: rgba(0, 79, 135, 0.08);
+  color: var(--blue-900);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .panel {
+    grid-column: 1 / -1;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+    height: 52px;
+    font-size: 16px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .panel {
+    padding: 20px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+  }
+}
+
+/* ── Divider ────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 20px 0;
+}
+</file>
+<file name="vite-env.d.ts" path="/src/vite-env.d.ts">
+/// <reference types="vite/client" />
+</file>
+<file name="pandocRunner.test.ts" path="/test/pandocRunner.test.ts">
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { buildArgs, runPandoc } from "../src/lib/pandocRunner.ts";
+import type { WorkerJobInput } from "../src/lib/types.ts";
+
+async function createPayload(): Promise<WorkerJobInput> {
+  return {
+    markdown: "# Titulo\n\nContenido.",
+    css: "body { color: red; }",
+    metadataYaml: "title: Prueba\nlang: es-ES\n",
+    toc: true,
+    tocDepth: 3,
+    splitLevel: 1,
+    wasmBytes: new Uint8Array(await readFile(new URL("../public/pandoc.wasm", import.meta.url)))
+  };
+}
+
+test("buildArgs omits --sandbox so pandoc can resolve epub.css in WASI", async () => {
+  const args = buildArgs(await createPayload(), null);
+
+  assert.ok(args.includes("--css=epub.css"));
+  assert.ok(args.includes("--resource-path=."));
+  assert.ok(!args.includes("--sandbox"));
+  assert.ok(args.indexOf("--toc") > -1);
+  assert.ok(args.indexOf("--toc") < args.indexOf("-o"));
+});
+
+test("runPandoc generates an EPUB when CSS is provided as epub.css", async () => {
+  const result = await runPandoc(await createPayload());
+
+  assert.ok(result.epubBytes.byteLength > 0);
+  assert.equal(result.logs, "");
+});
+</file>
+<file name="epub.css" path="/epub.css">
+/* ============================================================
+   epub.css — Manual de programación
+   v5 · Preciso para Pandoc
+   Corrige hueco antes de la primera línea de código
+   ============================================================ */
+
+/* --- Base --- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Georgia", "Palatino Linotype", serif;
+  font-size: 1em;
+  line-height: 1.65;
+  color: #1a1a2e;
+  background-color: #ffffff;
+  padding: 0 1em;
+}
+
+/* --- Párrafos --- */
+p {
+  margin: 0.6em 0 0.9em 0;
+  text-align: justify;
+  orphans: 2;
+  widows: 2;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* --- Encabezados --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f3460;
+  margin-top: 1.35em;
+  margin-bottom: 0.2em;
+  break-after: avoid;
+  page-break-after: avoid;
+  -webkit-column-break-after: avoid;
+}
+
+h1 {
+  font-size: 2em;
+  border-bottom: 3px solid #0f3460;
+  padding-bottom: 0.22em;
+  margin-top: 0.9em;
+  text-align: left;
+  break-before: page;
+  page-break-before: always;
+}
+
+h2 {
+  font-size: 1.5em;
+  border-bottom: 1px solid #ccd6f6;
+  padding-bottom: 0.15em;
+}
+
+h3 {
+  font-size: 1.2em;
+  color: #16213e;
+}
+
+h4 {
+  font-size: 1.05em;
+  color: #16213e;
+  font-style: italic;
+}
+
+h5, h6 {
+  font-size: 1em;
+  color: #333;
+}
+
+/* --- Portada --- */
+h1.title {
+  font-size: 2.5em;
+  text-align: center;
+  border: none;
+  margin-top: 3em;
+  break-before: auto;
+  page-break-before: avoid;
+  color: #0f3460;
+}
+
+p.author, p.date {
+  text-align: center;
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  color: #555;
+  font-size: 1em;
+}
+
+/* ============================================================
+   CÓDIGO — versión precisa para Pandoc
+   ============================================================ */
+
+/* Inline */
+code {
+  font-family: "Courier New", "Courier", "Lucida Console", monospace;
+  font-size: 0.87em;
+  background-color: #f0f0f0;
+  color: #b5173a;
+  padding: 0.08em 0.3em;
+  border-radius: 3px;
+  border: 1px solid #d8d8d8;
+  white-space: nowrap;
+}
+
+/* Wrapper típico de Pandoc */
+div.sourceCode {
+  margin: 0.45em 0 0.75em 0 !important;
+  background-color: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #0f3460;
+  border-radius: 0 5px 5px 0;
+  overflow: hidden;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+/* Menos hueco si viene tras heading */
+h1 + div.sourceCode,
+h2 + div.sourceCode,
+h3 + div.sourceCode,
+h4 + div.sourceCode,
+h5 + div.sourceCode,
+h6 + div.sourceCode,
+h1 + pre.sourceCode,
+h2 + pre.sourceCode,
+h3 + pre.sourceCode,
+h4 + pre.sourceCode,
+h5 + pre.sourceCode,
+h6 + pre.sourceCode,
+h1 + pre,
+h2 + pre,
+h3 + pre,
+h4 + pre,
+h5 + pre,
+h6 + pre {
+  margin-top: 0.15em !important;
+}
+
+/* PRE: padding superior mínimo */
+pre,
+pre.sourceCode,
+div.sourceCode > pre,
+div.sourceCode > pre.sourceCode {
+  font-family: "Courier New", "Courier", "Lucida Console", monospace;
+  font-size: 0.83em;
+  line-height: 1.24 !important;
+  background-color: #fafafa;
+  color: #24292e;
+  padding: 0.18em 0.95em 0.60em 0.95em !important;
+  margin: 0 !important;
+  overflow-x: auto;
+  white-space: pre;
+  -epub-hyphens: none;
+  hyphens: none;
+  border: none;
+  border-radius: 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+/* Reset completo dentro del pre */
+pre code,
+pre > code,
+pre > code.sourceCode,
+pre.sourceCode > code,
+div.sourceCode > pre > code,
+div.sourceCode > pre.sourceCode > code,
+div.sourceCode > pre.sourceCode > code.sourceCode {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 1em !important;
+  white-space: pre !important;
+  line-height: 1.24 !important;
+  vertical-align: top !important;
+}
+
+/* Pandoc suele renderizar cada línea como span block */
+pre > code.sourceCode > span,
+div.sourceCode > pre.sourceCode > code.sourceCode > span {
+  display: block !important;
+  line-height: 1.24 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* PRIMERA LÍNEA:
+   elimina hueco si el primer span está vacío */
+pre > code.sourceCode > span:first-child:empty,
+div.sourceCode > pre.sourceCode > code.sourceCode > span:first-child:empty {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Si Pandoc mete un ancla vacía al inicio, también la anulamos */
+pre > code.sourceCode > span:first-child > a:first-child:only-child,
+div.sourceCode > pre.sourceCode > code.sourceCode > span:first-child > a:first-child:only-child {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+}
+
+/* Si la primera línea solo contiene espacios/anchor visualmente inútil,
+   aplástala del todo */
+pre > code.sourceCode > span:first-child,
+div.sourceCode > pre.sourceCode > code.sourceCode > span:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Compresión extra del primer renglón cuando hay número de línea */
+pre.numberSource > code.sourceCode > span:first-child,
+div.sourceCode > pre.numberSource > code.sourceCode > span:first-child {
+  min-height: 0 !important;
+  line-height: 1.0 !important;
+}
+
+/* Líneas vacías internas compactas */
+pre > code.sourceCode > span:empty,
+div.sourceCode > pre.sourceCode > code.sourceCode > span:empty {
+  display: block !important;
+  height: 0.12em !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Números de línea de Pandoc */
+pre.numberSource,
+div.sourceCode > pre.numberSource {
+  margin-left: 0 !important;
+  padding-left: 3.2em !important;
+  border-left: none !important;
+}
+
+pre.numberSource code > span,
+div.sourceCode > pre.numberSource code > span {
+  position: relative !important;
+  left: -2.8em !important;
+  counter-increment: source-line !important;
+}
+
+pre.numberSource code > span > a:first-child::before,
+div.sourceCode > pre.numberSource code > span > a:first-child::before {
+  content: counter(source-line) !important;
+  position: relative !important;
+  left: -0.9em !important;
+  text-align: right !important;
+  color: #999 !important;
+  width: 2.3em !important;
+  padding-right: 0.45em !important;
+  border-right: 1px solid #d0d0d0 !important;
+  display: inline-block !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Evita que los anchors metan caja extra */
+pre.numberSource code > span > a:first-child,
+div.sourceCode > pre.numberSource code > span > a:first-child {
+  text-decoration: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+}
+
+/* Fallback para bloques sin spans de sintaxis */
+pre:not(.sourceCode),
+pre.sourceCode:not(:has(code.sourceCode > span)) {
+  padding-top: 0.35em !important;
+}
+
+/* ============================================================
+   COLORES DE SINTAXIS — tema claro
+   ============================================================ */
+code span.al { color: #cc0000; font-weight: bold; }
+code span.an { color: #5c6bc0; font-style: italic; }
+code span.at { color: #795548; }
+code span.bn { color: #e65100; }
+code span.bu { color: #0277bd; }
+code span.cf { color: #6a1b9a; font-weight: bold; }
+code span.ch { color: #2e7d32; }
+code span.cn { color: #880000; font-weight: bold; }
+code span.co { color: #888888; font-style: italic; }
+code span.cv { color: #5c6bc0; font-style: italic; }
+code span.do { color: #795548; font-style: italic; }
+code span.dt { color: #b71c1c; }
+code span.dv { color: #1565c0; }
+code span.er { color: #cc0000; font-weight: bold; }
+code span.ex { color: #0277bd; }
+code span.fl { color: #1565c0; }
+code span.fu { color: #0277bd; font-weight: bold; }
+code span.im { color: #2e7d32; font-weight: bold; }
+code span.in { color: #5c6bc0; font-style: italic; }
+code span.kw { color: #6a1b9a; font-weight: bold; }
+code span.op { color: #555555; }
+code span.ot { color: #2e7d32; }
+code span.pp { color: #795548; font-weight: bold; }
+code span.sc { color: #2e7d32; }
+code span.ss { color: #ad1457; }
+code span.st { color: #2e7d32; }
+code span.va { color: #0277bd; }
+code span.vs { color: #2e7d32; }
+code span.wa { color: #f57c00; font-weight: bold; }
+
+/* ============================================================
+   RESTO
+   ============================================================ */
+
+blockquote {
+  border-left: 4px solid #1a73e8;
+  background-color: #f0f4ff;
+  color: #16213e;
+  margin: 1.2em 0;
+  padding: 0.7em 1.1em;
+  border-radius: 0 5px 5px 0;
+  font-style: italic;
+}
+
+blockquote p { margin: 0.25em 0; }
+
+.note, .tip {
+  border-left: 4px solid #2e7d32;
+  background-color: #f1f8f1;
+  padding: 0.6em 1em;
+  margin: 1em 0;
+  border-radius: 0 5px 5px 0;
+}
+
+.warning, .caution {
+  border-left: 4px solid #e65100;
+  background-color: #fff8f0;
+  padding: 0.6em 1em;
+  margin: 1em 0;
+  border-radius: 0 5px 5px 0;
+}
+
+.danger, .important {
+  border-left: 4px solid #c62828;
+  background-color: #fff0f0;
+  padding: 0.6em 1em;
+  margin: 1em 0;
+  border-radius: 0 5px 5px 0;
+}
+
+ul, ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0 0.8em 0;
+}
+
+li {
+  margin-bottom: 0.3em;
+  line-height: 1.6;
+}
+
+li > ul, li > ol {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: 0.88em;
+  margin: 1em 0;
+}
+
+th, td {
+  padding: 0.28em 0.45em;
+  vertical-align: top;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+thead {
+  background: transparent;
+  color: inherit;
+}
+
+th {
+  font-weight: 700;
+  border-bottom: 1px solid #ccd6f6;
+}
+
+td {
+  border-bottom: 1px solid #dde3f5;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em auto;
+  border-radius: 4px;
+}
+
+figure {
+  margin: 1.2em 0;
+  text-align: center;
+}
+
+figcaption {
+  font-size: 0.84em;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.35em;
+}
+
+a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+a:hover { text-decoration: underline; }
+
+em {
+  font-style: italic;
+  color: #333;
+}
+
+strong {
+  font-weight: 700;
+  color: #0f3460;
+}
+
+.chapter > h1:first-child {
+  break-before: page;
+  page-break-before: always;
+}
+
+nav#toc ol {
+  list-style: decimal;
+  padding-left: 1.3em;
+}
+
+nav#toc a {
+  color: #0f3460;
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+}
+
+nav#toc li { margin-bottom: 0.35em; }
+
+.footnotes {
+  font-size: 0.84em;
+  color: #555;
+  border-top: 1px solid #dde3f5;
+  margin-top: 1.8em;
+  padding-top: 0.7em;
+}
+
+/* ============================================================
+   MODO OSCURO
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+  }
+
+  h1, h2, h3, h4, h5, h6 { color: #89b4fa; }
+  h1 { border-bottom-color: #45475a; }
+  h2 { border-bottom-color: #313244; }
+
+  code {
+    background-color: #313244;
+    color: #f38ba8;
+    border-color: #45475a;
+  }
+
+  div.sourceCode {
+    background-color: #181825;
+    border-color: #45475a;
+    border-left-color: #89b4fa;
+  }
+
+  pre,
+  pre.sourceCode,
+  div.sourceCode > pre,
+  div.sourceCode > pre.sourceCode {
+    background-color: #181825;
+    color: #cdd6f4;
+  }
+
+  blockquote {
+    background-color: #1e1e2e;
+    border-left-color: #89b4fa;
+    color: #cdd6f4;
+  }
+
+  table thead { background-color: #181825; }
+  /* tr:nth-child(even) td { background-color: #1e1e2e; } */
+  td { border-bottom-color: #313244; }
+  a { color: #89b4fa; }
+  strong { color: #e6edf3; }
+  hr { border-top-color: #313244; }
+
+  code span.al { color: #f38ba8; }
+  code span.an { color: #89b4fa; font-style: italic; }
+  code span.at { color: #fab387; }
+  code span.bn { color: #fab387; }
+  code span.bu { color: #89dceb; }
+  code span.cf { color: #cba6f7; font-weight: bold; }
+  code span.ch { color: #a6e3a1; }
+  code span.cn { color: #f38ba8; }
+  code span.co { color: #6c7086; font-style: italic; }
+  code span.cv { color: #89b4fa; font-style: italic; }
+  code span.do { color: #7f849c; font-style: italic; }
+  code span.dt { color: #f38ba8; }
+  code span.dv { color: #fab387; }
+  code span.er { color: #f38ba8; font-weight: bold; }
+  code span.ex { color: #89dceb; }
+  code span.fl { color: #fab387; }
+  code span.fu { color: #89b4fa; }
+  code span.im { color: #a6e3a1; font-weight: bold; }
+  code span.in { color: #89b4fa; font-style: italic; }
+  code span.kw { color: #cba6f7; font-weight: bold; }
+  code span.op { color: #89dceb; }
+  code span.ot { color: #a6e3a1; }
+  code span.pp { color: #fab387; }
+  code span.sc { color: #a6e3a1; }
+  code span.ss { color: #f5c2e7; }
+  code span.st { color: #a6e3a1; }
+  code span.va { color: #89dceb; }
+  code span.vs { color: #a6e3a1; }
+  code span.wa { color: #f9e2af; font-weight: bold; }
+}
+</file>
+<file name="index.html" path="/index.html">
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown → EPUB con pandoc.wasm</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+<file name="package.json" path="/package.json">
+{
+  "name": "pandoc-wasm-epub-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test test/pandocRunner.test.ts"
+  },
+  "dependencies": {
+    "@bjorn3/browser_wasi_shim": "^0.4.2",
+    "preact": "^10.29.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.5",
+    "typescript": "^5.8.3",
+    "vite": "^8.0.8"
+  },
+  "packageManager": "pnpm@10.7.1"
+}
+</file>
+<file name="README.md" path="/README.md">
+# Markdown → EPUB con pandoc.wasm
+
+Aplicación web autocontenida para convertir Markdown a EPUB en el navegador con `pandoc.wasm`.
+
+## Qué se ha corregido
+
+La versión anterior tenía tres problemas reales:
+
+1. El zip no incluía el binario real `pandoc.wasm`, así que no era autocontenido.
+2. Usaba `language` en el YAML; Pandoc lo acepta por compatibilidad, pero el nombre actual preferible para EPUB es `lang`.
+3. No exponía `--toc-depth`, pese a que Pandoc lo soporta y encaja con una UI de este tipo.
+
+Esta revisión lo corrige:
+
+- incluye `public/pandoc.wasm`
+- ejecuta Pandoc dentro de un Web Worker para no bloquear la UI
+- usa `--metadata-file=metadata.yaml`
+- usa `--css=epub.css`
+- usa `--toc` y `--toc-depth`
+- usa `--split-level`
+- usa `--epub-cover-image`
+- elimina `--sandbox`, porque en este entorno WASI impedía resolver `epub.css` aunque el archivo estuviera presente
+- permite sobrescribir el binario subiendo otro `pandoc.wasm` desde la interfaz
+
+## Estructura
+
+```text
+pandoc-wasm-epub-app/
+├─ public/
+│  └─ pandoc.wasm
+├─ src/
+│  ├─ lib/
+│  │  ├─ download.ts
+│  │  ├─ epubMetadata.ts
+│  │  ├─ types.ts
+│  │  └─ workerClient.ts
+│  ├─ workers/
+│  │  └─ pandoc.worker.ts
+│  ├─ app.tsx
+│  ├─ main.tsx
+│  ├─ styles.css
+│  └─ vite-env.d.ts
+├─ .gitignore
+├─ index.html
+├─ package.json
+├─ pnpm-workspace.yaml
+├─ README.md
+├─ tsconfig.json
+└─ vite.config.ts
+```
+
+## Requisitos
+
+- Node.js 20+
+- pnpm 9+
+
+## Instalación
+
+```bash
+pnpm install
+```
+
+## Desarrollo
+
+```bash
+pnpm dev
+```
+
+## Build
+
+```bash
+pnpm build
+pnpm preview
+```
+
+## Funcionamiento
+
+La aplicación genera un EPUB3 en el navegador con estos argumentos base:
+
+```bash
+pandoc \
+  --sandbox \
+  --from=markdown \
+  --to=epub3 \
+  --standalone \
+  --metadata-file=metadata.yaml \
+  --css=epub.css \
+  --toc \
+  --toc-depth=3 \
+  --split-level=1 \
+  -o book.epub \
+  book.md
+```
+
+Si el usuario aporta una portada, se añade `--epub-cover-image=<archivo>`.
+
+## Notas técnicas
+
+- Para EPUB, Pandoc trabaja correctamente con salida a fichero binario mediante `-o`.
+- `--metadata-file` admite YAML o JSON y es válido para cualquier formato de entrada.
+- `--css` afecta a EPUB y Pandoc requiere una hoja de estilo para EPUB; si no se aporta, busca `epub.css` o usa valores por defecto.
+- `--toc` y `--toc-depth` controlan la tabla de contenidos.
+- `--split-level` solo afecta a la composición interna del EPUB.
+- En los metadatos EPUB, `lang` es el nombre actual preferente; `language` se mantiene solo como alias heredado.
+
+## Empaquetar el repo en zip
+
+```bash
+zip -r pandoc-wasm-epub-app.zip . -x "node_modules/*" -x "dist/*"
+```
+</file>
+<file name="tsconfig.json" path="/tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "strict": true,
+    "types": ["vite/client"]
+  },
+  "include": ["src"]
+}
+</file>
+<file name="vite.config.ts" path="/vite.config.ts">
+import { defineConfig } from "vite";
+import preact from "@preact/preset-vite";
+
+export default defineConfig({
+  plugins: [preact()],
+  server: {
+    port: 5173
+  }
+});
+</file>
+</project_files>
+</context>
