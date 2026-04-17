@@ -1,11 +1,11 @@
-import { h } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
+import { h } from 'preact';
 import { createPortal } from 'preact/compat';
-import { editingAssignmentId } from '../state/signals';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { clampDedicationPct } from '../domain/slots';
-import { updateAssignment, deleteAssignment, clearTransientUi } from '../state/actions';
 import type { Assignment } from '../domain/types';
+import { clearTransientUi, deleteAssignment, updateAssignment } from '../state/actions';
+import { editingAssignmentId } from '../state/signals';
 import './AssignmentPopover.css';
 
 interface Props {

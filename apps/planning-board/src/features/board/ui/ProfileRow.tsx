@@ -55,7 +55,7 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
             <span className="profile-row__name">{profile.name}</span>
             {category && <span className="profile-row__category">{category}</span>}
           </div>
-          {overloads.length > 0 && <span className="profile-row__badge">⚠ {overloads.length} slots</span>}
+          {overloads.length > 0 && <span className="profile-row__badge">⚠ {overloads.length} slots &gt; 100%</span>}
         </div>
         {!isDeleting && (
           <div className="profile-row__actions">

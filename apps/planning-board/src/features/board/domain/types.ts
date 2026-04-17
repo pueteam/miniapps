@@ -9,6 +9,7 @@ export interface Profile {
 
 export interface Assignment {
   id: string;
+  index: number;
   profileId: string;
   task: string;
   startSlot: number;

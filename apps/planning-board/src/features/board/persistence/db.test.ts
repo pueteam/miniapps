@@ -72,7 +72,7 @@ describe('persistence', () => {
 
   describe('assignmentRepo', () => {
     it('creates and retrieves an assignment', async () => {
-      const a: Assignment = { id: 'a1', profileId: 'p1', task: 'Task', startSlot: 0, endSlot: 2, dedicationPct: 100 };
+      const a: Assignment = { id: 'a1', index: 0, profileId: 'p1', task: 'Task', startSlot: 0, endSlot: 2, dedicationPct: 100 };
       await db.assignments.add(a);
       const result = await db.assignments.get('a1');
       expect(result).toEqual(a);
@@ -80,9 +80,9 @@ describe('persistence', () => {
 
     it('deletes by profileId', async () => {
       await db.assignments.bulkAdd([
-        { id: 'a1', profileId: 'p1', task: 'T1', startSlot: 0, endSlot: 0, dedicationPct: 100 },
-        { id: 'a2', profileId: 'p1', task: 'T2', startSlot: 1, endSlot: 1, dedicationPct: 50 },
-        { id: 'a3', profileId: 'p2', task: 'T3', startSlot: 0, endSlot: 0, dedicationPct: 100 },
+        { id: 'a1', index: 0, profileId: 'p1', task: 'T1', startSlot: 0, endSlot: 0, dedicationPct: 100 },
+        { id: 'a2', index: 1, profileId: 'p1', task: 'T2', startSlot: 1, endSlot: 1, dedicationPct: 50 },
+        { id: 'a3', index: 2, profileId: 'p2', task: 'T3', startSlot: 0, endSlot: 0, dedicationPct: 100 },
       ]);
       await db.assignments.where('profileId').equals('p1').delete();
       const remaining = await db.assignments.toArray();

@@ -22,6 +22,7 @@ vi.mock('@floating-ui/dom', () => ({
 
 const assignment = {
   id: 'a1',
+  index: 0,
   profileId: 'p1',
   task: 'Build',
   startSlot: 0,

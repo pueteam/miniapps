@@ -63,7 +63,8 @@ export async function deleteProfile(id: string): Promise<void> {
 }
 
 export async function createAssignment(profileId: string, startSlot: number = 0, endSlot: number = 0): Promise<string | null> {
-  const assignment: Assignment = { id: generateId(), profileId, task: 'New task', startSlot, endSlot, dedicationPct: 100 };
+  const nextIndex = assignments.value.reduce((max, a) => Math.max(max, a.index ?? -1), -1) + 1;
+  const assignment: Assignment = { id: generateId(), index: nextIndex, profileId, task: 'New task', startSlot, endSlot, dedicationPct: 100 };
   const validation = validateAssignment(assignment.task, assignment.startSlot, assignment.endSlot, assignment.dedicationPct);
   if (!validation.valid) return null;
   assignments.value = [...assignments.value, assignment];
@@ -144,7 +145,8 @@ export async function duplicateAssignment(id: string): Promise<void> {
   const maxSlot = slotCount.value - 1;
   const newStart = clampSlot(original.endSlot + 1, 0, maxSlot);
   const newEnd = clampSlot(newStart + duration, 0, maxSlot);
-  const copy: Assignment = { ...original, id: generateId(), task: `${original.task} (copy)`, startSlot: newStart, endSlot: newEnd };
+  const nextIndex = assignments.value.reduce((max, a) => Math.max(max, a.index ?? -1), -1) + 1;
+  const copy: Assignment = { ...original, id: generateId(), index: nextIndex, task: `${original.task} (copy)`, startSlot: newStart, endSlot: newEnd };
   assignments.value = [...assignments.value, copy];
   try {
     await assignmentRepo.createAssignment(copy);

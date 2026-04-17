@@ -27,7 +27,7 @@ vi.mock('../state/actions', async (importOriginal) => {
 
 beforeEach(() => {
   assignments.value = [
-    { id: 'a1', profileId: 'p1', task: 'Task', startSlot: 0, endSlot: 1, dedicationPct: 100 },
+    { id: 'a1', index: 0, profileId: 'p1', task: 'Task', startSlot: 0, endSlot: 1, dedicationPct: 100 },
   ];
   contextMenuTarget.value = { assignmentId: 'a1', x: 20, y: 30 };
   vi.clearAllMocks();

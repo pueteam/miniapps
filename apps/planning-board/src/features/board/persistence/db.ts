@@ -17,6 +17,12 @@ class PlanningDB extends Dexie {
         index += 1;
       });
     });
+    this.version(3).stores({ profiles: 'id', assignments: 'id, profileId' }).upgrade(async (tx) => {
+      let i = 0;
+      await tx.table('assignments').toCollection().modify((a: Partial<import('../domain/types').Assignment>) => {
+        if (a.index === undefined) { a.index = i++; }
+      });
+    });
   }
 }
 

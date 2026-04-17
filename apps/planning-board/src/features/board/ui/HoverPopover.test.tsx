@@ -26,7 +26,7 @@ beforeEach(() => {
     { id: 'p1', name: 'Alice', category: '', capacityPct: 100, color: '#4f9cf8', initials: 'AL' },
   ];
   assignments.value = [
-    { id: 'a1', profileId: 'p1', task: 'Build', startSlot: 1, endSlot: 3, dedicationPct: 75 },
+    { id: 'a1', index: 0, profileId: 'p1', task: 'Build', startSlot: 1, endSlot: 3, dedicationPct: 75 },
   ];
   hoveredBarState.value = { assignmentId: 'a1', rect: new DOMRect(10, 20, 100, 20), anchorEl };
   contextMenuTarget.value = null;

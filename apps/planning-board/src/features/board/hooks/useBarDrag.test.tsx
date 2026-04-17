@@ -36,6 +36,7 @@ import { useBarDrag } from './useBarDrag';
 
 const assignment: Assignment = {
   id: 'a1',
+  index: 0,
   profileId: 'p1',
   task: 'Task',
   startSlot: 2,

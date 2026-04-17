@@ -35,6 +35,7 @@ describe('ProfileRow', () => {
     assignments.value = [
       {
         id: 'a1',
+        index: 0,
         profileId: 'p1',
         task: 'Task 1',
         startSlot: 0,
@@ -94,8 +95,8 @@ describe('ProfileRow', () => {
 
   it('grows the row height when assignments overlap', () => {
     assignments.value = [
-      { id: 'a1', profileId: 'p1', task: 'Task 1', startSlot: 0, endSlot: 2, dedicationPct: 100 },
-      { id: 'a2', profileId: 'p1', task: 'Task 2', startSlot: 1, endSlot: 3, dedicationPct: 100 },
+      { id: 'a1', index: 0, profileId: 'p1', task: 'Task 1', startSlot: 0, endSlot: 2, dedicationPct: 100 },
+      { id: 'a2', index: 1, profileId: 'p1', task: 'Task 2', startSlot: 1, endSlot: 3, dedicationPct: 100 },
     ];
 
     const { container } = render(
@@ -108,8 +109,8 @@ describe('ProfileRow', () => {
 
   it('stretches slot cells to the full row height when assignments overlap', () => {
     assignments.value = [
-      { id: 'a1', profileId: 'p1', task: 'Task 1', startSlot: 0, endSlot: 2, dedicationPct: 100 },
-      { id: 'a2', profileId: 'p1', task: 'Task 2', startSlot: 1, endSlot: 3, dedicationPct: 100 },
+      { id: 'a1', index: 0, profileId: 'p1', task: 'Task 1', startSlot: 0, endSlot: 2, dedicationPct: 100 },
+      { id: 'a2', index: 1, profileId: 'p1', task: 'Task 2', startSlot: 1, endSlot: 3, dedicationPct: 100 },
     ];
 
     const { container } = render(

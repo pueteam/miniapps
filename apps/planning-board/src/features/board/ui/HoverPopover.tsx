@@ -33,6 +33,10 @@ export function HoverPopover(): h.JSX.Element | null {
         <div className="hover-popover__title">{assignment.task}</div>
       </div>
       <div className="hover-popover__row">
+        <span className="hover-popover__lbl">Profile</span>
+        <span className="hover-popover__val">{profile?.name ?? 'Unknown'}</span>
+      </div>
+      <div className="hover-popover__row">
         <span className="hover-popover__lbl">Dedication</span>
         <span className="hover-popover__val">{assignment.dedicationPct}%</span>
       </div>
@@ -41,8 +45,8 @@ export function HoverPopover(): h.JSX.Element | null {
         <span className="hover-popover__val">{assignment.startSlot + 1}–{assignment.endSlot + 1}</span>
       </div>
       <div className="hover-popover__row">
-        <span className="hover-popover__lbl">Profile</span>
-        <span className="hover-popover__val">{profile?.name ?? 'Unknown'}</span>
+        <span className="hover-popover__lbl">Total Slots</span>
+        <span className="hover-popover__val">{(assignment.endSlot - assignment.startSlot + 1)}</span>
       </div>
       <div className="hover-popover__track">
         <div className="hover-popover__fill" style={{ width: `${assignment.dedicationPct}%`, background: profile?.color ?? 'var(--board-accent)' }} />

@@ -8,8 +8,8 @@ describe('buildExportSnapshot', () => {
       { id: 'p1', name: 'Alice', category: '', capacityPct: 100, color: '#4f9cf8', initials: 'AL' },
     ];
     const assignments: Assignment[] = [
-      { id: 'a1', profileId: 'p1', task: 'Build', startSlot: 0, endSlot: 2, dedicationPct: 100 },
-      { id: 'a2', profileId: 'p1', task: 'Review', startSlot: 1, endSlot: 3, dedicationPct: 50 },
+      { id: 'a1', index: 0, profileId: 'p1', task: 'Build', startSlot: 0, endSlot: 2, dedicationPct: 100 },
+      { id: 'a2', index: 1, profileId: 'p1', task: 'Review', startSlot: 1, endSlot: 3, dedicationPct: 50 },
     ];
 
     const snapshot = buildExportSnapshot(profiles, assignments, 'days', 4, 80);

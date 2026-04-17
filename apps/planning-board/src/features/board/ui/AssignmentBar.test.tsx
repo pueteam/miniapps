@@ -17,6 +17,7 @@ vi.mock('../state/actions', async (importOriginal) => {
 
 const mockAssignment = {
   id: 'a1',
+  index: 0,
   profileId: 'p1',
   task: 'Test task',
   startSlot: 2,
