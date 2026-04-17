@@ -124,27 +124,8 @@ describe('ProfileRow', () => {
     expect((cells[0] as HTMLElement).style.height).toBe(row.style.getPropertyValue('--row-height-current'));
   });
 
-  it('supports keyboard selection for the row header interaction', () => {
-    const { container } = render(<ProfileRow profile={mockProfile} slotCount={60} />);
-
-    const row = container.querySelector('.profile-row') as HTMLElement;
-    expect(row.getAttribute('role')).toBeNull();
-
-    const selectButton = screen.getByRole('button', { name: 'Select profile Alice' });
-    fireEvent.keyDown(selectButton, { key: 'Enter' });
-
-    expect(activeProfileId.value).toBe('p1');
-  });
-
-  it('gives the delete trigger an accessible name when active', () => {
-    activeProfileId.value = 'p1';
-    render(<ProfileRow profile={mockProfile} slotCount={60} />);
-
-    expect(screen.getByRole('button', { name: 'Delete profile Alice' })).toBeTruthy();
-  });
 
   it('shows an edit trigger and opens a profile editor popover', () => {
-    activeProfileId.value = 'p1';
     render(<ProfileRow profile={mockProfile} slotCount={60} />);
 
     const editTrigger = screen.getByRole('button', { name: 'Edit profile Alice' });
@@ -163,7 +144,6 @@ describe('ProfileRow', () => {
 
   it('submits profile updates from the editor popover', () => {
     const updateSpy = vi.spyOn(actions, 'updateProfile').mockResolvedValue();
-    activeProfileId.value = 'p1';
 
     render(<ProfileRow profile={mockProfile} slotCount={60} />);
 

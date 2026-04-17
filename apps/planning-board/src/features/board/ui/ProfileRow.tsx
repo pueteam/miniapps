@@ -3,8 +3,8 @@ import { useRef, useState } from 'preact/hooks';
 import { isMilestoneSlot } from '../domain/slots';
 import { computeAssignmentLanes, rowHeightForLaneCount } from '../domain/stacking';
 import type { Profile } from '../domain/types';
-import { deleteProfile, setActiveProfileId, setDeletingProfileId } from '../state/actions';
-import { activeProfileId, assignments, deletingProfileId, overloadMap } from '../state/signals';
+import { deleteProfile, setDeletingProfileId } from '../state/actions';
+import { assignments, deletingProfileId, overloadMap } from '../state/signals';
 import { AssignmentBar } from './AssignmentBar';
 import { DeleteConfirm } from './DeleteConfirm';
 import { ProfileEditPopover } from './ProfileEditPopover';
@@ -30,7 +30,6 @@ function ProfileRowActionButton({ ariaLabel, className, buttonRef, onClick, chil
 }
 
 export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Element {
-  const isActive = activeProfileId.value === profile.id;
   const isDeleting = deletingProfileId.value === profile.id;
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const editTriggerRef = useRef<HTMLButtonElement>(null);
@@ -44,22 +43,12 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
 
   return (
     <div
-      className={`profile-row ${isActive ? 'profile-row--active' : ''}`}
+      className="profile-row"
       style={{ '--row-height-current': `${rowHeight}px`, '--current-color': profile.color } as Record<string, string>}
     >
       <div className="profile-row__header">
-        <button
-          type="button"
+        <div
           className="profile-row__select"
-          aria-label={`Select profile ${profile.name}`}
-          aria-pressed={isActive}
-          onClick={() => setActiveProfileId(profile.id)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              setActiveProfileId(profile.id);
-            }
-          }}
         >
           <div className="profile-row__avatar" style={{ background: profile.color }}>{profile.initials}</div>
           <div className="profile-row__identity">
@@ -67,7 +56,7 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
             {category && <span className="profile-row__category">{category}</span>}
           </div>
           {overloads.length > 0 && <span className="profile-row__badge">⚠ {overloads.length} slots</span>}
-        </button>
+        </div>
         {!isDeleting && (
           <div className="profile-row__actions">
             <ProfileRowActionButton

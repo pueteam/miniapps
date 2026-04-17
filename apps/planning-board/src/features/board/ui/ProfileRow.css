@@ -24,20 +24,11 @@
 .profile-row__select {
   flex: 1;
   min-width: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
   display: flex;
   align-items: center;
   gap: 11px;
-  cursor: pointer;
   padding: 0;
   text-align: left;
-}
-.profile-row__select:focus-visible {
-  outline: 2px solid var(--board-accent);
-  outline-offset: 2px;
-  border-radius: var(--board-radius-sm);
 }
 .profile-row__avatar {
   width: var(--avatar-size);
@@ -55,10 +46,6 @@
 }
 .profile-row:hover .profile-row__header {
   background: var(--board-surface-2);
-}
-.profile-row--active .profile-row__header {
-  border-left: 3px solid var(--current-color, var(--board-accent));
-  background: var(--board-selected-bg);
 }
 .profile-row__name {
   font-size: 12.5px;
