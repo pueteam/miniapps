@@ -11,11 +11,15 @@ export function Toolbar(): h.JSX.Element {
       <div className="toolbar__group">
         <ProfileCreateForm />
       </div>
+      <div className="toolbar__spacer" />
       <div className="toolbar__sep" />
+      <div className="toolbar__spacer" />
       <div className="toolbar__group">
         <ViewToggle />
         <ZoomControl />
       </div>
+      <div className="toolbar__spacer" />
+      <div className="toolbar__sep" />
       <div className="toolbar__spacer" />
       <div className="toolbar__group">
         <ExportButton />

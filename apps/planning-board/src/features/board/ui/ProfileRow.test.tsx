@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/preact';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as actions from '../state/actions';
-import { activeProfileId, assignments, deletingProfileId } from '../state/signals';
+import { assignments, deletingProfileId } from '../state/signals';
 import { ProfileRow } from './ProfileRow';
 
 vi.mock('../state/signals', async (importOriginal) => {
@@ -26,7 +26,6 @@ const mockProfile = {
 };
 
 beforeEach(() => {
-  activeProfileId.value = null;
   deletingProfileId.value = null;
   assignments.value = [];
 });

@@ -13,7 +13,6 @@ function getStoredNumber(key: string, fallback: number, min: number, max: number
 
 export const profiles = signal<Profile[]>([]);
 export const assignments = signal<Assignment[]>([]);
-export const activeProfileId = signal<string | null>(null);
 export const viewMode = signal<ViewMode>((localStorage.getItem('viewMode') as ViewMode) || 'days');
 export const slotWidth = signal<number>(
   getStoredNumber('slotWidth', BOARD_DEFAULTS.SLOT_WIDTH_DEFAULT, BOARD_DEFAULTS.SLOT_WIDTH_MIN, BOARD_DEFAULTS.SLOT_WIDTH_MAX),

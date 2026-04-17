@@ -6,7 +6,6 @@ import { validateAssignment, validateProfile } from '../domain/validate';
 import * as assignmentRepo from '../persistence/assignmentRepo';
 import * as profileRepo from '../persistence/profileRepo';
 import {
-    activeProfileId,
     assignments,
     contextMenuTarget,
     deletingProfileId,
@@ -164,10 +163,6 @@ export function clearTransientUi(): void {
 export function setViewMode(mode: ViewMode): void {
   viewMode.value = mode;
   localStorage.setItem('viewMode', mode);
-}
-
-export function setActiveProfileId(id: string | null): void {
-  activeProfileId.value = activeProfileId.value === id ? null : id;
 }
 
 export function setDeletingProfileId(id: string | null): void {

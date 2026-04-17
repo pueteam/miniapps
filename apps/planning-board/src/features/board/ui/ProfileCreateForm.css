@@ -78,24 +78,7 @@
 .profile-create__input--error {
   border-color: var(--board-danger);
 }
-/* .profile-create__btn {
-  height: 32px;
-  padding: 0 13px;
-  background: var(--board-surface-2);
-  border: 1px solid var(--board-border-2);
-  border-radius: var(--board-radius-md);
-  color: var(--board-text);
-  font-size: 12.5px;
-  font-weight: 500;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background var(--board-transition-fast);
-}
-.profile-create__btn:hover {
-  background: var(--board-surface-3);
-} */
+
 .profile-create__error {
   font-size: 11px;
   color: var(--board-danger);
