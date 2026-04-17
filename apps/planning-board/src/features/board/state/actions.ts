@@ -56,8 +56,8 @@ export async function deleteProfile(id: string): Promise<void> {
   }
 }
 
-export async function createAssignment(profileId: string): Promise<string | null> {
-  const assignment: Assignment = { id: generateId(), profileId, task: 'New task', startSlot: 0, endSlot: 0, dedicationPct: 100 };
+export async function createAssignment(profileId: string, startSlot: number = 0, endSlot: number = 0): Promise<string | null> {
+  const assignment: Assignment = { id: generateId(), profileId, task: 'New task', startSlot, endSlot, dedicationPct: 100 };
   const validation = validateAssignment(assignment.task, assignment.startSlot, assignment.endSlot, assignment.dedicationPct);
   if (!validation.valid) return null;
   assignments.value = [...assignments.value, assignment];

@@ -4,13 +4,45 @@
   min-width: var(--slot-width);
   height: var(--row-height-current, var(--row-height));
   border-right: 1px solid var(--board-border);
-  border-bottom: 1px solid var(--board-border); 
+  border-bottom: 1px solid var(--board-border);
   transition: background var(--board-transition-fast);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .slot-cell--milestone {
   border-right-color: var(--board-border-2);
 }
+
 .slot-cell--overloaded {
   background: var(--board-overload-bg);
   border-top: 2px solid var(--board-overload-border);
+}
+
+.slot-cell__add-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--board-accent);
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background var(--board-transition-fast), transform var(--board-transition-fast);
+}
+
+.slot-cell__add-btn:hover {
+  background: var(--board-accent-2);
+  transform: scale(1.1);
+}
+
+.slot-cell__add-btn:active {
+  transform: scale(0.95);
 }

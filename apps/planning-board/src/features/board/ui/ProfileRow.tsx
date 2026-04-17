@@ -113,7 +113,7 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
       </div>
       <div className="profile-row__slots">
         {Array.from({ length: slotCount }, (_, i) => (
-          <SlotCell key={i} overloaded={overloadedSlots.has(i)} isMilestone={isMilestoneSlot(i)} height={rowHeight} />
+          <SlotCell key={i} profileId={profile.id} slotIndex={i} overloaded={overloadedSlots.has(i)} isMilestone={isMilestoneSlot(i)} height={rowHeight} />
         ))}
         {profileAssignments.map((assignment) => (
           <AssignmentBar
