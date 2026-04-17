@@ -3,9 +3,15 @@
   align-items: center;
   gap: var(--board-space-xs);
 }
+.profile-create__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 .profile-create__input {
   height: 32px;
   padding: 0 var(--board-space-md);
+  padding-right: 28px;
   border: 1px solid var(--board-border-2);
   border-radius: var(--board-radius-md);
   background: var(--board-bg);
@@ -17,6 +23,57 @@
 .profile-create__input:focus {
   outline: none;
   border-color: var(--board-accent);
+}
+.profile-create__toggle {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--board-text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.profile-create__toggle:hover {
+  background: var(--board-surface-3);
+  color: var(--board-text);
+}
+.profile-create__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  min-width: 220px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--board-surface);
+  border: 1px solid var(--board-border-2);
+  border-radius: var(--board-radius-sm);
+  box-shadow: var(--board-shadow-popup);
+  list-style: none;
+  padding: 4px;
+  margin: 0;
+  z-index: 300;
+}
+.profile-create__menu-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--board-text);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.profile-create__menu-item:hover {
+  background: var(--board-selected-bg);
 }
 .profile-create__input--error {
   border-color: var(--board-danger);

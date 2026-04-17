@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/preact';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as actions from '../state/actions';
+import { activeProfileId, assignments, deletingProfileId } from '../state/signals';
 import { ProfileRow } from './ProfileRow';
-import { activeProfileId, deletingProfileId, assignments } from '../state/signals';
 
 vi.mock('../state/signals', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../state/signals')>();
@@ -124,10 +125,13 @@ describe('ProfileRow', () => {
   });
 
   it('supports keyboard selection for the row header interaction', () => {
-    render(<ProfileRow profile={mockProfile} slotCount={60} />);
+    const { container } = render(<ProfileRow profile={mockProfile} slotCount={60} />);
 
-    const row = screen.getByRole('button', { name: 'Select profile Alice' });
-    fireEvent.keyDown(row, { key: 'Enter' });
+    const row = container.querySelector('.profile-row') as HTMLElement;
+    expect(row.getAttribute('role')).toBeNull();
+
+    const selectButton = screen.getByRole('button', { name: 'Select profile Alice' });
+    fireEvent.keyDown(selectButton, { key: 'Enter' });
 
     expect(activeProfileId.value).toBe('p1');
   });
@@ -137,5 +141,42 @@ describe('ProfileRow', () => {
     render(<ProfileRow profile={mockProfile} slotCount={60} />);
 
     expect(screen.getByRole('button', { name: 'Delete profile Alice' })).toBeTruthy();
+  });
+
+  it('shows an edit trigger and opens a profile editor popover', () => {
+    activeProfileId.value = 'p1';
+    render(<ProfileRow profile={mockProfile} slotCount={60} />);
+
+    const editTrigger = screen.getByRole('button', { name: 'Edit profile Alice' });
+    fireEvent.click(editTrigger);
+
+    expect(screen.getByRole('dialog', { name: 'Edit profile Alice' })).toBeTruthy();
+    expect(screen.getByLabelText('Role / profile name')).toBeTruthy();
+
+    const avatarInput = screen.getByLabelText('Avatar text') as HTMLInputElement;
+    expect(avatarInput).toBeTruthy();
+    expect(avatarInput.maxLength).toBe(3);
+
+    expect(screen.getByLabelText('Color')).toBeTruthy();
+    expect(screen.queryByLabelText('Category')).toBeNull();
+  });
+
+  it('submits profile updates from the editor popover', () => {
+    const updateSpy = vi.spyOn(actions, 'updateProfile').mockResolvedValue();
+    activeProfileId.value = 'p1';
+
+    render(<ProfileRow profile={mockProfile} slotCount={60} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit profile Alice' }));
+    fireEvent.input(screen.getByLabelText('Role / profile name'), { target: { value: 'Arquitecto' } });
+    fireEvent.input(screen.getByLabelText('Avatar text'), { target: { value: 'AR' } });
+    fireEvent.input(screen.getByLabelText('Color'), { target: { value: '#87b0e8' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save profile changes' }));
+
+    expect(updateSpy).toHaveBeenCalledWith('p1', expect.objectContaining({
+      name: 'Arquitecto',
+      initials: 'AR',
+      color: '#87b0e8',
+    }));
   });
 });
