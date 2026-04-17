@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as profileRepo from '../persistence/profileRepo';
-import * as assignmentRepo from '../persistence/assignmentRepo';
-import { profiles, assignments, overloadMap, slotCount } from './signals';
-import { createProfile, deleteProfile, createAssignment, updateAssignment, duplicateAssignment, clearTransientUi, updateProfile } from './actions';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PROFILE_COLOR_PALETTE } from '../domain/color';
+import * as assignmentRepo from '../persistence/assignmentRepo';
+import * as profileRepo from '../persistence/profileRepo';
+import { clearTransientUi, createAssignment, createProfile, deleteProfile, duplicateAssignment, updateAssignment, updateProfile } from './actions';
+import { assignments, overloadMap, profiles, slotCount } from './signals';
 
 vi.mock('../persistence/profileRepo');
 vi.mock('../persistence/assignmentRepo');

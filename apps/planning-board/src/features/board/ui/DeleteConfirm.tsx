@@ -10,13 +10,13 @@ export function DeleteConfirm({ onConfirm, onCancel }: Props): h.JSX.Element {
   return (
     <div className="delete-confirm" role="alertdialog" aria-modal={true} aria-label="Delete profile confirmation" aria-describedby="delete-confirm-text"
       onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); onCancel(); } }}>
-      <div className="delete-confirm__content">
+      {/* <div className="delete-confirm__content"> */}
         <span id="delete-confirm-text" className="delete-confirm__text">Delete profile?</span>
-        <div className="delete-confirm__buttons">
+        {/* <div className="delete-confirm__buttons"> */}
           <button className="delete-confirm__yes" onClick={onConfirm}>Yes</button>
           <button ref={cancelRef} className="delete-confirm__no" onClick={onCancel}>No</button>
-        </div>
-      </div>
+        {/* </div>
+      </div> */}
     </div>
   );
 }

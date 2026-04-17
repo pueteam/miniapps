@@ -3,8 +3,9 @@ import { useRef, useState } from 'preact/hooks';
 import { isMilestoneSlot } from '../domain/slots';
 import { computeAssignmentLanes, rowHeightForLaneCount } from '../domain/stacking';
 import type { Profile } from '../domain/types';
+import { useProfileDrag } from '../hooks/useProfileDrag';
 import { deleteProfile, setDeletingProfileId } from '../state/actions';
-import { assignments, deletingProfileId, overloadMap } from '../state/signals';
+import { assignments, deletingProfileId, overloadMap, profiles } from '../state/signals';
 import { AssignmentBar } from './AssignmentBar';
 import { DeleteConfirm } from './DeleteConfirm';
 import { ProfileEditPopover } from './ProfileEditPopover';
@@ -33,6 +34,7 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
   const isDeleting = deletingProfileId.value === profile.id;
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const editTriggerRef = useRef<HTMLButtonElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
   const overloads = overloadMap.value.get(profile.id) || [];
   const overloadedSlots = new Set(overloads.map((o) => o.slotIndex));
   const overloadedAssignmentIds = new Set(overloads.flatMap((o) => o.assignmentIds));
@@ -40,10 +42,26 @@ export function ProfileRow({ profile, slotCount }: Readonly<Props>): h.JSX.Eleme
   const { byId: laneByAssignmentId, laneCount } = computeAssignmentLanes(profileAssignments);
   const rowHeight = rowHeightForLaneCount(laneCount);
   const category = profile.category.trim();
+  
+  // Calculate current index for drag & drop
+  const currentIndex = profiles.value.findIndex((p) => p.id === profile.id);
+  const totalProfiles = profiles.value.length;
+  
+  // Setup drag & drop
+  useProfileDrag({
+    profileId: profile.id,
+    currentIndex: Math.max(0, currentIndex),
+    totalProfiles,
+    rowHeight,
+    ref: rowRef,
+  });
 
   return (
     <div
+      ref={rowRef}
       className="profile-row"
+      draggable={true}
+      data-profile-id={profile.id}
       style={{ '--row-height-current': `${rowHeight}px`, '--current-color': profile.color } as Record<string, string>}
     >
       <div className="profile-row__header">

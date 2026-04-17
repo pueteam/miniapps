@@ -4,6 +4,18 @@
   height: var(--row-height-current, var(--row-height));
   position: relative;
   cursor: pointer;
+  transition: box-shadow var(--board-transition-fast);
+}
+.profile-row--dragging {
+  z-index: 10;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  opacity: 0.8;
+}
+.profile-row--drag-active {
+  cursor: grabbing;
+}
+.profile-row--can-drop {
+  border-bottom: 2px solid var(--board-accent);
 }
 .profile-row__header {
   position: sticky;

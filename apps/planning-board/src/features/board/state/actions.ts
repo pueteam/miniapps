@@ -174,3 +174,34 @@ export function setDeletingProfileId(id: string | null): void {
 export function setEditingAssignmentId(id: string | null): void {
   editingAssignmentId.value = id;
 }
+
+export async function reorderProfiles(profileId: string, fromIndex: number, toIndex: number): Promise<void> {
+  // Prevent unnecessary operations
+  if (fromIndex === toIndex) return;
+
+  // Get the profile to move
+  const profile = profiles.value.find((p) => p.id === profileId);
+  if (!profile) return;
+
+  // Create new array without the profile
+  const profilesWithoutCurrent = profiles.value.filter((p) => p.id !== profileId);
+
+  // Insert profile at the new position
+  const newProfiles = [
+    ...profilesWithoutCurrent.slice(0, toIndex),
+    profile,
+    ...profilesWithoutCurrent.slice(toIndex),
+  ];
+
+  const prevProfiles = profiles.value;
+  profiles.value = newProfiles;
+
+  try {
+    // Persist the new order to the repository
+    await Promise.all(newProfiles.map((p, index) => profileRepo.updateProfile(p.id, { ...p })));
+  } catch (error) {
+    // Rollback on error
+    profiles.value = prevProfiles;
+    logActionError('[actions] failed to reorder profiles', error);
+  }
+}
