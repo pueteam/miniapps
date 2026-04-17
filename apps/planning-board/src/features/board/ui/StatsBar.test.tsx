@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/preact';
-import { StatsBar } from './StatsBar';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { assignments, profiles, slotCount, viewMode } from '../state/signals';
+import { StatsBar } from './StatsBar';
 
 describe('StatsBar', () => {
   beforeEach(() => {

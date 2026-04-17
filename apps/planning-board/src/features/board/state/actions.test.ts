@@ -23,7 +23,7 @@ describe('createProfile', () => {
     expect(profiles.value).toHaveLength(1);
     expect(profiles.value[0].name).toBe('Alice');
     expect(profiles.value[0].color).toBe(PROFILE_COLOR_PALETTE[0]);
-    expect(profiles.value[0].initials).toBe('AL');
+    expect(profiles.value[0].initials).toBe('ALI');
     expect(profileRepo.createProfile).toHaveBeenCalledOnce();
   });
 

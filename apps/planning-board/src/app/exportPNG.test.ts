@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildExportSnapshot } from './exportPNG';
 import type { Assignment, Profile } from '../features/board/domain/types';
+import { buildExportSnapshot } from './exportPNG';
 
 describe('buildExportSnapshot', () => {
   it('uses active slot width, slot count, lane heights, and profile colors', () => {

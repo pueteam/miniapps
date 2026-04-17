@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/preact';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { assignments, contextMenuTarget, editingAssignmentId, hoveredBarState, profiles } from '../state/signals';
 import { AssignmentPopover } from './AssignmentPopover';
 import { ContextMenu } from './ContextMenu';
-import { assignments, contextMenuTarget, editingAssignmentId, hoveredBarState, profiles } from '../state/signals';
 
 const floatingUi = vi.hoisted(() => ({
   computePosition: vi.fn(async () => ({ x: 100, y: 100 })),

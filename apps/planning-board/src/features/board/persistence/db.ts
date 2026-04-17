@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
-import type { Profile, Assignment } from '../domain/types';
 import { generateInitials, getProfileColor } from '../domain/color';
+import type { Assignment, Profile } from '../domain/types';
 
 class PlanningDB extends Dexie {
   profiles!: Table<Profile, string>;

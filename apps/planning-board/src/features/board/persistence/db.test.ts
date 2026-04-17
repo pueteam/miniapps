@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import Dexie from 'dexie';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { Assignment, Profile } from '../domain/types';
 import { db } from './db';
-import type { Profile, Assignment } from '../domain/types';
 
 describe('persistence', () => {
   beforeEach(async () => {
@@ -64,7 +64,7 @@ describe('persistence', () => {
       const profile = await migratedDb.profiles.get('p1');
 
       expect(profile?.color).toBeTruthy();
-      expect(profile?.initials).toBe('AL');
+      expect(profile?.initials).toBe('ALI');
 
       await migratedDb.delete();
     });

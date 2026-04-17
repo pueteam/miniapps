@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/preact';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { contextMenuTarget, editingAssignmentId, hoveredBarState, slotCount } from '../state/signals';
 import { AssignmentBar } from './AssignmentBar';
 
