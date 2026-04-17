@@ -6,8 +6,8 @@ import './ProfileCreateForm.css';
 const PROFILE_ROLE_OPTIONS = [
   'Jefe de Proyecto',
   'Arquitecto',
-  'Data Engineer Senior',
-  'Data Engineer Junior',
+  'Data Engineer Sr',
+  'Data Engineer Jr',
   'Data Scientist',
   'DevOps',
   'QA / Testing',

@@ -1,8 +1,8 @@
-import { signal, computed, effect } from '@preact/signals';
-import type { Profile, Assignment, ViewMode, OverloadInfo, BoardStats } from '../domain/types';
+import { computed, effect, signal } from '@preact/signals';
 import { BOARD_DEFAULTS } from '../domain/constants';
 import { detectOverloads } from '../domain/overload';
 import { computeStats } from '../domain/stats';
+import type { Assignment, BoardStats, OverloadInfo, Profile, ViewMode } from '../domain/types';
 
 function getStoredNumber(key: string, fallback: number, min: number, max: number): number {
   const raw = localStorage.getItem(key);

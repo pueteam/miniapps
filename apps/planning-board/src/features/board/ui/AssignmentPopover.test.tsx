@@ -55,12 +55,14 @@ beforeEach(() => {
 });
 
 describe('AssignmentPopover', () => {
-  it('renders task input, slider, number input, and delete button', () => {
+  it('renders task input, slider, number input, delete, save and cancel buttons', () => {
     render(<AssignmentPopover assignment={mockAssignment} anchorRef={anchorRef} />);
     expect(screen.getByDisplayValue('Test task')).toBeTruthy();
     expect(screen.getByRole('slider')).toBeTruthy();
     expect(screen.getByRole('spinbutton')).toBeTruthy();
     expect(screen.getByText('Delete assignment')).toBeTruthy();
+    expect(screen.getByText('Save')).toBeTruthy();
+    expect(screen.getByText('Cancel')).toBeTruthy();
   });
 
   it('shows correct dedicationPct value', () => {
@@ -178,5 +180,43 @@ describe('AssignmentPopover', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(editingAssignmentId.value).toBeNull();
+  });
+
+  it('typing in number input updates slider value', () => {
+    render(<AssignmentPopover assignment={mockAssignment} anchorRef={anchorRef} />);
+    const number = screen.getByRole('spinbutton') as HTMLInputElement;
+    const slider = screen.getByRole('slider') as HTMLInputElement;
+
+    fireEvent.input(number, { target: { value: '50' } });
+
+    expect(slider.value).toBe('50');
+  });
+
+  it('Save button calls updateAssignment with local values and closes', () => {
+    render(<AssignmentPopover assignment={mockAssignment} anchorRef={anchorRef} />);
+    const number = screen.getByRole('spinbutton') as HTMLInputElement;
+    fireEvent.input(number, { target: { value: '50' } });
+
+    screen.getByText('Save').click();
+
+    expect(actions.updateAssignment).toHaveBeenCalledWith('a1', { task: 'Test task', dedicationPct: 50 });
+    expect(editingAssignmentId.value).toBeNull();
+  });
+
+  it('Cancel button closes without calling updateAssignment', () => {
+    render(<AssignmentPopover assignment={mockAssignment} anchorRef={anchorRef} />);
+    const number = screen.getByRole('spinbutton') as HTMLInputElement;
+    fireEvent.input(number, { target: { value: '50' } });
+
+    screen.getByText('Cancel').click();
+
+    expect(actions.updateAssignment).not.toHaveBeenCalled();
+    expect(editingAssignmentId.value).toBeNull();
+  });
+
+  it('shows slot range and total slot count', () => {
+    render(<AssignmentPopover assignment={mockAssignment} anchorRef={anchorRef} />);
+    expect(screen.getByText(/Slots 1–3/)).toBeTruthy();
+    expect(screen.getByText('3 slots')).toBeTruthy();
   });
 });

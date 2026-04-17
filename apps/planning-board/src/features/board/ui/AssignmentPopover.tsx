@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { autoUpdate, computePosition, flip, offset, shift } from '@floating-ui/dom';
 import { createPortal } from 'preact/compat';
 import { editingAssignmentId } from '../state/signals';
@@ -19,6 +19,14 @@ export function AssignmentPopover({ assignment, anchorRef }: Props): h.JSX.Eleme
   const isOpen = editingAssignmentId.value === assignment.id;
   const taskInputId = `pop-task-${assignment.id}`;
   const dedicationSliderId = `pop-ded-${assignment.id}`;
+
+  const [localTask, setLocalTask] = useState(assignment.task);
+  const [localDedPct, setLocalDedPct] = useState(assignment.dedicationPct);
+
+  useEffect(() => {
+    setLocalTask(assignment.task);
+    setLocalDedPct(assignment.dedicationPct);
+  }, [assignment.id]);
 
   useEffect(() => {
     if (!isOpen || !ref.current || !anchorRef.current) return;
@@ -73,39 +81,50 @@ export function AssignmentPopover({ assignment, anchorRef }: Props): h.JSX.Eleme
           id={taskInputId}
           className="assignment-popover__input"
           type="text"
-          defaultValue={assignment.task}
-          key={assignment.id + '-task'}
+          value={localTask}
           maxLength={40}
-          onBlur={(e) => {
-            const val = (e.target as HTMLInputElement).value.slice(0, 40);
-            if (val !== assignment.task) updateAssignment(assignment.id, { task: val });
-          }}
+          onInput={(e) => setLocalTask((e.target as HTMLInputElement).value)}
         />
       </div>
       <div>
         <label className="assignment-popover__label" htmlFor={dedicationSliderId}>
-          Dedication: {assignment.dedicationPct}%
+          Dedication: {localDedPct}%
         </label>
         <div className="assignment-popover__dedication">
           <input
             id={dedicationSliderId}
             className="assignment-popover__slider"
             type="range" min={10} max={100} step={5}
-            value={assignment.dedicationPct}
-            onInput={(e) => updateAssignment(assignment.id, { dedicationPct: clampDedicationPct(Number((e.target as HTMLInputElement).value)) })}
+            value={localDedPct}
+            onInput={(e) => setLocalDedPct(Number((e.target as HTMLInputElement).value))}
           />
           <input
             className="assignment-popover__number"
             type="number" min={10} max={100} step={5}
-            value={assignment.dedicationPct}
-            onBlur={(e) => updateAssignment(assignment.id, { dedicationPct: clampDedicationPct(Number((e.target as HTMLInputElement).value)) })}
+            value={localDedPct}
+            onInput={(e) => {
+              const v = Number((e.target as HTMLInputElement).value);
+              if (v >= 10 && v <= 100) setLocalDedPct(v);
+            }}
           />
         </div>
       </div>
-      <div className="assignment-popover__effort">Slots {assignment.startSlot + 1}–{assignment.endSlot + 1}</div>
-      <button className="assignment-popover__delete" onClick={() => deleteAssignment(assignment.id)}>
-        Delete assignment
-      </button>
+      <div className="assignment-popover__effort">
+        <span>Slots {assignment.startSlot + 1}–{assignment.endSlot + 1}</span>
+        <span className="assignment-popover__effort-total">{assignment.endSlot - assignment.startSlot + 1} slots</span>
+      </div>
+      <div className="assignment-popover__actions">
+        <button className="assignment-popover__delete" onClick={() => deleteAssignment(assignment.id)}>
+          Delete assignment
+        </button>
+        <div className="assignment-popover__actions-right">
+          <button className="assignment-popover__cancel" onClick={() => clearTransientUi()}>Cancel</button>
+          <button className="assignment-popover__save" onClick={() => {
+            updateAssignment(assignment.id, { task: localTask.slice(0, 40), dedicationPct: clampDedicationPct(localDedPct) });
+            clearTransientUi();
+          }}>Save</button>
+        </div>
+      </div>
     </div>
   );
 

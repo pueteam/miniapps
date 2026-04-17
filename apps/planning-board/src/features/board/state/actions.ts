@@ -6,14 +6,14 @@ import { validateAssignment, validateProfile } from '../domain/validate';
 import * as assignmentRepo from '../persistence/assignmentRepo';
 import * as profileRepo from '../persistence/profileRepo';
 import {
-    assignments,
-    contextMenuTarget,
-    deletingProfileId,
-    editingAssignmentId,
-    hoveredBarState,
-    profiles,
-    slotCount,
-    viewMode,
+  assignments,
+  contextMenuTarget,
+  deletingProfileId,
+  editingAssignmentId,
+  hoveredBarState,
+  profiles,
+  slotCount,
+  viewMode,
 } from './signals';
 
 function logActionError(message: string, error: unknown): void {

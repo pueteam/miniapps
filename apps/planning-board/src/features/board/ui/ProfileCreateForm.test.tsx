@@ -10,8 +10,8 @@ vi.mock('../state/actions', () => ({
 const ROLE_OPTIONS = [
   'Jefe de Proyecto',
   'Arquitecto',
-  'Data Engineer Senior',
-  'Data Engineer Junior',
+  'Data Engineer Sr',
+  'Data Engineer Jr',
   'Data Scientist',
   'DevOps',
   'QA / Testing',
@@ -47,11 +47,11 @@ describe('ProfileCreateForm', () => {
     const input = screen.getByPlaceholderText('Role or profile name…') as HTMLInputElement;
     const submit = screen.getByRole('button', { name: 'Add profile' });
 
-    fireEvent.input(input, { target: { value: 'Data Engineer Senior' } });
+    fireEvent.input(input, { target: { value: 'Data Engineer Sr' } });
     fireEvent.click(submit);
 
     await waitFor(() => {
-      expect(createProfile).toHaveBeenCalledWith('Data Engineer Senior');
+      expect(createProfile).toHaveBeenCalledWith('Data Engineer Sr');
     });
   });
 });
