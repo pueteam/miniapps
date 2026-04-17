@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import { useState, useRef, useEffect } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { createAssignment } from '../state/actions';
 import './SlotCell.css';
 

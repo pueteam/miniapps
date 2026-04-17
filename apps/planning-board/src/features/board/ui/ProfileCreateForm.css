@@ -78,7 +78,7 @@
 .profile-create__input--error {
   border-color: var(--board-danger);
 }
-.profile-create__btn {
+/* .profile-create__btn {
   height: 32px;
   padding: 0 13px;
   background: var(--board-surface-2);
@@ -95,7 +95,7 @@
 }
 .profile-create__btn:hover {
   background: var(--board-surface-3);
-}
+} */
 .profile-create__error {
   font-size: 11px;
   color: var(--board-danger);

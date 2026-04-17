@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/preact';
-import { SlotCell } from './SlotCell';
+import { fireEvent, render } from '@testing-library/preact';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as actions from '../state/actions';
+import { SlotCell } from './SlotCell';
 
 describe('SlotCell', () => {
   beforeEach(() => {

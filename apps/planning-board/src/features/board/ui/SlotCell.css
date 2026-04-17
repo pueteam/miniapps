@@ -35,7 +35,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background var(--board-transition-fast), transform var(--board-transition-fast);
+  transition:
+    background var(--board-transition-fast),
+    transform var(--board-transition-fast);
 }
 
 .slot-cell__add-btn:hover {

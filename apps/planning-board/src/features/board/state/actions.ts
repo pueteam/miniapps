@@ -1,14 +1,21 @@
-import type { Profile, Assignment, ViewMode } from '../domain/types';
+import { generateInitials, getProfileColor, normalizeInitials } from '../domain/color';
 import { generateId } from '../domain/id';
-import { getProfileColor, generateInitials, normalizeInitials } from '../domain/color';
 import { clampSlot } from '../domain/slots';
-import { validateProfile, validateAssignment } from '../domain/validate';
-import {
-  profiles, assignments, viewMode, activeProfileId, editingAssignmentId,
-  deletingProfileId, slotCount, contextMenuTarget, hoveredBarState,
-} from './signals';
-import * as profileRepo from '../persistence/profileRepo';
+import type { Assignment, Profile, ViewMode } from '../domain/types';
+import { validateAssignment, validateProfile } from '../domain/validate';
 import * as assignmentRepo from '../persistence/assignmentRepo';
+import * as profileRepo from '../persistence/profileRepo';
+import {
+    activeProfileId,
+    assignments,
+    contextMenuTarget,
+    deletingProfileId,
+    editingAssignmentId,
+    hoveredBarState,
+    profiles,
+    slotCount,
+    viewMode,
+} from './signals';
 
 function logActionError(message: string, error: unknown): void {
   console.error(message, error);

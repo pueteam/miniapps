@@ -91,7 +91,7 @@ export function ProfileCreateForm(): h.JSX.Element {
           </ul>
         )}
       </div>
-      <button className="profile-create__btn" type="submit">
+      <button className="toolbar__btn toolbar__btn--primary" type="submit">
         <UserPlusIcon /> Add profile
       </button>
       {error && <span className="profile-create__error">{error}</span>}

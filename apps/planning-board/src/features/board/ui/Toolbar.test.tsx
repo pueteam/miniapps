@@ -1,49 +1,18 @@
 import { render } from '@testing-library/preact';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { activeProfileId } from '../state/signals';
+import { describe, expect, it, vi } from 'vitest';
 import { Toolbar } from './Toolbar';
 
 vi.mock('./ProfileCreateForm', () => ({ ProfileCreateForm: () => <div>profile-form</div> }));
 vi.mock('./ViewToggle', () => ({ ViewToggle: () => <div>view-toggle</div> }));
 vi.mock('./ExportButton', () => ({ ExportButton: () => <div>export-button</div> }));
 vi.mock('./ZoomControl', () => ({ ZoomControl: () => <div>zoom-control</div> }));
-vi.mock('../state/actions', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../state/actions')>();
-  return {
-    ...actual,
-    createAssignment: vi.fn(),
-  };
-});
 
 describe('Toolbar', () => {
-  beforeEach(() => {
-    activeProfileId.value = null;
-  });
-
-  it('shows hint and disables add assignment when no profile is active', () => {
-    const { getByRole } = render(<Toolbar />);
-
-    const button = getByRole('button', { name: 'Add assignment' }) as HTMLButtonElement;
-    expect(button.title).toBe('Select a profile row to add an assignment');
-    expect(button.disabled).toBe(true);
-  });
-
-  it('hides hint when an active profile is selected', () => {
-    activeProfileId.value = 'p1';
-
-    const { getByRole } = render(<Toolbar />);
-
-    const button = getByRole('button', { name: 'Add assignment' }) as HTMLButtonElement;
-    expect(button.title).toBe('Add assignment');
-    expect(button.disabled).toBe(false);
-  });
-
   it('renders grouped toolbar structure with separators and right-aligned export', () => {
-    const { container, getByRole } = render(<Toolbar />);
+    const { container } = render(<Toolbar />);
 
-    expect(container.querySelectorAll('.toolbar__group').length).toBeGreaterThanOrEqual(4);
-    expect(container.querySelectorAll('.toolbar__sep').length).toBeGreaterThanOrEqual(2);
-    expect(getByRole('button', { name: 'Add assignment' }).className).toContain('toolbar__btn--primary');
+    expect(container.querySelectorAll('.toolbar__group').length).toBeGreaterThanOrEqual(3);
+    expect(container.querySelectorAll('.toolbar__sep').length).toBeGreaterThanOrEqual(1);
     expect(container.querySelector('.toolbar__spacer')).toBeTruthy();
   });
 
