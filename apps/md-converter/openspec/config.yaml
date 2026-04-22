@@ -1,20 +1,72 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Proyecto: md-converter (titulo de producto: MDconvertix).
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Dominio:
+  - Miniapp PWA que convierte Markdown a EPUB3 enteramente en el navegador.
+  - No hay backend ni servicios remotos para la conversion; la logica corre localmente con WebAssembly.
+  - La conversion usa pandoc.wasm ejecutado en un Web Worker mediante @bjorn3/browser_wasi_shim.
+
+  Stack principal:
+  - Preact 10 + TypeScript + Vite.
+  - vite-plugin-pwa para manifest, service worker e instalabilidad.
+  - Persistencia local con localStorage via useLocalStorage.
+
+  Arquitectura relevante:
+  - src/app/App.tsx orquesta estado, importacion de archivos y disparo de conversion.
+  - src/lib/workerClient.ts comunica el hilo principal con src/workers/pandoc.worker.ts.
+  - src/lib/pandocRunner.ts monta un filesystem virtual, carga pandoc.wasm y ejecuta pandoc.
+  - src/lib/epubMetadata.ts genera metadata YAML para pandoc.
+  - src/components/AppShell.tsx y src/components/InstallButton.tsx cubren el shell e instalacion PWA.
+
+  Capacidades implementadas hoy:
+  - Conversion Markdown -> EPUB3.
+  - Metadatos de libro: title, author, lang.
+  - CSS personalizado embebido en el EPUB.
+  - TOC opcional con tocDepth configurable.
+  - splitLevel configurable.
+  - Portada opcional.
+  - Importacion de archivos .md y .css.
+  - Descarga local del .epub generado.
+  - Persistencia local del borrador.
+  - Instalacion PWA y registro de service worker.
+
+  Restricciones y notas de producto:
+  - El output implementado actualmente es solo EPUB3.
+  - No documentar como requisito capacidades sugeridas solo por copy o roadmap; por ejemplo, el header menciona DOCX/HTML pero no estan implementados.
+  - La app usa router: false; es una SPA simple sin routing funcional.
+  - El lenguaje de producto y UI es espanol.
+
+  Convenciones para specs:
+  - Escribir specs en espanol, con terminos tecnicos en ingles cuando sea mas preciso.
+  - Basarse en comportamiento observable y codigo existente, no en intenciones futuras.
+  - Referenciar evidencia concreta con rutas del proyecto cuando sea util.
+  - Preferir capacidades separadas y pequenas antes que una spec gigante y ambigua.
+  - Si una decision afecta alcance futuro pero no esta implementada, capturarla en proposal/design, no como requirement implementado.
+
+rules:
+  proposal:
+    - Mantener el foco en cambios futuros; no re-documentar toda la app si el cambio afecta una sola capacidad.
+    - Incluir alcance, impacto visible para la persona usuaria y no-objetivos cuando aplique.
+    - Explicitar si el cambio toca UI, pipeline de conversion, worker/WASM, PWA o persistencia local.
+    - Si el cambio menciona nuevos formatos de salida, justificar por que salen del baseline actual solo-EPUB.
+
+  design:
+    - Documentar flujos de datos entre App, workerClient, pandoc.worker y pandocRunner cuando el cambio afecte conversion.
+    - Señalar implicaciones de hilo principal vs Web Worker, transferables y carga de pandoc.wasm cuando sea relevante.
+    - Hacer explicitas las restricciones del runtime navegador/WASI y la ausencia de backend.
+    - Incluir riesgos de UX o compatibilidad EPUB/PWA solo si son materialmente relevantes al cambio.
+
+  spec:
+    - Marcar claramente si la spec representa capacidad implementada o capacidad nueva.
+    - Usar requirements verificables con escenarios observables por comportamiento de la app.
+    - No introducir requirements para DOCX, HTML, sync remota, cuentas o backend salvo que exista cambio aprobado para ello.
+    - Separar concerns: conversion, persistencia local, PWA/install, shell UI, etc.
+    - Cuando una limitacion actual sea importante, reflejarla en wording preciso en vez de prometer capacidades futuras.
+
+  tasks:
+    - Desglosar trabajo en pasos pequenos y secuenciales.
+    - Separar tareas de UI, worker/conversion, assets PWA y validacion.
+    - Incluir verificacion explicita al final: revisar specs afectadas y validar OpenSpec.
+    - En explore mode no proponer tareas de implementacion a menos que el usuario pida formalizar un cambio.

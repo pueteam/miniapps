@@ -8,6 +8,18 @@ import { downloadBlob, slugify } from '../lib/download';
 import { runPandocInWorker } from '../lib/workerClient';
 import type { BinaryInput } from '../lib/types';
 
+type ConfigSection = 'book' | 'styles';
+
+type ConfigDraft = {
+  title: string;
+  author: string;
+  lang: string;
+  toc: boolean;
+  tocDepth: number;
+  splitLevel: number;
+  css: string;
+};
+
 const sampleMarkdown = `# Capítulo 1
 
 Este libro se genera completamente en el navegador con **pandoc.wasm**.
@@ -65,6 +77,14 @@ async function toBinaryInput(file: File | null): Promise<BinaryInput | null> {
 }
 
 function readTextFile(file: File): Promise<string> {
+  if (typeof file.text === 'function') {
+    return file.text();
+  }
+
+  if (typeof file.arrayBuffer === 'function') {
+    return file.arrayBuffer().then((buffer) => new TextDecoder().decode(buffer));
+  }
+
   return file.text();
 }
 
@@ -120,6 +140,22 @@ function IconStatus() {
   );
 }
 
+function IconSettings() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="1.75" />
+      <path d="M8 2.25v1.5" />
+      <path d="M8 12.25v1.5" />
+      <path d="M12.07 3.93l-1.06 1.06" />
+      <path d="M4.99 11.01l-1.06 1.06" />
+      <path d="M13.75 8h-1.5" />
+      <path d="M3.75 8h-1.5" />
+      <path d="M12.07 12.07l-1.06-1.06" />
+      <path d="M4.99 4.99L3.93 3.93" />
+    </svg>
+  );
+}
+
 function IconDownload() {
   return (
     <svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -157,6 +193,23 @@ export function App() {
   const [logs, setLogs] = useState('Sin mensajes todavía.');
   const [error, setError] = useState('');
   const [statusState, setStatusState] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [configSection, setConfigSection] = useState<ConfigSection>('book');
+  const [configDraft, setConfigDraft] = useState<ConfigDraft | null>(null);
+  const [coverDraft, setCoverDraft] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (!isConfigOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeConfig();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isConfigOpen]);
 
   const markdownInputRef = useRef<HTMLInputElement>(null);
   const cssInputRef = useRef<HTMLInputElement>(null);
@@ -170,6 +223,34 @@ export function App() {
     error: 'Error en la conversión'
   }[statusState];
 
+  function openConfig() {
+    setConfigDraft({ title, author, lang, toc, tocDepth, splitLevel, css });
+    setCoverDraft(coverFile);
+    setConfigSection('book');
+    setIsConfigOpen(true);
+  }
+
+  function closeConfig() {
+    setIsConfigOpen(false);
+    setConfigDraft(null);
+    setCoverDraft(null);
+    setConfigSection('book');
+  }
+
+  function saveConfig() {
+    if (!configDraft) return;
+
+    setTitle(configDraft.title);
+    setAuthor(configDraft.author);
+    setLang(configDraft.lang);
+    setToc(configDraft.toc);
+    setTocDepth(configDraft.tocDepth);
+    setSplitLevel(configDraft.splitLevel);
+    setCss(configDraft.css);
+    setCoverFile(coverDraft);
+    closeConfig();
+  }
+
   async function handleMarkdownImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
@@ -182,7 +263,11 @@ export function App() {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const text = await readTextFile(file);
-    setCss(text);
+    if (configDraft) {
+      setConfigDraft({ ...configDraft, css: text });
+    } else {
+      setCss(text);
+    }
     (event.target as HTMLInputElement).value = '';
   }
 
@@ -230,70 +315,6 @@ export function App() {
         </div> */}
 
         <section class="grid">
-          <article class="panel panel--meta">
-            <div class="panel-header">
-              <div class="panel-icon"><IconMetadata /></div>
-              <h3>Metadatos del libro</h3>
-            </div>
-
-            <div class="field-group-title">Identificación</div>
-
-            <label>
-              <span>Título</span>
-              <input type="text" value={title} onInput={(e) => setTitle((e.target as HTMLInputElement).value)} />
-            </label>
-
-            <label>
-              <span>Autor / Autora</span>
-              <input type="text" value={author} onInput={(e) => setAuthor((e.target as HTMLInputElement).value)} />
-            </label>
-
-            <div class="row">
-              <label>
-                <span>Idioma (BCP 47)</span>
-                <input type="text" value={lang} onInput={(e) => setLang((e.target as HTMLInputElement).value)} />
-              </label>
-
-              <label>
-                <span>Split level</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="6"
-                  value={splitLevel}
-                  onInput={(e) => setSplitLevel(clamp(Number((e.target as HTMLInputElement).value || '1'), 1, 6))}
-                />
-              </label>
-            </div>
-
-            <div class="divider" />
-            <div class="field-group-title">Tabla de contenidos</div>
-
-            <label>
-              <span>Profundidad del TOC</span>
-              <input
-                type="number"
-                min="1"
-                max="6"
-                value={tocDepth}
-                onInput={(e) => setTocDepth(clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6))}
-              />
-            </label>
-
-            <label class="checkbox">
-              <input type="checkbox" checked={toc} onChange={(e) => setToc((e.target as HTMLInputElement).checked)} />
-              <span>Incluir tabla de contenidos</span>
-            </label>
-
-            <div class="divider" />
-            <div class="field-group-title">Archivos</div>
-
-            <label>
-              <span>Portada</span>
-              <input type="file" accept="image/*" onChange={(e) => setCoverFile((e.target as HTMLInputElement).files?.[0] ?? null)} />
-            </label>
-          </article>
-
           <article class="panel panel--editor">
             <div class="panel-header panel-header--between">
               <div class="panel-header__left">
@@ -301,6 +322,10 @@ export function App() {
                 <h3>Contenido Markdown</h3>
               </div>
               <div class="panel-actions">
+                <button type="button" class="btn-secondary" onClick={openConfig}>
+                  <IconSettings />
+                  Configuración
+                </button>
                 <input ref={markdownInputRef} class="visually-hidden" type="file" accept=".md,.markdown,text/markdown,text/plain" onChange={handleMarkdownImport} />
                 <button type="button" class="btn-secondary" onClick={() => markdownInputRef.current?.click()}>
                   <IconFile />
@@ -310,24 +335,6 @@ export function App() {
             </div>
             <p class="panel-help">Pega aquí el contenido Markdown o importa un fichero .md.</p>
             <textarea class="editor" value={markdown} onInput={(e) => setMarkdown((e.target as HTMLTextAreaElement).value)} spellcheck={false} />
-          </article>
-
-          <article class="panel panel--editor">
-            <div class="panel-header panel-header--between">
-              <div class="panel-header__left">
-                <div class="panel-icon"><IconCss /></div>
-                <h3>CSS del EPUB</h3>
-              </div>
-              <div class="panel-actions">
-                <input ref={cssInputRef} class="visually-hidden" type="file" accept=".css,text/css,text/plain" onChange={handleCssImport} />
-                <button type="button" class="btn-secondary" onClick={() => cssInputRef.current?.click()}>
-                  <IconFile />
-                  Importar .css
-                </button>
-              </div>
-            </div>
-            <p class="panel-help">Pega aquí el CSS o importa un fichero .css.</p>
-            <textarea class="editor editor--css" value={css} onInput={(e) => setCss((e.target as HTMLTextAreaElement).value)} spellcheck={false} />
           </article>
 
           <article class="panel panel--status wide">
@@ -357,6 +364,106 @@ export function App() {
             </div>
           </article>
         </section>
+
+        {isConfigOpen && configDraft && (
+          <div class="modal-backdrop" onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closeConfig();
+            }
+          }}>
+            <div class="settings-modal" role="dialog" aria-modal="true" aria-label="Configuración EPUB">
+              <div class="panel-header panel-header--between settings-modal__header">
+                <div class="panel-header__left">
+                  <div class="panel-icon"><IconMetadata /></div>
+                  <h3>Configuración EPUB</h3>
+                </div>
+                <div class="panel-actions">
+                  <button type="button" class={`btn-secondary ${configSection === 'book' ? 'is-active' : ''}`} onClick={() => setConfigSection('book')}>
+                    Libro
+                  </button>
+                  <button type="button" class={`btn-secondary ${configSection === 'styles' ? 'is-active' : ''}`} onClick={() => setConfigSection('styles')}>
+                    Estilos
+                  </button>
+                </div>
+              </div>
+
+              {configSection === 'book' ? (
+                <div class="settings-modal__body">
+                  <label>
+                    <span>Título</span>
+                    <input type="text" value={configDraft.title} onInput={(e) => setConfigDraft({ ...configDraft, title: (e.target as HTMLInputElement).value })} />
+                  </label>
+
+                  <label>
+                    <span>Autor / Autora</span>
+                    <input type="text" value={configDraft.author} onInput={(e) => setConfigDraft({ ...configDraft, author: (e.target as HTMLInputElement).value })} />
+                  </label>
+
+                  <div class="row">
+                    <label>
+                      <span>Idioma (BCP 47)</span>
+                      <input type="text" value={configDraft.lang} onInput={(e) => setConfigDraft({ ...configDraft, lang: (e.target as HTMLInputElement).value })} />
+                    </label>
+
+                    <label>
+                      <span>Split level</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="6"
+                        value={configDraft.splitLevel}
+                        onInput={(e) => setConfigDraft({ ...configDraft, splitLevel: clamp(Number((e.target as HTMLInputElement).value || '1'), 1, 6) })}
+                      />
+                    </label>
+                  </div>
+
+                  <div class="divider" />
+                  <div class="field-group-title">Tabla de contenidos</div>
+
+                  <label>
+                    <span>Profundidad del TOC</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="6"
+                      value={configDraft.tocDepth}
+                      onInput={(e) => setConfigDraft({ ...configDraft, tocDepth: clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6) })}
+                    />
+                  </label>
+
+                  <label class="checkbox">
+                    <input type="checkbox" checked={configDraft.toc} onChange={(e) => setConfigDraft({ ...configDraft, toc: (e.target as HTMLInputElement).checked })} />
+                    <span>Incluir tabla de contenidos</span>
+                  </label>
+
+                  <div class="divider" />
+                  <div class="field-group-title">Archivos</div>
+
+                  <label>
+                    <span>Portada</span>
+                    <input type="file" accept="image/*" onChange={(e) => setCoverDraft((e.target as HTMLInputElement).files?.[0] ?? null)} />
+                  </label>
+                </div>
+              ) : (
+                <div class="settings-modal__body">
+                  <div class="panel-actions settings-modal__import">
+                    <input ref={cssInputRef} class="visually-hidden" type="file" accept=".css,text/css,text/plain" onChange={handleCssImport} />
+                    <button type="button" class="btn-secondary" onClick={() => cssInputRef.current?.click()}>
+                      <IconFile />
+                      Importar .css
+                    </button>
+                  </div>
+                  <textarea class="editor editor--css" value={configDraft.css} onInput={(e) => setConfigDraft({ ...configDraft, css: (e.target as HTMLTextAreaElement).value })} spellcheck={false} />
+                </div>
+              )}
+
+              <div class="footer-actions settings-modal__footer">
+                <button type="button" class="btn-secondary" onClick={closeConfig}>Cancelar</button>
+                <button type="button" class="btn-primary" onClick={saveConfig}>Guardar</button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </AppShell>
   );
