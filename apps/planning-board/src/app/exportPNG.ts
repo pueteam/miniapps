@@ -1,8 +1,8 @@
-import { profiles, assignments, viewMode, slotCount, slotWidth } from '../features/board/state/signals';
-import { headerLabel } from '../features/board/domain/slots';
 import { detectOverloads } from '../features/board/domain/overload';
+import { headerLabel } from '../features/board/domain/slots';
 import { computeAssignmentLanes, rowHeightForLaneCount } from '../features/board/domain/stacking';
 import type { Assignment, Profile, ViewMode } from '../features/board/domain/types';
+import { assignments, profiles, slotCount, slotWidth, viewMode } from '../features/board/state/signals';
 
 const OVERLOAD_BG = 'rgba(220, 53, 69, 0.08)';
 const OVERLOAD_BORDER = '#dc3545';
@@ -25,10 +25,28 @@ interface ExportSnapshot {
   rowHeaderWidth: number;
   headerHeight: number;
   barHeight: number;
+  barInsetX: number;
   totalWidth: number;
   totalHeight: number;
   rows: ExportRowSnapshot[];
   viewMode: ViewMode;
+}
+
+function readCssPxVar(name: string, fallback: number): number {
+  if (typeof document === 'undefined' || typeof getComputedStyle === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function readCssFontVar(name: string, fallback: string): string {
+  if (typeof document === 'undefined' || typeof getComputedStyle === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function canvasFont(weight: number, sizePx: number, family: string): string {
+  return `${weight} ${sizePx}px ${family}`;
 }
 
 export function buildExportSnapshot(
@@ -38,9 +56,10 @@ export function buildExportSnapshot(
   count: number,
   width: number,
 ): ExportSnapshot {
-  const rowHeaderWidth = 180;
-  const headerHeight = 32;
-  const barHeight = 32;
+  const rowHeaderWidth = readCssPxVar('--row-header-width', 180);
+  const headerHeight = readCssPxVar('--header-slot-height', 32);
+  const barHeight = readCssPxVar('--bar-height', 32);
+  const barInsetX = 1;
   const padding = 8;
 
   const rows = profilesList.map((profile) => {
@@ -67,7 +86,18 @@ export function buildExportSnapshot(
   const totalWidth = rowHeaderWidth + count * width;
   const totalHeight = headerHeight + rows.reduce((sum, row) => sum + row.rowHeight, 0) + padding;
 
-  return { slotWidth: width, slotCount: count, rowHeaderWidth, headerHeight, barHeight, totalWidth, totalHeight, rows, viewMode: mode };
+  return {
+    slotWidth: width,
+    slotCount: count,
+    rowHeaderWidth,
+    headerHeight,
+    barHeight,
+    barInsetX,
+    totalWidth,
+    totalHeight,
+    rows,
+    viewMode: mode,
+  };
 }
 
 export function exportToPNG(): void {
@@ -83,6 +113,8 @@ export function exportToPNG(): void {
   canvas.width = snapshot.totalWidth * 2;
   canvas.height = snapshot.totalHeight * 2;
   const ctx = canvas.getContext('2d')!;
+  const uiFontFamily = readCssFontVar('--board-font-ui', 'sans-serif');
+  const monoFontFamily = readCssFontVar('--board-font-mono', 'monospace');
   ctx.scale(2, 2);
 
   ctx.fillStyle = '#ffffff';
@@ -92,7 +124,7 @@ export function exportToPNG(): void {
   ctx.fillRect(0, 0, snapshot.totalWidth, snapshot.headerHeight);
 
   ctx.fillStyle = MUTED_COLOR;
-  ctx.font = '11px sans-serif';
+  ctx.font = canvasFont(500, 10.5, monoFontFamily);
   ctx.textAlign = 'center';
   for (let i = 0; i < snapshot.slotCount; i++) {
     const x = snapshot.rowHeaderWidth + i * snapshot.slotWidth + snapshot.slotWidth / 2;
@@ -121,14 +153,14 @@ export function exportToPNG(): void {
     currentY += row.rowHeight;
 
     ctx.fillStyle = '#212529';
-    ctx.font = '13px sans-serif';
+    ctx.font = canvasFont(600, 12.5, uiFontFamily);
     ctx.textAlign = 'left';
     const name = row.profile.name.length > 20 ? row.profile.name.slice(0, 20) + '\u2026' : row.profile.name;
     ctx.fillText(name, 8, y + row.rowHeight / 2 + 4);
 
     if (row.overloadedSlots.size > 0) {
       ctx.fillStyle = OVERLOAD_BORDER;
-      ctx.font = '11px sans-serif';
+      ctx.font = canvasFont(600, 11, monoFontFamily);
       ctx.fillText(`\u26a0 ${row.overloadedSlots.size} slots`, 108, y + row.rowHeight / 2 + 4);
     }
 
@@ -154,8 +186,9 @@ export function exportToPNG(): void {
     ctx.stroke();
 
     row.bars.forEach(({ assignment, laneIndex }) => {
-      const barX = snapshot.rowHeaderWidth + assignment.startSlot * snapshot.slotWidth;
-      const barW = (assignment.endSlot - assignment.startSlot + 1) * snapshot.slotWidth;
+      const barX = snapshot.rowHeaderWidth + assignment.startSlot * snapshot.slotWidth + snapshot.barInsetX;
+      const barW = (assignment.endSlot - assignment.startSlot + 1) * snapshot.slotWidth - snapshot.barInsetX * 2;
+      if (barW <= 0) return;
       const barY = y + 8 + laneIndex * 38;
       const isOverloaded = row.overloadedAssignmentIds.has(assignment.id);
 
@@ -178,8 +211,8 @@ export function exportToPNG(): void {
         ctx.fillRect(barX, barY, 3, snapshot.barHeight);
       }
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '12px sans-serif';
+      ctx.fillStyle = '#000000';
+      ctx.font = canvasFont(600, 11.5, uiFontFamily);
       ctx.textAlign = 'left';
       const text = `${assignment.task} \u00b7 ${assignment.dedicationPct}%`;
       const maxTextW = barW - 12;
