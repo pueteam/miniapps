@@ -25,7 +25,7 @@ export const DEFAULT_CONVERSION_MODE: ConversionMode = 'markdown-to-epub';
 export const CONVERSION_MODES: ConversionModeDefinition[] = [
   {
     value: 'docx-to-markdown',
-    label: 'Word (.docx) -> Markdown',
+    label: 'Word (.docx) → Markdown',
     importLabel: 'Importar .docx',
     importAccept: '.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     downloadLabel: 'Convertir y descargar Markdown',
@@ -38,7 +38,7 @@ export const CONVERSION_MODES: ConversionModeDefinition[] = [
   },
   {
     value: 'epub-to-markdown',
-    label: 'EPUB -> Markdown',
+    label: 'EPUB → Markdown',
     importLabel: 'Importar .epub',
     importAccept: '.epub,application/epub+zip',
     downloadLabel: 'Convertir y descargar Markdown',
@@ -51,7 +51,7 @@ export const CONVERSION_MODES: ConversionModeDefinition[] = [
   },
   {
     value: 'html-to-markdown',
-    label: 'HTML -> Markdown',
+    label: 'HTML → Markdown',
     importLabel: 'Importar .html',
     importAccept: '.html,.htm,text/html',
     downloadLabel: 'Convertir y descargar Markdown',
@@ -64,7 +64,7 @@ export const CONVERSION_MODES: ConversionModeDefinition[] = [
   },
   {
     value: 'markdown-to-docx',
-    label: 'Markdown -> Word (.docx)',
+    label: 'Markdown → Word (.docx)',
     importLabel: 'Importar .md',
     importAccept: '.md,.markdown,text/markdown,text/plain',
     downloadLabel: 'Convertir y descargar Word',
@@ -77,7 +77,7 @@ export const CONVERSION_MODES: ConversionModeDefinition[] = [
   },
   {
     value: 'markdown-to-epub',
-    label: 'Markdown -> EPUB',
+    label: 'Markdown → EPUB',
     importLabel: 'Importar .md',
     importAccept: '.md,.markdown,text/markdown,text/plain',
     downloadLabel: 'Convertir y descargar EPUB',
@@ -90,7 +90,7 @@ export const CONVERSION_MODES: ConversionModeDefinition[] = [
   },
   {
     value: 'markdown-to-html',
-    label: 'Markdown -> HTML',
+    label: 'Markdown → HTML',
     importLabel: 'Importar .md',
     importAccept: '.md,.markdown,text/markdown,text/plain',
     downloadLabel: 'Convertir y descargar HTML',
