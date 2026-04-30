@@ -4,6 +4,29 @@ import { getModeConfig, saveModeConfig } from '../lib/modeConfig';
 import { getConversionModeDefinition } from '../lib/conversionModes';
 import { sampleCss } from './sampleContent';
 
+function buildConfigDraft(
+  conversionMode: ConversionMode,
+  referenceDoc: File | null
+): ConfigDraft {
+  const modeConfig = getModeConfig(conversionMode) ?? {};
+  return {
+    title: modeConfig.title ?? 'Mi libro',
+    author: modeConfig.author ?? 'Autor/a',
+    lang: modeConfig.lang ?? 'es-ES',
+    toc: modeConfig.toc ?? true,
+    tocDepth: modeConfig.tocDepth ?? 3,
+    splitLevel: modeConfig.splitLevel ?? 1,
+    css: modeConfig.css ?? (conversionMode === 'markdown-to-epub' ? sampleCss : ''),
+    referenceDoc,
+    mathRendering: modeConfig.mathRendering ?? '',
+    highlightStyle: modeConfig.highlightStyle ?? '',
+  };
+}
+
+function resolveInitialSection(conversionMode: ConversionMode): ConfigSection {
+  return conversionMode === 'markdown-to-epub' ? 'book' : 'document';
+}
+
 export function useConfigManager(
   conversionMode: ConversionMode,
   coverFile: File | null,
@@ -25,39 +48,15 @@ export function useConfigManager(
 
   useEffect(() => {
     if (!isConfigOpen || !getConversionModeDefinition(conversionMode).supportsConfig) return;
-    const modeConfig = getModeConfig(conversionMode) ?? {};
-    setConfigDraft({
-      title: modeConfig.title ?? 'Mi libro',
-      author: modeConfig.author ?? 'Autor/a',
-      lang: modeConfig.lang ?? 'es-ES',
-      toc: modeConfig.toc ?? true,
-      tocDepth: modeConfig.tocDepth ?? 3,
-      splitLevel: modeConfig.splitLevel ?? 1,
-      css: modeConfig.css ?? (conversionMode === 'markdown-to-epub' ? sampleCss : ''),
-      referenceDoc,
-      mathRendering: modeConfig.mathRendering ?? '',
-      highlightStyle: modeConfig.highlightStyle ?? '',
-    });
+    setConfigDraft(buildConfigDraft(conversionMode, referenceDoc));
     setCoverDraft(coverFile);
-    setConfigSection(conversionMode === 'markdown-to-epub' ? 'book' : 'document');
+    setConfigSection(resolveInitialSection(conversionMode));
   }, [conversionMode, isConfigOpen, referenceDoc]);
 
   const openConfig = useCallback(() => {
-    const modeConfig = getModeConfig(conversionMode) ?? {};
-    setConfigDraft({
-      title: modeConfig.title ?? 'Mi libro',
-      author: modeConfig.author ?? 'Autor/a',
-      lang: modeConfig.lang ?? 'es-ES',
-      toc: modeConfig.toc ?? true,
-      tocDepth: modeConfig.tocDepth ?? 3,
-      splitLevel: modeConfig.splitLevel ?? 1,
-      css: modeConfig.css ?? (conversionMode === 'markdown-to-epub' ? sampleCss : ''),
-      referenceDoc,
-      mathRendering: modeConfig.mathRendering ?? '',
-      highlightStyle: modeConfig.highlightStyle ?? '',
-    });
+    setConfigDraft(buildConfigDraft(conversionMode, referenceDoc));
     setCoverDraft(coverFile);
-    setConfigSection(conversionMode === 'markdown-to-epub' ? 'book' : 'document');
+    setConfigSection(resolveInitialSection(conversionMode));
     setIsConfigOpen(true);
   }, [conversionMode, coverFile, referenceDoc]);
 

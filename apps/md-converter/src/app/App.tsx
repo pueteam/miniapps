@@ -1,72 +1,34 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { AppShell } from '../components/AppShell';
-import { registerSW } from './registerSW';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_PREFIX } from '../lib/constants';
-import type { BinaryInput } from '../lib/types';
-import { CONVERSION_MODES, DEFAULT_CONVERSION_MODE, getConversionModeDefinition, type ConversionMode } from '../lib/conversionModes';
+import {
+  CONVERSION_MODES,
+  DEFAULT_CONVERSION_MODE,
+  getConversionModeDefinition,
+  type ConversionMode,
+} from '../lib/conversionModes';
+import { isAcceptedFile, readTextFile } from '../lib/fileUtils';
 import { getModeConfig } from '../lib/modeConfig';
+import { registerSW } from './registerSW';
+import { sampleCss, sampleMarkdown } from './sampleContent';
 import { useConfigManager } from './useConfigManager';
 import { useConversionHandler } from './useConversionHandler';
-import { sampleMarkdown, sampleCss } from './sampleContent';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function getFileExtension(name: string): string {
-  const index = name.lastIndexOf('.');
-  return index >= 0 ? name.slice(index).toLowerCase() : '';
-}
-
-export function getBaseFilename(name: string): string {
-  const index = name.lastIndexOf('.');
-  return index >= 0 ? name.slice(0, index) : name;
-}
-
-function isAcceptedFile(name: string, accept: string): boolean {
-  const extension = getFileExtension(name);
-  return accept
-    .split(',')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter((entry) => entry.startsWith('.'))
-    .includes(extension);
-}
-
-export async function toBinaryInput(file: File | null): Promise<BinaryInput | null> {
-  if (!file) return null;
-
-  const buffer = await readFileArrayBuffer(file);
-
-  return {
-    name: file.name,
-    bytes: new Uint8Array(buffer)
-  };
-}
-
-function readFileArrayBuffer(file: File): Promise<ArrayBuffer> {
-  if (typeof file.arrayBuffer === 'function') {
-    return file.arrayBuffer();
-  }
-
-  if (typeof Blob !== 'undefined' && typeof Blob.prototype.arrayBuffer === 'function') {
-    return new Blob([file], { type: file.type }).arrayBuffer();
-  }
-
-  return new Response(file).arrayBuffer();
-}
-
-function readTextFile(file: File): Promise<string> {
-  if (typeof file.text === 'function') {
-    return file.text();
-  }
-
-  return readFileArrayBuffer(file).then((buffer) => new TextDecoder().decode(buffer));
-}
-
 function IconFile() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <path d="M4 2h6l3 3v9H4V2z" />
       <path d="M10 2v3h3" />
       <path d="M6.5 8.5h4" />
@@ -77,7 +39,14 @@ function IconFile() {
 
 function IconMetadata() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <rect x="1.5" y="1.5" width="13" height="13" rx="2" />
       <line x1="4.5" y1="5.5" x2="11.5" y2="5.5" />
       <line x1="4.5" y1="8" x2="9" y2="8" />
@@ -88,7 +57,14 @@ function IconMetadata() {
 
 function IconMarkdown() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <rect x="1" y="2.5" width="14" height="11" rx="2" />
       <path d="M4 10V6l2 2 2-2v4" />
       <path d="M11 10V6" />
@@ -99,7 +75,14 @@ function IconMarkdown() {
 
 function IconCss() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <path d="M2 2l1 11 5 1.5L13 13l1-11H2z" />
       <path d="M5.5 6.5h5" />
       <path d="M5.5 9.5h3.5" />
@@ -109,7 +92,14 @@ function IconCss() {
 
 function IconStatus() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <circle cx="8" cy="8" r="6.5" />
       <path d="M8 5v3.5l2 1.5" />
     </svg>
@@ -118,7 +108,14 @@ function IconStatus() {
 
 function IconSettings() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <circle cx="8" cy="8" r="1.75" />
       <path d="M8 2.25v1.5" />
       <path d="M8 12.25v1.5" />
@@ -134,7 +131,15 @@ function IconSettings() {
 
 function IconDownload() {
   return (
-    <svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg
+      class="btn-icon"
+      viewBox="0 0 18 18"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
       <path d="M9 2v9" />
       <path d="M5.5 8l3.5 3.5L12.5 8" />
       <path d="M2 14h14" />
@@ -144,11 +149,45 @@ function IconDownload() {
 
 function IconLoading() {
   return (
-    <svg class="btn-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-      <circle cx="9" cy="9" r="7" stroke-dasharray="22 22" stroke-dashoffset="0" style="transform-origin:50% 50%;animation:spin 0.75s linear infinite;" />
+    <svg
+      class="btn-icon"
+      viewBox="0 0 18 18"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    >
+      <circle
+        cx="9"
+        cy="9"
+        r="7"
+        stroke-dasharray="22 22"
+        stroke-dashoffset="0"
+        style="transform-origin:50% 50%;animation:spin 0.75s linear infinite;"
+      />
       <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
     </svg>
   );
+}
+
+function IconClose() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M3 3l10 10M13 3L3 13" />
+    </svg>
+  );
+}
+
+function handleDragOver(e: DragEvent) {
+  e.preventDefault();
+  (e.dataTransfer as DataTransfer).dropEffect = 'copy';
 }
 
 export function App() {
@@ -156,15 +195,33 @@ export function App() {
     registerSW();
   }, []);
 
-  const [title, setTitle] = useLocalStorage(`${STORAGE_PREFIX}title`, 'Mi libro');
-  const [author, setAuthor] = useLocalStorage(`${STORAGE_PREFIX}author`, 'Autor/a');
+  const [title, setTitle] = useLocalStorage(
+    `${STORAGE_PREFIX}title`,
+    'Mi libro',
+  );
+  const [author, setAuthor] = useLocalStorage(
+    `${STORAGE_PREFIX}author`,
+    'Autor/a',
+  );
   const [lang, setLang] = useLocalStorage(`${STORAGE_PREFIX}lang`, 'es-ES');
   const [toc, setToc] = useLocalStorage(`${STORAGE_PREFIX}toc`, true);
-  const [tocDepth, setTocDepth] = useLocalStorage(`${STORAGE_PREFIX}tocDepth`, 3);
-  const [splitLevel, setSplitLevel] = useLocalStorage(`${STORAGE_PREFIX}splitLevel`, 1);
-  const [markdown, setMarkdown] = useLocalStorage(`${STORAGE_PREFIX}markdown`, sampleMarkdown);
+  const [tocDepth, setTocDepth] = useLocalStorage(
+    `${STORAGE_PREFIX}tocDepth`,
+    3,
+  );
+  const [splitLevel, setSplitLevel] = useLocalStorage(
+    `${STORAGE_PREFIX}splitLevel`,
+    1,
+  );
+  const [markdown, setMarkdown] = useLocalStorage(
+    `${STORAGE_PREFIX}markdown`,
+    sampleMarkdown,
+  );
   const [css, setCss] = useLocalStorage(`${STORAGE_PREFIX}css`, sampleCss);
-  const [conversionMode, setConversionMode] = useLocalStorage<ConversionMode>(`${STORAGE_PREFIX}conversionMode`, DEFAULT_CONVERSION_MODE);
+  const [conversionMode, setConversionMode] = useLocalStorage<ConversionMode>(
+    `${STORAGE_PREFIX}conversionMode`,
+    DEFAULT_CONVERSION_MODE,
+  );
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [referenceDoc, setReferenceDoc] = useState<File | null>(null);
   const [mathRendering, setMathRendering] = useState('');
@@ -172,6 +229,7 @@ export function App() {
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [logs, setLogs] = useState('Sin mensajes todavía.');
   const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     const modeConfig = getModeConfig(conversionMode) ?? {};
@@ -181,7 +239,11 @@ export function App() {
     setToc(modeConfig.toc ?? true);
     setTocDepth(modeConfig.tocDepth ?? 3);
     setSplitLevel(modeConfig.splitLevel ?? 1);
-    setCss(modeConfig.css ?? (conversionMode === 'markdown-to-epub' ? sampleCss : ''));
+    setCss(
+      modeConfig.css ??
+        (conversionMode === 'markdown-to-epub' ? sampleCss : ''),
+    );
+    setSourceFile(null);
     setReferenceDoc(null);
     setMathRendering(modeConfig.mathRendering ?? '');
     setHighlightStyle(modeConfig.highlightStyle ?? '');
@@ -198,11 +260,7 @@ export function App() {
     saveConfig: saveConfigDraft,
   } = useConfigManager(conversionMode, coverFile, referenceDoc);
 
-  const {
-    isRunning,
-    statusState,
-    handleGenerate,
-  } = useConversionHandler({
+  const { isRunning, statusState, handleGenerate } = useConversionHandler({
     conversionMode,
     markdown,
     sourceFile,
@@ -224,13 +282,16 @@ export function App() {
   const markdownInputRef = useRef<HTMLInputElement>(null);
   const cssInputRef = useRef<HTMLInputElement>(null);
 
-  const modeDefinition = useMemo(() => getConversionModeDefinition(conversionMode), [conversionMode]);
+  const modeDefinition = useMemo(
+    () => getConversionModeDefinition(conversionMode),
+    [conversionMode],
+  );
 
   const outputLabel = {
     markdown: 'Markdown',
     html: 'HTML',
     docx: 'Word',
-    epub3: 'EPUB'
+    epub3: 'EPUB',
   }[modeDefinition.outputFormat];
 
   const statusDotClass = useMemo(() => {
@@ -254,17 +315,20 @@ export function App() {
     idle: 'En espera',
     running: `Generando ${outputLabel}…`,
     success: `${outputLabel} generado correctamente`,
-    error: 'Error en la conversión'
+    error: 'Error en la conversión',
   }[statusState];
 
-  const primaryConfigSection = modeDefinition.outputFormat === 'epub3' ? 'book' : 'document';
+  const primaryConfigSection =
+    modeDefinition.outputFormat === 'epub3' ? 'book' : 'document';
 
   async function handleMarkdownImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     if (!isAcceptedFile(file.name, modeDefinition.importAccept)) {
-      setError('El archivo seleccionado no es compatible con la conversión activa.');
+      setError(
+        'El archivo seleccionado no es compatible con la conversión activa.',
+      );
       (event.target as HTMLInputElement).value = '';
       return;
     }
@@ -278,7 +342,9 @@ export function App() {
     } else {
       setSourceFile(file);
       setError('');
-      setLogs(`Archivo cargado: ${file.name}. Listo para convertir a Markdown.`);
+      setLogs(
+        `Archivo cargado: ${file.name}. Listo para convertir a Markdown.`,
+      );
     }
 
     (event.target as HTMLInputElement).value = '';
@@ -296,24 +362,90 @@ export function App() {
     (event.target as HTMLInputElement).value = '';
   }
 
+  function handleDragEnter(e: DragEvent) {
+    e.preventDefault();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(e: DragEvent) {
+    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }
+
+  async function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = (e.dataTransfer as DataTransfer).files[0];
+    if (!file) return;
+
+    if (!isAcceptedFile(file.name, modeDefinition.importAccept)) {
+      setError(
+        'El archivo seleccionado no es compatible con la conversión activa.',
+      );
+      return;
+    }
+
+    if (modeDefinition.sourceKind === 'markdown') {
+      const text = await readTextFile(file);
+      setMarkdown(text);
+      setSourceFile(null);
+      setError('');
+      setLogs(`Markdown importado desde ${file.name}.`);
+    } else {
+      setSourceFile(file);
+      setError('');
+      setLogs(
+        `Archivo cargado: ${file.name}. Listo para convertir a Markdown.`,
+      );
+    }
+  }
+
   function renderConfigSection() {
     if (configSection === 'book') {
       return (
         <div class="settings-modal__body">
           <label>
             <span>Título</span>
-            <input type="text" value={configDraft!.title} onInput={(e) => setConfigDraft({ ...configDraft!, title: (e.target as HTMLInputElement).value })} />
+            <input
+              type="text"
+              value={configDraft!.title}
+              onInput={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  title: (e.target as HTMLInputElement).value,
+                })
+              }
+            />
           </label>
 
           <label>
             <span>Autor / Autora</span>
-            <input type="text" value={configDraft!.author} onInput={(e) => setConfigDraft({ ...configDraft!, author: (e.target as HTMLInputElement).value })} />
+            <input
+              type="text"
+              value={configDraft!.author}
+              onInput={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  author: (e.target as HTMLInputElement).value,
+                })
+              }
+            />
           </label>
 
           <div class="row">
             <label>
               <span>Idioma (BCP 47)</span>
-              <input type="text" value={configDraft!.lang} onInput={(e) => setConfigDraft({ ...configDraft!, lang: (e.target as HTMLInputElement).value })} />
+              <input
+                type="text"
+                value={configDraft!.lang}
+                onInput={(e) =>
+                  setConfigDraft({
+                    ...configDraft!,
+                    lang: (e.target as HTMLInputElement).value,
+                  })
+                }
+              />
             </label>
 
             {modeDefinition.outputFormat === 'epub3' && (
@@ -324,7 +456,16 @@ export function App() {
                   min="1"
                   max="6"
                   value={configDraft!.splitLevel}
-                  onInput={(e) => setConfigDraft({ ...configDraft!, splitLevel: clamp(Number((e.target as HTMLInputElement).value || '1'), 1, 6) })}
+                  onInput={(e) =>
+                    setConfigDraft({
+                      ...configDraft!,
+                      splitLevel: clamp(
+                        Number((e.target as HTMLInputElement).value || '1'),
+                        1,
+                        6,
+                      ),
+                    })
+                  }
                 />
               </label>
             )}
@@ -340,12 +481,30 @@ export function App() {
               min="1"
               max="6"
               value={configDraft!.tocDepth}
-              onInput={(e) => setConfigDraft({ ...configDraft!, tocDepth: clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6) })}
+              onInput={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  tocDepth: clamp(
+                    Number((e.target as HTMLInputElement).value || '3'),
+                    1,
+                    6,
+                  ),
+                })
+              }
             />
           </label>
 
           <label class="checkbox">
-            <input type="checkbox" checked={configDraft!.toc} onChange={(e) => setConfigDraft({ ...configDraft!, toc: (e.target as HTMLInputElement).checked })} />
+            <input
+              type="checkbox"
+              checked={configDraft!.toc}
+              onChange={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  toc: (e.target as HTMLInputElement).checked,
+                })
+              }
+            />
             <span>Incluir tabla de contenidos</span>
           </label>
 
@@ -355,31 +514,66 @@ export function App() {
           {modeDefinition.outputFormat === 'docx' && (
             <label>
               <span>Reference DOCX</span>
-              <input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => setConfigDraft({ ...configDraft!, referenceDoc: (e.target as HTMLInputElement).files?.[0] ?? null })} />
+              <input
+                type="file"
+                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={(e) =>
+                  setConfigDraft({
+                    ...configDraft!,
+                    referenceDoc:
+                      (e.target as HTMLInputElement).files?.[0] ?? null,
+                  })
+                }
+              />
             </label>
           )}
 
           {modeDefinition.outputFormat === 'epub3' && (
             <label>
               <span>Portada</span>
-              <input type="file" accept="image/*" onChange={(e) => setCoverFile((e.target as HTMLInputElement).files?.[0] ?? null)} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setCoverFile(
+                    (e.target as HTMLInputElement).files?.[0] ?? null,
+                  )
+                }
+              />
             </label>
           )}
 
-          {modeDefinition.outputFormat !== 'epub3' && modeDefinition.outputFormat !== 'docx' && (
-            <label>
-              <span>Math rendering</span>
-              <select value={configDraft!.mathRendering} onInput={(e) => setConfigDraft({ ...configDraft!, mathRendering: (e.target as HTMLSelectElement).value })}>
-                <option value="">None</option>
-                <option value="mathjax">MathJax</option>
-                <option value="katex">KaTeX</option>
-              </select>
-            </label>
-          )}
+          {modeDefinition.outputFormat !== 'epub3' &&
+            modeDefinition.outputFormat !== 'docx' && (
+              <label>
+                <span>Math rendering</span>
+                <select
+                  value={configDraft!.mathRendering}
+                  onInput={(e) =>
+                    setConfigDraft({
+                      ...configDraft!,
+                      mathRendering: (e.target as HTMLSelectElement).value,
+                    })
+                  }
+                >
+                  <option value="">None</option>
+                  <option value="mathjax">MathJax</option>
+                  <option value="katex">KaTeX</option>
+                </select>
+              </label>
+            )}
 
           <label>
             <span>Highlight style</span>
-            <select value={configDraft!.highlightStyle} onInput={(e) => setConfigDraft({ ...configDraft!, highlightStyle: (e.target as HTMLSelectElement).value })}>
+            <select
+              value={configDraft!.highlightStyle}
+              onInput={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  highlightStyle: (e.target as HTMLSelectElement).value,
+                })
+              }
+            >
               <option value="">Default</option>
               <option value="pygments">Pygments</option>
               <option value="zenburn">Zenburn</option>
@@ -396,7 +590,17 @@ export function App() {
           {modeDefinition.outputFormat === 'docx' && (
             <label>
               <span>Reference DOCX</span>
-              <input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => setConfigDraft({ ...configDraft!, referenceDoc: (e.target as HTMLInputElement).files?.[0] ?? null })} />
+              <input
+                type="file"
+                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={(e) =>
+                  setConfigDraft({
+                    ...configDraft!,
+                    referenceDoc:
+                      (e.target as HTMLInputElement).files?.[0] ?? null,
+                  })
+                }
+              />
             </label>
           )}
 
@@ -407,18 +611,44 @@ export function App() {
               min="1"
               max="6"
               value={configDraft!.tocDepth}
-              onInput={(e) => setConfigDraft({ ...configDraft!, tocDepth: clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6) })}
+              onInput={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  tocDepth: clamp(
+                    Number((e.target as HTMLInputElement).value || '3'),
+                    1,
+                    6,
+                  ),
+                })
+              }
             />
           </label>
 
           <label class="checkbox">
-            <input type="checkbox" checked={configDraft!.toc} onChange={(e) => setConfigDraft({ ...configDraft!, toc: (e.target as HTMLInputElement).checked })} />
+            <input
+              type="checkbox"
+              checked={configDraft!.toc}
+              onChange={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  toc: (e.target as HTMLInputElement).checked,
+                })
+              }
+            />
             <span>Incluir tabla de contenidos</span>
           </label>
 
           <label>
             <span>Highlight style</span>
-            <select value={configDraft!.highlightStyle} onInput={(e) => setConfigDraft({ ...configDraft!, highlightStyle: (e.target as HTMLSelectElement).value })}>
+            <select
+              value={configDraft!.highlightStyle}
+              onInput={(e) =>
+                setConfigDraft({
+                  ...configDraft!,
+                  highlightStyle: (e.target as HTMLSelectElement).value,
+                })
+              }
+            >
               <option value="">Default</option>
               <option value="pygments">Pygments</option>
               <option value="zenburn">Zenburn</option>
@@ -429,7 +659,15 @@ export function App() {
           {modeDefinition.outputFormat === 'html' && (
             <label>
               <span>Math rendering</span>
-              <select value={configDraft!.mathRendering} onInput={(e) => setConfigDraft({ ...configDraft!, mathRendering: (e.target as HTMLSelectElement).value })}>
+              <select
+                value={configDraft!.mathRendering}
+                onInput={(e) =>
+                  setConfigDraft({
+                    ...configDraft!,
+                    mathRendering: (e.target as HTMLSelectElement).value,
+                  })
+                }
+              >
                 <option value="">None</option>
                 <option value="mathjax">MathJax</option>
                 <option value="katex">KaTeX</option>
@@ -443,13 +681,33 @@ export function App() {
     return (
       <div class="settings-modal__body">
         <div class="panel-actions settings-modal__import">
-          <input ref={cssInputRef} class="visually-hidden" type="file" accept=".css,text/css,text/plain" onChange={handleCssImport} />
-          <button type="button" class="btn-secondary" onClick={() => cssInputRef.current?.click()}>
+          <input
+            ref={cssInputRef}
+            class="visually-hidden"
+            type="file"
+            accept=".css,text/css,text/plain"
+            onChange={handleCssImport}
+          />
+          <button
+            type="button"
+            class="btn-secondary"
+            onClick={() => cssInputRef.current?.click()}
+          >
             <IconFile />
             Importar .css
           </button>
         </div>
-        <textarea class="editor editor--css" value={configDraft!.css} onInput={(e) => setConfigDraft({ ...configDraft!, css: (e.target as HTMLTextAreaElement).value })} spellcheck={false} />
+        <textarea
+          class="editor editor--css"
+          value={configDraft!.css}
+          onInput={(e) =>
+            setConfigDraft({
+              ...configDraft!,
+              css: (e.target as HTMLTextAreaElement).value,
+            })
+          }
+          spellcheck={false}
+        />
       </div>
     );
   }
@@ -457,48 +715,122 @@ export function App() {
   return (
     <AppShell>
       <section class="converter-page">
-        <section class="hero-compact" aria-labelledby="converter-title">
+        {/* <section class="hero-compact" aria-labelledby="converter-title">
           <p class="hero-compact__eyebrow">MDconvertix</p>
-          <h2 id="converter-title">Convierte Markdown en documentos listos para publicar</h2>
-          <p>Prepara EPUB, Word o HTML con configuración por formato, estilos propios y feedback claro del proceso.</p>
-        </section>
+          <h2 id="converter-title">MDconvertix</h2>
+          <p>Convierte Markdown a DOCX, EPUB y HTML (y al revés)</p>
+        </section> */}
 
         <section class="grid">
-          <article class="panel panel--editor">
+          <article
+            class={`panel panel--editor${isDragging ? ' is-dragging' : ''}`}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <div class="panel-header panel-header--between">
-              <div class="panel-header__left">
-                <div class="panel-icon"><IconMarkdown /></div>
-                <h3>Contenido Markdown</h3>
-              </div>
               <div class="panel-actions">
                 <label>
                   <span class="visually-hidden">Conversión</span>
-                  <select aria-label="Conversión" value={conversionMode} onChange={(event) => setConversionMode((event.target as HTMLSelectElement).value as ConversionMode)}>
+                  <select
+                    aria-label="Conversión"
+                    value={conversionMode}
+                    onChange={(event) =>
+                      setConversionMode(
+                        (event.target as HTMLSelectElement)
+                          .value as ConversionMode,
+                      )
+                    }
+                  >
                     {CONVERSION_MODES.map((mode) => (
-                      <option key={mode.value} value={mode.value}>{mode.label}</option>
+                      <option key={mode.value} value={mode.value}>
+                        {mode.label}
+                      </option>
                     ))}
                   </select>
                 </label>
-                {modeDefinition.supportsConfig && (
-                  <button type="button" class="btn-secondary" onClick={openConfigModal}>
-                    <IconSettings />
-                    Configuración
-                  </button>
-                )}
-                <input ref={markdownInputRef} class="visually-hidden" type="file" accept={modeDefinition.importAccept} onChange={handleMarkdownImport} />
-                <button type="button" class="btn-secondary" onClick={() => markdownInputRef.current?.click()}>
-                  <IconFile />
-                  {modeDefinition.importLabel}
-                </button>
               </div>
+              {modeDefinition.supportsConfig && (
+                <button
+                  type="button"
+                  class="btn-icon-only"
+                  aria-label="Configuración"
+                  title="Configuración"
+                  onClick={openConfigModal}
+                >
+                  <IconSettings />
+                </button>
+              )}
             </div>
-            <p class="panel-help">{modeDefinition.sourceKind === 'markdown' ? 'Pega aquí el contenido Markdown o importa un fichero .md.' : 'Importa un fichero compatible y convierte su contenido a Markdown editable.'}</p>
-            <textarea class="editor" value={markdown} onInput={(e) => setMarkdown((e.target as HTMLTextAreaElement).value)} spellcheck={false} />
+            <div class="panel-help-row">
+              <p class="panel-help">
+                {modeDefinition.sourceKind === 'markdown'
+                  ? 'Pega aquí el contenido Markdown o importa un fichero .md.'
+                  : 'Importa el fichero de origen. La conversión a Markdown se descargará directamente.'}
+              </p>
+              <input
+                ref={markdownInputRef}
+                class="visually-hidden"
+                type="file"
+                accept={modeDefinition.importAccept}
+                onChange={handleMarkdownImport}
+              />
+              <button
+                type="button"
+                class="btn-import"
+                onClick={() => markdownInputRef.current?.click()}
+              >
+                <IconFile />
+                {modeDefinition.importLabel}
+              </button>
+            </div>
+            {modeDefinition.sourceKind === 'markdown' ? (
+              <textarea
+                class="editor"
+                value={markdown}
+                onInput={(e) =>
+                  setMarkdown((e.target as HTMLTextAreaElement).value)
+                }
+                spellcheck={false}
+              />
+            ) : (
+              <div
+                class={`source-drop-zone ${sourceFile ? 'source-drop-zone--loaded' : ''}`}
+              >
+                {sourceFile ? (
+                  <>
+                    <div class="source-drop-zone__icon">
+                      <IconFile />
+                    </div>
+                    <p class="source-drop-zone__name">{sourceFile.name}</p>
+                    <p class="source-drop-zone__hint">
+                      Archivo listo para convertir
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div class="source-drop-zone__icon source-drop-zone__icon--empty">
+                      <IconFile />
+                    </div>
+                    <p class="source-drop-zone__name">
+                      Ningún archivo seleccionado
+                    </p>
+                    <p class="source-drop-zone__hint">
+                      Pulsa «{modeDefinition.importLabel}» para elegir el
+                      fichero de origen
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </article>
 
           <article class="panel panel--status">
             <div class="panel-header">
-              <div class="panel-icon"><IconStatus /></div>
+              <div class="panel-icon">
+                <IconStatus />
+              </div>
               <h3>Estado de la conversión</h3>
             </div>
 
@@ -516,43 +848,100 @@ export function App() {
             <pre class="logs-block">{logs}</pre>
 
             <div class="footer-actions">
-              <button type="button" class="btn-primary" disabled={isRunning} onClick={handleGenerate}>
+              <button
+                type="button"
+                class="btn-primary"
+                disabled={isRunning}
+                onClick={handleGenerate}
+              >
                 {isRunning ? <IconLoading /> : <IconDownload />}
-                {isRunning ? `Generando ${outputLabel}…` : modeDefinition.downloadLabel}
+                {isRunning
+                  ? `Generando ${outputLabel}…`
+                  : modeDefinition.downloadLabel}
               </button>
             </div>
           </article>
         </section>
 
         {isConfigOpen && configDraft && (
-          <dialog class="settings-modal" open aria-label={`Configuración ${configTitle}`}>
-            <div class="settings-modal__header">
-              <div class="panel-header__left">
-                <div class="panel-icon"><IconMetadata /></div>
-                <h3>Configuración {configTitle}</h3>
-              </div>
+          <div class="modal-backdrop">
+            <dialog
+              class="settings-modal"
+              open
+              aria-modal="true"
+              aria-label={`Configuración ${configTitle}`}
+            >
+              <div class="settings-modal__header">
+                <div class="panel-header__left">
+                  <div class="panel-icon">
+                    <IconMetadata />
+                  </div>
+                  <h3>Configuración {configTitle}</h3>
+                </div>
 
-              <div class="panel-actions">
-                <button type="button" class={`btn-secondary ${configSection === primaryConfigSection ? 'is-active' : ''}`} onClick={() => setConfigSection(primaryConfigSection)}>
-                  {sectionLabel}
-                </button>
-                {(modeDefinition.outputFormat === 'epub3' || modeDefinition.outputFormat === 'html') && (
-                  <button type="button" class={`btn-secondary ${configSection === 'styles' ? 'is-active' : ''}`} onClick={() => setConfigSection('styles')}>
-                    Estilos
+                <div class="panel-actions">
+                  <button
+                    type="button"
+                    class={`btn-secondary ${configSection === primaryConfigSection ? 'is-active' : ''}`}
+                    onClick={() => setConfigSection(primaryConfigSection)}
+                  >
+                    {sectionLabel}
                   </button>
-                )}
+                  {(modeDefinition.outputFormat === 'epub3' ||
+                    modeDefinition.outputFormat === 'html') && (
+                    <button
+                      type="button"
+                      class={`btn-secondary ${configSection === 'styles' ? 'is-active' : ''}`}
+                      onClick={() => setConfigSection('styles')}
+                    >
+                      Estilos
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    class="btn-icon-only"
+                    aria-label="Cerrar"
+                    onClick={closeConfig}
+                  >
+                    <IconClose />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {renderConfigSection()}
+              {renderConfigSection()}
 
-            <div class="footer-actions settings-modal__footer">
-              <button type="button" class="btn-secondary" onClick={closeConfig}>Cancelar</button>
-              <button type="button" class="btn-primary" onClick={() => saveConfigDraft({
-                setTitle, setAuthor, setLang, setToc, setTocDepth, setSplitLevel, setCss, setCoverFile, setReferenceDoc, setMathRendering, setHighlightStyle
-              })}>Guardar</button>
-            </div>
-          </dialog>
+              <div class="footer-actions settings-modal__footer">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onClick={closeConfig}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="btn-primary"
+                  onClick={() =>
+                    saveConfigDraft({
+                      setTitle,
+                      setAuthor,
+                      setLang,
+                      setToc,
+                      setTocDepth,
+                      setSplitLevel,
+                      setCss,
+                      setCoverFile,
+                      setReferenceDoc,
+                      setMathRendering,
+                      setHighlightStyle,
+                    })
+                  }
+                >
+                  Guardar
+                </button>
+              </div>
+            </dialog>
+          </div>
         )}
       </section>
     </AppShell>
