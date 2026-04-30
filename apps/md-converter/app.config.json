@@ -2,7 +2,7 @@
   "name": "md-converter",
   "title": "MDconvertix",
   "description": "Convert Markdown files to DOCX, EPUB, HTML",
-  "listed": false,
+  "listed": true,
   "pwa": true,
   "router": false,
   "themeColor": "#004F87",

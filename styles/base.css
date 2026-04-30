@@ -127,7 +127,6 @@ body {
 
 /* ── Page shell ────────────────────────────── */
 .app-shell {
-  /* max-width: 1080px; */
   margin: 0 auto;
   padding: var(--space-10) clamp(var(--space-4), 4vw, var(--space-12));
 }
@@ -137,7 +136,7 @@ body {
   gap: var(--space-3);
   margin-bottom: var(--space-8);
   position: relative;
-  padding-right: calc(var(--space-12) + 56px);
+  /* padding-right: calc(var(--space-12) + 56px); */
 }
 
 .app-shell__header h1 {
@@ -154,6 +153,65 @@ body {
   font-size: 0.9375rem;
   line-height: 1.65;
   max-width: 56ch;
+}
+
+.hero-compact {
+  position: relative;
+  margin-bottom: 24px;
+  padding: 28px;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--color-border-subtle) 78%,
+      var(--color-accent-primary)
+    );
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-surface) 0%,
+    color-mix(in srgb, var(--color-bg-subtle) 86%, var(--color-accent-primary))
+      100%
+  );
+  box-shadow: var(--shadow-subtle);
+  width: 100%;
+}
+
+.hero-compact::after {
+  content: '';
+  position: absolute;
+  inset: auto -8% -52% auto;
+  width: min(42vw, 420px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent-primary) 11%, transparent);
+  pointer-events: none;
+}
+
+.hero-compact__eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-accent-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-compact h2 {
+  position: relative;
+  margin: 0;
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  max-width: 780px;
+}
+
+.hero-compact p {
+  position: relative;
+  margin: 6px 0 0;
+  color: var(--color-text-muted);
+  max-width: 68ch;
 }
 
 /* ── Card ──────────────────────────────────── */
