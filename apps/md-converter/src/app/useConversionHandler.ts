@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'preact/hooks';
-import type { ConversionMode } from '../lib/types';
+import { useCallback, useState } from 'preact/hooks';
 import { getConversionModeDefinition } from '../lib/conversionModes';
-import { runPandocInWorker } from '../lib/workerClient';
 import { downloadBlob, slugify } from '../lib/download';
 import { buildMetadataYaml } from '../lib/epubMetadata';
-import { toBinaryInput, getBaseFilename } from './App';
+import { getBaseFilename, isAcceptedFile, toBinaryInput } from '../lib/fileUtils';
+import type { ConversionMode } from '../lib/types';
+import { runPandocInWorker } from '../lib/workerClient';
 
 interface UseConversionHandlerProps {
   conversionMode: ConversionMode;
@@ -36,56 +36,69 @@ export function useConversionHandler(props: UseConversionHandlerProps): UseConve
   const [statusState, setStatusState] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
 
   const handleGenerate = useCallback(async () => {
-    const modeDefinition = getConversionModeDefinition(props.conversionMode);
+    const {
+      conversionMode, markdown, sourceFile, coverFile, referenceDoc,
+      css, title, author, lang, toc, tocDepth, splitLevel,
+      mathRendering, highlightStyle, setLogs, setError,
+    } = props;
 
-    if (modeDefinition.sourceKind === 'binary' && !props.sourceFile) {
-      props.setError('Selecciona un archivo compatible antes de convertir.');
+    const modeDefinition = getConversionModeDefinition(conversionMode);
+
+    if (modeDefinition.sourceKind === 'binary' && !sourceFile) {
+      setError('Selecciona un archivo compatible antes de convertir.');
       setStatusState('error');
-      props.setLogs('No hay archivo fuente para la conversión actual.');
+      setLogs('No hay archivo fuente para la conversión actual.');
+      return;
+    }
+
+    if (
+      modeDefinition.sourceKind === 'binary' &&
+      sourceFile &&
+      !isAcceptedFile(sourceFile.name, modeDefinition.importAccept)
+    ) {
+      setError('El archivo cargado no es compatible con la conversión seleccionada.');
+      setStatusState('error');
+      setLogs(`El archivo "${sourceFile.name}" no es válido para la conversión ${modeDefinition.label}.`);
       return;
     }
 
     setIsRunning(true);
-    props.setError('');
+    setError('');
     setStatusState('running');
-    props.setLogs('Iniciando conversión con pandoc.wasm…');
+    setLogs('Iniciando conversión con pandoc.wasm…');
 
     try {
-      const sourceBinary = await toBinaryInput(props.sourceFile);
-      const cover = await toBinaryInput(props.coverFile);
-      const referenceDoc = await toBinaryInput(props.referenceDoc);
-      const metadataYaml = buildMetadataYaml({ title: props.title, author: props.author, lang: props.lang });
+      const sourceBinary = await toBinaryInput(sourceFile);
+      const cover = await toBinaryInput(coverFile);
+      const referenceDocBinary = await toBinaryInput(referenceDoc);
+      const metadataYaml = buildMetadataYaml({ title, author, lang });
 
       const result = await runPandocInWorker({
-        conversionMode: props.conversionMode,
-        markdown: props.markdown,
+        conversionMode,
+        markdown,
         sourceFile: sourceBinary,
         outputBasename: sourceBinary
           ? slugify(getBaseFilename(sourceBinary.name)) || 'document'
-          : (slugify(props.title) || 'book'),
-        css: props.css,
+          : (slugify(title) || 'book'),
+        css,
         metadataYaml,
-        toc: props.toc,
-        tocDepth: props.tocDepth,
-        splitLevel: props.splitLevel,
+        toc,
+        tocDepth,
+        splitLevel,
         cover,
-        referenceDoc,
-        mathRendering: props.mathRendering,
-        highlightStyle: props.highlightStyle,
+        referenceDoc: referenceDocBinary,
+        mathRendering,
+        highlightStyle,
         wasmBytes: null
       });
 
-      if (modeDefinition.outputFormat === 'markdown') {
-        // Handle markdown output
-      }
-
       downloadBlob(new Blob([new Uint8Array(result.outputBytes)], { type: result.mimeType }), result.outputFilename);
-      props.setLogs(result.logs || `Archivo generado correctamente → ${result.outputFilename}`);
+      setLogs(result.logs || `Archivo generado correctamente → ${result.outputFilename}`);
       setStatusState('success');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido al completar la conversión.';
-      props.setError(message);
-      props.setLogs('La conversión ha fallado. Revisa el detalle del error.');
+      setError(message);
+      setLogs('La conversión ha fallado. Revisa el detalle del error.');
       setStatusState('error');
     } finally {
       setIsRunning(false);
