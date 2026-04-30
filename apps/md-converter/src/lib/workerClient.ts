@@ -68,6 +68,9 @@ export function runPandocInWorker(input: WorkerJobInput): Promise<WorkerJobResul
     instance.addEventListener('error', onError);
 
     const transferables: Transferable[] = [];
+    if (input.sourceFile?.bytes) {
+      transferables.push(input.sourceFile.bytes.buffer);
+    }
     if (input.cover?.bytes) {
       transferables.push(input.cover.bytes.buffer);
     }

@@ -1,0 +1,1796 @@
+
+> @miniapps/md-converter@0.1.0 test
+> vitest run App.config.test.tsx
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mC:/Users/Pablo/puedata/proyectos/puedata/miniapps/apps/md-converter[39m
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mlocalStorage after save: {"markdown-to-docx":{"title":"DocX Title","toc":true}}
+Looking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+[90mstdout[2m | src/app/App.config.test.tsx[2m > [22m[2mConfig Modal Dynamic Sections[2m > [22m[2mSHALL load mode-specific config when opening config
+[22m[39mLooking for input with value "DocX Title"
+
+ [31mÔØ»[39m src/app/App.config.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1163[2mms[22m[39m
+   [32mÔ£ô[39m Config Modal Dynamic Sections[2m > [22mSHALL show "Documento" section for markdown-to-docx mode[32m 99[2mms[22m[39m
+   [32mÔ£ô[39m Config Modal Dynamic Sections[2m > [22mSHALL show "Documento" and "Estilos" sections for markdown-to-html mode[32m 20[2mms[22m[39m
+[31m   [31m├ù[31m Config Modal Dynamic Sections[2m > [22mSHALL load mode-specific config when opening config[39m[33m 1041[2mms[22m[39m
+[31m     ÔåÆ Unable to find an element with the display value: DocX Title.
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"app-shell"[31m
+    [36m>[31m
+      [36m<header[31m
+        [33mclass[31m=[32m"app-shell__header"[31m
+      [36m>[31m
+        [36m<div>[31m
+          [36m<h1>[31m
+            [0mMDconvertix[0m
+          [36m</h1>[31m
+          [36m<p>[31m
+            [0mConvert Markdown files to DOCX, EPUB, HTML[0m
+          [36m</p>[31m
+        [36m</div>[31m
+      [36m</header>[31m
+      [36m<main>[31m
+        [36m<section[31m
+          [33mclass[31m=[32m"converter-page"[31m
+        [36m>[31m
+          [36m<section[31m
+            [33mclass[31m=[32m"grid"[31m
+          [36m>[31m
+            [36m<article[31m
+              [33mclass[31m=[32m"panel panel--editor"[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"panel-header panel-header--between"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-header__left"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"panel-icon"[31m
+                  [36m>[31m
+                    [36m<svg[31m
+                      [33mfill[31m=[32m"none"[31m
+                      [33mstroke[31m=[32m"currentColor"[31m
+                      [33mstroke-linecap[31m=[32m"round"[31m
+                      [33mstroke-linejoin[31m=[32m"round"[31m
+                      [33mstroke-width[31m=[32m"1.5"[31m
+                      [33mviewBox[31m=[32m"0 0 16 16"[31m
+                    [36m>[31m
+                      [36m<rect[31m
+                        [33mheight[31m=[32m"11"[31m
+                        [33mrx[31m=[32m"2"[31m
+                        [33mwidth[31m=[32m"14"[31m
+                        [33mx[31m=[32m"1"[31m
+                        [33my[31m=[32m"2.5"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M4 10V6l2 2 2-2v4"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M11 10V6"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M9.5 8.5L11 10l1.5-1.5"[31m
+                      [36m/>[31m
+                    [36m</svg>[31m
+                  [36m</div>[31m
+                  [36m<h3>[31m
+                    [0mContenido Markdown[0m
+                  [36m</h3>[31m
+                [36m</div>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-actions"[31m
+                [36m>[31m
+                  [36m<label>[31m
+                    [36m<span[31m
+                      [33mclass[31m=[32m"visually-hidden"[31m
+                    [36m>[31m
+                      [0mConversi├│n[0m
+                    [36m</span>[31m
+                    [36m<select[31m
+                      [33maria-label[31m=[32m"Conversi├│n"[31m
+                    [36m>[31m
+                      [36m<option[31m
+                        [33mvalue[31m=[32m"docx-to-markdown"[31m
+                      [36m>[31m
+                        [0mWord (.docx) -&gt; Markdown[0m
+                      [36m</option>[31m
+                      [36m<option[31m
+                        [33mvalue[31m=[32m"epub-to-markdown"[31m
+                      [36m>[31m
+                        [0mEPUB -&gt; Markdown[0m
+                      [36m</option>[31m
+                      [36m<option[31m
+                        [33mvalue[31m=[32m"html-to-markdown"[31m
+                      [36m>[31m
+                        [0mHTML -&gt; Markdown[0m
+                      [36m</option>[31m
+                      [36m<option[31m
+                        [33mvalue[31m=[32m"markdown-to-docx"[31m
+                      [36m>[31m
+                        [0mMarkdown -&gt; Word (.docx)[0m
+                      [36m</option>[31m
+                      [36m<option[31m
+                        [33mvalue[31m=[32m"markdown-to-epub"[31m
+                      [36m>[31m
+                        [0mMarkdown -&gt; EPUB[0m
+                      [36m</option>[31m
+                      [36m<option[31m
+                        [33mvalue[31m=[32m"markdown-to-html"[31m
+                      [36m>[31m
+                        [0mMarkdown -&gt; HTML[0m
+                      [36m</option>[31m
+                    [36m</select>[31m
+                  [36m</label>[31m
+                  [36m<button[31m
+                    [33mclass[31m=[32m"btn-secondary"[31m
+                    [33mtype[31m=[32m"button"[31m
+                  [36m>[31m
+                    [36m<svg[31m
+                      [33mfill[31m=[32m"none"[31m
+                      [33mstroke[31m=[32m"currentColor"[31m
+                      [33mstroke-linecap[31m=[32m"round"[31m
+                      [33mstroke-linejoin[31m=[32m"round"[31m
+                      [33mstroke-width[31m=[32m"1.5"[31m
+                      [33mviewBox[31m=[32m"0 0 16 16"[31m
+                    [36m>[31m
+                      [36m<circle[31m
+                        [33mcx[31m=[32m"8"[31m
+                        [33mcy[31m=[32m"8"[31m
+                        [33mr[31m=[32m"1.75"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M8 2.25v1.5"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M8 12.25v1.5"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M12.07 3.93l-1.06 1.06"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M4.99 11.01l-1.06 1.06"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M13.75 8h-1.5"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M3.75 8h-1.5"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M12.07 12.07l-1.06-1.06"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M4.99 4.99L3.93 3.93"[31m
+                      [36m/>[31m
+                    [36m</svg>[31m
+                    [0mConfiguraci├│n[0m
+                  [36m</button>[31m
+                  [36m<input[31m
+                    [33maccept[31m=[32m".md,.markdown,text/markdown,text/plain"[31m
+                    [33mclass[31m=[32m"visually-hidden"[31m
+                    [33mtype[31m=[32m"file"[31m
+                  [36m/>[31m
+                  [36m<button[31m
+                    [33mclass[31m=[32m"btn-secondary"[31m
+                    [33mtype[31m=[32m"button"[31m
+                  [36m>[31m
+                    [36m<svg[31m
+                      [33mfill[31m=[32m"none"[31m
+                      [33mstroke[31m=[32m"currentColor"[31m
+                      [33mstroke-linecap[31m=[32m"round"[31m
+                      [33mstroke-linejoin[31m=[32m"round"[31m
+                      [33mstroke-width[31m=[32m"1.5"[31m
+                      [33mviewBox[31m=[32m"0 0 16 16"[31m
+                    [36m>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M4 2h6l3 3v9H4V2z"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M10 2v3h3"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M6.5 8.5h4"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M6.5 11h4"[31m
+                      [36m/>[31m
+                    [36m</svg>[31m
+                    [0mImportar .md[0m
+                  [36m</button>[31m
+                [36m</div>[31m
+              [36m</div>[31m
+              [36m<p[31m
+                [33mclass[31m=[32m"panel-help"[31m
+              [36m>[31m
+                [0mPega aqu├¡ el contenido Markdown o importa un fichero .md.[0m
+              [36m</p>[31m
+              [36m<textarea[31m
+                [33mclass[31m=[32m"editor"[31m
+              [36m/>[31m
+            [36m</article>[31m
+            [36m<article[31m
+              [33mclass[31m=[32m"panel panel--status wide"[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"panel-header"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-icon"[31m
+                [36m>[31m
+                  [36m<svg[31m
+                    [33mfill[31m=[32m"none"[31m
+                    [33mstroke[31m=[32m"currentColor"[31m
+                    [33mstroke-linecap[31m=[32m"round"[31m
+                    [33mstroke-linejoin[31m=[32m"round"[31m
+                    [33mstroke-width[31m=[32m"1.5"[31m
+                    [33mviewBox[31m=[32m"0 0 16 16"[31m
+                  [36m>[31m
+                    [36m<circle[31m
+                      [33mcx[31m=[32m"8"[31m
+                      [33mcy[31m=[32m"8"[31m
+                      [33mr[31m=[32m"6.5"[31m
+                    [36m/>[31m
+                    [36m<path[31m
+                      [33md[31m=[32m"M8 5v3.5l2 1.5"[31m
+                    [36m/>[31m
+                  [36m</svg>[31m
+                [36m</div>[31m
+                [36m<h3>[31m
+                  [0mEstado de la conversi├│n[0m
+                [36m</h3>[31m
+              [36m</div>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"status-bar"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"status-dot "[31m
+                [36m/>[31m
+                [36m<span[31m
+                  [33mclass[31m=[32m"status-text"[31m
+                [36m>[31m
+                  [0mEn espera[0m
+                [36m</span>[31m
+              [36m</div>[31m
+              [0m[0m
+              [36m<pre[31m
+                [33mclass[31m=[32m"logs-block"[31m
+              [36m>[31m
+                [0mSin mensajes todav├¡a.[0m
+              [36m</pre>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"footer-actions"[31m
+              [36m>[31m
+                [36m<button[31m
+                  [33mclass[31m=[32m"btn-primary"[31m
+                  [33mtype[31m=[32m"button"[31m
+                [36m>[31m
+                  [36m<svg[31m
+                    [33mclass[31m=[32m"btn-icon"[31m
+                    [33mfill[31m=[32m"none"[31m
+                    [33mstroke[31m=[32m"currentColor"[31m
+                    [33mstroke-linecap[31m=[32m"round"[31m
+                    [33mstroke-linejoin[31m=[32m"round"[31m
+                    [33mstroke-width[31m=[32m"2"[31m
+                    [33mviewBox[31m=[32m"0 0 18 18"[31m
+                  [36m>[31m
+                    [36m<path[31m
+                      [33md[31m=[32m"M9 2v9"[31m
+                    [36m/>[31m
+                    [36m<path[31m
+                      [33md[31m=[32m"M5.5 8l3.5 3.5L12.5 8"[31m
+                    [36m/>[31m
+                    [36m<path[31m
+                      [33md[31m=[32m"M2 14h14"[31m
+                    [36m/>[31m
+                  [36m</svg>[31m
+                  [0mConvertir y descargar Word[0m
+                [36m</button>[31m
+              [36m</div>[31m
+            [36m</article>[31m
+          [36m</section>[31m
+          [36m<dialog[31m
+            [33maria-label[31m=[32m"Configuraci├│n DOCX"[31m
+            [33mclass[31m=[32m"settings-modal"[31m
+            [33mopen[31m=[32m""[31m
+          [36m>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"settings-modal__header"[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"panel-header__left"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-icon"[31m
+                [36m>[31m
+                  [36m<svg[31m
+                    [33mfill[31m=[32m"none"[31m
+                    [33mstroke[31m=[32m"currentColor"[31m
+                    [33mstroke-linecap[31m=[32m"round"[31m
+                    [33mstroke-linejoin[31m=[32m"round"[31m
+                    [33mstroke-width[31m=[32m"1.5"[31m
+                    [33mviewBox[31m=[32m"0 0 16 16"[31m
+                  [36m>[31m
+                    [36m<rect[31m
+                      [33mheight[31m=[32m"13"[31m
+                      [33mrx[31m=[32m"2"[31m
+                      [33mwidth[31m=[32m"13"[31m
+                      [33mx[31m=[32m"1.5"[31m
+                      [33my[31m=[32m"1.5"[31m
+                    [36m/>[31m
+                    [36m<line[31m
+                      [33mx1[31m=[32m"4.5"[31m
+                      [33mx2[31m=[32m"11.5"[31m
+                      [33my1[31m=[32m"5.5"[31m
+                      [33my2[31m=[32m"5.5"[31m
+                    [36m/>[31m
+                    [36m<line[31m
+                      [33mx1[31m=[32m"4.5"[31m
+                      [33mx2[31m=[32m"9"[31m
+                      [33my1[31m=[32m"8"[31m
+                      [33my2[31m=[32m"8"[31m
+                    [36m/>[31m
+                    [36m<line[31m
+                      [33mx1[31m=[32m"4.5"[31m
+                      [33mx2[31m=[32m"10"[31m
+                      [33my1[31m=[32m"10.5"[31m
+                      [33my2[31m=[32m"10.5"[31m
+                    [36m/>[31m
+                  [36m</svg>[31m
+                [36m</div>[31m
+                [36m<h3>[31m
+                  [0mConfiguraci├│n [0m
+                  [0mDOCX[0m
+                [36m</h3>[31m
+              [36m</div>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"panel-actions"[31m
+              [36m>[31m
+                [36m<button[31m
+                  [33mclass[31m=[32m"btn-secondary "[31m
+                  [33mtype[31m=[32m"button"[31m
+                [36m>[31m
+                  [0mDocumento[0m
+                [36m</button>[31m
+              [36m</div>[31m
+            [36m</div>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"settings-modal__body"[31m
+            [36m>[31m
+              [36m<label>[31m
+                [36m<span>[31m
+                  [0mReference DOCX[0m
+                [36m</span>[31m
+                [36m<input[31m
+                  [33maccept[31m=[32m".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"[31m
+                  [33mtype[31m=[32m"file"[31m
+                [36m/>[31m
+              [36m</label>[31m
+              [36m<label>[31m
+                [36m<span>[31m
+                  [0mProfundidad del TOC[0m
+                [36m</span>[31m
+                [36m<input[31m
+                  [33mmax[31m=[32m"6"[31m
+                  [33mmin[31m=[32m"1"[31m
+                  [33mtype[31m=[32m"number"[31m
+                [36m/>[31m
+              [36m</label>[31m
+              [36m<label[31m
+                [33mclass[31m=[32m"checkbox"[31m
+              [36m>[31m
+                [36m<input[31m
+                  [33mtype[31m=[32m"checkbox"[31m
+                [36m/>[31m
+                [36m<span>[31m
+                  [0mIncluir tabla de contenidos[0m
+                [36m</span>[31m
+              [36m</label>[31m
+              [36m<label>[31m
+                [36m<span>[31m
+                  [0mHighlight style[0m
+                [36m</span>[31m
+                [36m<select>[31m
+                  [36m<option[31m
+                    [33mvalue[31m=[32m""[31m
+                  [36m>[31m
+                    [0mDefault[0m
+                  [36m</option>[31m
+                  [36m<option[31m
+                    [33mvalue[31m=[32m"pygments"[31m
+                  [36m>[31m
+                    [0mPygments[0m
+                  [36m</option>[31m
+                  [36m<option[31m
+                    [33mvalue[31m=[32m"zenburn"[31m
+                  [36m>[31m
+                    [0mZenburn[0m
+                  [36m</option>[31m
+                  [36m<option[31m
+                    [33mvalue[31m=[32m"tango"[31m
+                  [36m>[31m
+                    [0mTango[0m
+                  [36m</option>[31m
+                [36m</select>[31m
+              [36m</label>[31m
+            [36m</div>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"footer-actions settings-modal__footer"[31m
+            [36m>[31m
+              [36m<button[31m
+                [33mclass[31m=[32m"btn-secondary"[31m
+                [33mtype[31m=[32m"button"[31m
+              [36m>[31m
+                [0mCancelar[0m
+              [36m</button>[31m
+              [36m<button[31m
+                [33mclass[31m=[32m"btn-primary"[31m
+                [33mtype[31m=[32m"button"[31m
+              [36m>[31m
+                [0mGuardar[0m
+              [36m</button>[31m
+            [36m</div>[31m
+          [36m</dialog>[31m
+        [36m</section>[31m
+      [36m</main>[31m
+    [36m</div>[31m
+  [36m</div>[31m
+[36m</body>[31m
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head />[31m
+  [36m<body>[31m
+    [36m<div>[31m
+      [36m<div[31m
+        [33mclass[31m=[32m"app-shell"[31m
+      [36m>[31m
+        [36m<header[31m
+          [33mclass[31m=[32m"app-shell__header"[31m
+        [36m>[31m
+          [36m<div>[31m
+            [36m<h1>[31m
+              [0mMDconvertix[0m
+            [36m</h1>[31m
+            [36m<p>[31m
+              [0mConvert Markdown files to DOCX, EPUB, HTML[0m
+            [36m</p>[31m
+          [36m</div>[31m
+        [36m</header>[31m
+        [36m<main>[31m
+          [36m<section[31m
+            [33mclass[31m=[32m"converter-page"[31m
+          [36m>[31m
+            [36m<section[31m
+              [33mclass[31m=[32m"grid"[31m
+            [36m>[31m
+              [36m<article[31m
+                [33mclass[31m=[32m"panel panel--editor"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-header panel-header--between"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"panel-header__left"[31m
+                  [36m>[31m
+                    [36m<div[31m
+                      [33mclass[31m=[32m"panel-icon"[31m
+                    [36m>[31m
+                      [36m<svg[31m
+                        [33mfill[31m=[32m"none"[31m
+                        [33mstroke[31m=[32m"currentColor"[31m
+                        [33mstroke-linecap[31m=[32m"round"[31m
+                        [33mstroke-linejoin[31m=[32m"round"[31m
+                        [33mstroke-width[31m=[32m"1.5"[31m
+                        [33mviewBox[31m=[32m"0 0 16 16"[31m
+                      [36m>[31m
+                        [36m<rect[31m
+                          [33mheight[31m=[32m"11"[31m
+                          [33mrx[31m=[32m"2"[31m
+                          [33mwidth[31m=[32m"14"[31m
+                          [33mx[31m=[32m"1"[31m
+                          [33my[31m=[32m"2.5"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M4 10V6l2 2 2-2v4"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M11 10V6"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M9.5 8.5L11 10l1.5-1.5"[31m
+                        [36m/>[31m
+                      [36m</svg>[31m
+                    [36m</div>[31m
+                    [36m<h3>[31m
+                      [0mContenido Markdown[0m
+                    [36m</h3>[31m
+                  [36m</div>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"panel-actions"[31m
+                  [36m>[31m
+                    [36m<label>[31m
+                      [36m<span[31m
+                        [33mclass[31m=[32m"visually-hidden"[31m
+                      [36m>[31m
+                        [0mConversi├│n[0m
+                      [36m</span>[31m
+                      [36m<select[31m
+                        [33maria-label[31m=[32m"Conversi├│n"[31m
+                      [36m>[31m
+                        [36m<option[31m
+                          [33mvalue[31m=[32m"docx-to-markdown"[31m
+                        [36m>[31m
+                          [0mWord (.docx) -&gt; Markdown[0m
+                        [36m</option>[31m
+                        [36m<option[31m
+                          [33mvalue[31m=[32m"epub-to-markdown"[31m
+                        [36m>[31m
+                          [0mEPUB -&gt; Markdown[0m
+                        [36m</option>[31m
+                        [36m<option[31m
+                          [33mvalue[31m=[32m"html-to-markdown"[31m
+                        [36m>[31m
+                          [0mHTML -&gt; Markdown[0m
+                        [36m</option>[31m
+                        [36m<option[31m
+                          [33mvalue[31m=[32m"markdown-to-docx"[31m
+                        [36m>[31m
+                          [0mMarkdown -&gt; Word (.docx)[0m
+                        [36m</option>[31m
+                        [36m<option[31m
+                          [33mvalue[31m=[32m"markdown-to-epub"[31m
+                        [36m>[31m
+                          [0mMarkdown -&gt; EPUB[0m
+                        [36m</option>[31m
+                        [36m<option[31m
+                          [33mvalue[31m=[32m"markdown-to-html"[31m
+                        [36m>[31m
+                          [0mMarkdown -&gt; HTML[0m
+                        [36m</option>[31m
+                      [36m</select>[31m
+                    [36m</label>[31m
+                    [36m<button[31m
+                      [33mclass[31m=[32m"btn-secondary"[31m
+                      [33mtype[31m=[32m"button"[31m
+                    [36m>[31m
+                      [36m<svg[31m
+                        [33mfill[31m=[32m"none"[31m
+                        [33mstroke[31m=[32m"currentColor"[31m
+                        [33mstroke-linecap[31m=[32m"round"[31m
+                        [33mstroke-linejoin[31m=[32m"round"[31m
+                        [33mstroke-width[31m=[32m"1.5"[31m
+                        [33mviewBox[31m=[32m"0 0 16 16"[31m
+                      [36m>[31m
+                        [36m<circle[31m
+                          [33mcx[31m=[32m"8"[31m
+                          [33mcy[31m=[32m"8"[31m
+                          [33mr[31m=[32m"1.75"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M8 2.25v1.5"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M8 12.25v1.5"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M12.07 3.93l-1.06 1.06"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M4.99 11.01l-1.06 1.06"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M13.75 8h-1.5"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M3.75 8h-1.5"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M12.07 12.07l-1.06-1.06"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M4.99 4.99L3.93 3.93"[31m
+                        [36m/>[31m
+                      [36m</svg>[31m
+                      [0mConfiguraci├│n[0m
+                    [36m</button>[31m
+                    [36m<input[31m
+                      [33maccept[31m=[32m".md,.markdown,text/markdown,text/plain"[31m
+                      [33mclass[31m=[32m"visually-hidden"[31m
+                      [33mtype[31m=[32m"file"[31m
+                    [36m/>[31m
+                    [36m<button[31m
+                      [33mclass[31m=[32m"btn-secondary"[31m
+                      [33mtype[31m=[32m"button"[31m
+                    [36m>[31m
+                      [36m<svg[31m
+                        [33mfill[31m=[32m"none"[31m
+                        [33mstroke[31m=[32m"currentColor"[31m
+                        [33mstroke-linecap[31m=[32m"round"[31m
+                        [33mstroke-linejoin[31m=[32m"round"[31m
+                        [33mstroke-width[31m=[32m"1.5"[31m
+                        [33mviewBox[31m=[32m"0 0 16 16"[31m
+                      [36m>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M4 2h6l3 3v9H4V2z"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M10 2v3h3"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M6.5 8.5h4"[31m
+                        [36m/>[31m
+                        [36m<path[31m
+                          [33md[31m=[32m"M6.5 11h4"[31m
+                        [36m/>[31m
+                      [36m</svg>[31m
+                      [0mImportar .md[0m
+                    [36m</button>[31m
+                  [36m</div>[31m
+                [36m</div>[31m
+                [36m<p[31m
+                  [33mclass[31m=[32m"panel-help"[31m
+                [36m>[31m
+                  [0mPega aqu├¡ el contenido Markdown o importa un fichero .md.[0m
+                [36m</p>[31m
+                [36m<textarea[31m
+                  [33mclass[31m=[32m"editor"[31m
+                [36m/>[31m
+              [36m</article>[31m
+              [36m<article[31m
+                [33mclass[31m=[32m"panel panel--status wide"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-header"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"panel-icon"[31m
+                  [36m>[31m
+                    [36m<svg[31m
+                      [33mfill[31m=[32m"none"[31m
+                      [33mstroke[31m=[32m"currentColor"[31m
+                      [33mstroke-linecap[31m=[32m"round"[31m
+                      [33mstroke-linejoin[31m=[32m"round"[31m
+                      [33mstroke-width[31m=[32m"1.5"[31m
+                      [33mviewBox[31m=[32m"0 0 16 16"[31m
+                    [36m>[31m
+                      [36m<circle[31m
+                        [33mcx[31m=[32m"8"[31m
+                        [33mcy[31m=[32m"8"[31m
+                        [33mr[31m=[32m"6.5"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M8 5v3.5l2 1.5"[31m
+                      [36m/>[31m
+                    [36m</svg>[31m
+                  [36m</div>[31m
+                  [36m<h3>[31m
+                    [0mEstado de la conversi├│n[0m
+                  [36m</h3>[31m
+                [36m</div>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"status-bar"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"status-dot "[31m
+                  [36m/>[31m
+                  [36m<span[31m
+                    [33mclass[31m=[32m"status-text"[31m
+                  [36m>[31m
+                    [0mEn espera[0m
+                  [36m</span>[31m
+                [36m</div>[31m
+                [0m[0m
+                [36m<pre[31m
+                  [33mclass[31m=[32m"logs-block"[31m
+                [36m>[31m
+                  [0mSin mensajes todav├¡a.[0m
+                [36m</pre>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"footer-actions"[31m
+                [36m>[31m
+                  [36m<button[31m
+                    [33mclass[31m=[32m"btn-primary"[31m
+                    [33mtype[31m=[32m"button"[31m
+                  [36m>[31m
+                    [36m<svg[31m
+                      [33mclass[31m=[32m"btn-icon"[31m
+                      [33mfill[31m=[32m"none"[31m
+                      [33mstroke[31m=[32m"currentColor"[31m
+                      [33mstroke-linecap[31m=[32m"round"[31m
+                      [33mstroke-linejoin[31m=[32m"round"[31m
+                      [33mstroke-width[31m=[32m"2"[31m
+                      [33mviewBox[31m=[32m"0 0 18 18"[31m
+                    [36m>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M9 2v9"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M5.5 8l3.5 3.5L12.5 8"[31m
+                      [36m/>[31m
+                      [36m<path[31m
+                        [33md[31m=[32m"M2 14h14"[31m
+                      [36m/>[31m
+                    [36m</svg>[31m
+                    [0mConvertir y descargar Word[0m
+                  [36m</button>[31m
+                [36m</div>[31m
+              [36m</article>[31m
+            [36m</section>[31m
+            [36m<dialog[31m
+              [33maria-label[31m=[32m"Configuraci├│n DOCX"[31m
+              [33mclass[31m=[32m"settings-modal"[31m
+              [33mopen[31m=[32m""[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"settings-modal__header"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-header__left"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"panel-icon"[31m
+                  [36m>[31m
+                    [36m<svg[31m
+                      [33mfill[31m=[32m"none"[31m
+                      [33mstroke[31m=[32m"currentColor"[31m
+                      [33mstroke-linecap[31m=[32m"round"[31m
+                      [33mstroke-linejoin[31m=[32m"round"[31m
+                      [33mstroke-width[31m=[32m"1.5"[31m
+                      [33mviewBox[31m=[32m"0 0 16 16"[31m
+                    [36m>[31m
+                      [36m<rect[31m
+                        [33mheight[31m=[32m"13"[31m
+                        [33mrx[31m=[32m"2"[31m
+                        [33mwidth[31m=[32m"13"[31m
+                        [33mx[31m=[32m"1.5"[31m
+                        [33my[31m=[32m"1.5"[31m
+                      [36m/>[31m
+                      [36m<line[31m
+                        [33mx1[31m=[32m"4.5"[31m
+                        [33mx2[31m=[32m"11.5"[31m
+                        [33my1[31m=[32m"5.5"[31m
+                        [33my2[31m=[32m"5.5"[31m
+                      [36m/>[31m
+                      [36m<line[31m
+                        [33mx1[31m=[32m"4.5"[31m
+                        [33mx2[31m=[32m"9"[31m
+                        [33my1[31m=[32m"8"[31m
+                        [33my2[31m=[32m"8"[31m
+                      [36m/>[31m
+                      [36m<line[31m
+                        [33mx1[31m=[32m"4.5"[31m
+                        [33mx2[31m=[32m"10"[31m
+                        [33my1[31m=[32m"10.5"[31m
+                        [33my2[31m=[32m"10.5"[31m
+                      [36m/>[31m
+                    [36m</svg>[31m
+                  [36m</div>[31m
+                  [36m<h3>[31m
+                    [0mConfiguraci├│n [0m
+                    [0mDOCX[0m
+                  [36m</h3>[31m
+                [36m</div>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"panel-actions"[31m
+                [36m>[31m
+                  [36m<button[31m
+                    [33mclass[31m=[32m"btn-secondary "[31m
+                    [33mtype[31m=[32m"button"[31m
+                  [36m>[31m
+                    [0mDocumento[0m
+                  [36m</button>[31m
+                [36m</div>[31m
+              [36m</div>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"settings-modal__body"[31m
+              [36m>[31m
+                [36m<label>[31m
+                  [36m<span>[31m
+                    [0mReference DOCX[0m
+                  [36m</span>[31m
+                  [36m<input[31m
+                    [33maccept[31m=[32m".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"[31m
+                    [33mtype[31m=[32m"file"[31m
+                  [36m/>[31m
+                [36m</label>[31m
+                [36m<label>[31m
+                  [36m<span>[31m
+                    [0mProfundidad del TOC[0m
+                  [36m</span>[31m
+                  [36m<input[31m
+                    [33mmax[31m=[32m"6"[31m
+                    [33mmin[31m=[32m"1"[31m
+                    [33mtype[31m=[32m"number"[31m
+                  [36m/>[31m
+                [36m</label>[31m
+                [36m<label[31m
+                  [33mclass[31m=[32m"checkbox"[31m
+                [36m>[31m
+                  [36m<input[31m
+                    [33mtype[31m=[32m"checkbox"[31m
+                  [36m/>[31m
+                  [36m<span>[31m
+                    [0mIncluir tabla de contenidos[0m
+                  [36m</span>[31m
+                [36m</label>[31m
+                [36m<label>[31m
+                  [36m<span>[31m
+                    [0mHighlight style[0m
+                  [36m</span>[31m
+                  [36m<select>[31m
+                    [36m<option[31m
+                      [33mvalue[31m=[32m""[31m
+                    [36m>[31m
+                      [0mDefault[0m
+                    [36m</option>[31m
+                    [36m<option[31m
+                      [33mvalue[31m=[32m"pygments"[31m
+                    [36m>[31m
+                      [0mPygments[0m
+                    [36m</option>[31m
+                    [36m<option[31m
+                      [33mvalue[31m=[32m"zenburn"[31m
+                    [36m>[31m
+                      [0mZenburn[0m
+                    [36m</option>[31m
+                    [36m<option[31m
+                      [33mvalue[31m=[32m"tango"[31m
+                    [36m>[31m
+                      [0mTango[0m
+                    [36m</option>[31m
+                  [36m</select>[31m
+                [36m</label>[31m
+              [36m</div>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"footer-actions settings-modal__footer"[31m
+              [36m>[31m
+                [36m<button[31m
+                  [33mclass[31m=[32m"btn-secondary"[31m
+                  [33mtype[31m=[32m"button"[31m
+                [36m>[31m
+                  [0mCancelar[0m
+                [36m</button>[31m
+                [36m<button[31m
+                  [33mclass[31m=[32m"btn-primary"[31m
+                  [33mtype[31m=[32m"button"[31m
+                [36m>[31m
+                  [0mGuardar[0m
+                [36m</button>[31m
+              [36m</div>[31m
+            [36m</dialog>[31m
+          [36m</section>[31m
+        [36m</main>[31m
+      [36m</div>[31m
+    [36m</div>[31m
+  [36m</body>[31m
+[36m</html>[31m[39m
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 1 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/app/App.config.test.tsx > Config Modal Dynamic Sections > SHALL load mode-specific config when opening config
+TestingLibraryElementError: Unable to find an element with the display value: DocX Title.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="app-shell"
+    >
+      <header
+        class="app-shell__header"
+      >
+        <div>
+          <h1>
+            MDconvertix
+          </h1>
+          <p>
+            Convert Markdown files to DOCX, EPUB, HTML
+          </p>
+        </div>
+      </header>
+      <main>
+        <section
+          class="converter-page"
+        >
+          <section
+            class="grid"
+          >
+            <article
+              class="panel panel--editor"
+            >
+              <div
+                class="panel-header panel-header--between"
+              >
+                <div
+                  class="panel-header__left"
+                >
+                  <div
+                    class="panel-icon"
+                  >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 16 16"
+                    >
+                      <rect
+                        height="11"
+                        rx="2"
+                        width="14"
+                        x="1"
+                        y="2.5"
+                      />
+                      <path
+                        d="M4 10V6l2 2 2-2v4"
+                      />
+                      <path
+                        d="M11 10V6"
+                      />
+                      <path
+                        d="M9.5 8.5L11 10l1.5-1.5"
+                      />
+                    </svg>
+                  </div>
+                  <h3>
+                    Contenido Markdown
+                  </h3>
+                </div>
+                <div
+                  class="panel-actions"
+                >
+                  <label>
+                    <span
+                      class="visually-hidden"
+                    >
+                      Conversi├│n
+                    </span>
+                    <select
+                      aria-label="Conversi├│n"
+                    >
+                      <option
+                        value="docx-to-markdown"
+                      >
+                        Word (.docx) -&gt; Markdown
+                      </option>
+                      <option
+                        value="epub-to-markdown"
+                      >
+                        EPUB -&gt; Markdown
+                      </option>
+                      <option
+                        value="html-to-markdown"
+                      >
+                        HTML -&gt; Markdown
+                      </option>
+                      <option
+                        value="markdown-to-docx"
+                      >
+                        Markdown -&gt; Word (.docx)
+                      </option>
+                      <option
+                        value="markdown-to-epub"
+                      >
+                        Markdown -&gt; EPUB
+                      </option>
+                      <option
+                        value="markdown-to-html"
+                      >
+                        Markdown -&gt; HTML
+                      </option>
+                    </select>
+                  </label>
+                  <button
+                    class="btn-secondary"
+                    type="button"
+                  >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 16 16"
+                    >
+                      <circle
+                        cx="8"
+                        cy="8"
+                        r="1.75"
+                      />
+                      <path
+                        d="M8 2.25v1.5"
+                      />
+                      <path
+                        d="M8 12.25v1.5"
+                      />
+                      <path
+                        d="M12.07 3.93l-1.06 1.06"
+                      />
+                      <path
+                        d="M4.99 11.01l-1.06 1.06"
+                      />
+                      <path
+                        d="M13.75 8h-1.5"
+                      />
+                      <path
+                        d="M3.75 8h-1.5"
+                      />
+                      <path
+                        d="M12.07 12.07l-1.06-1.06"
+                      />
+                      <path
+                        d="M4.99 4.99L3.93 3.93"
+                      />
+                    </svg>
+                    Configuraci├│n
+                  </button>
+                  <input
+                    accept=".md,.markdown,text/markdown,text/plain"
+                    class="visually-hidden"
+                    type="file"
+                  />
+                  <button
+                    class="btn-secondary"
+                    type="button"
+                  >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M4 2h6l3 3v9H4V2z"
+                      />
+                      <path
+                        d="M10 2v3h3"
+                      />
+                      <path
+                        d="M6.5 8.5h4"
+                      />
+                      <path
+                        d="M6.5 11h4"
+                      />
+                    </svg>
+                    Importar .md
+                  </button>
+                </div>
+              </div>
+              <p
+                class="panel-help"
+              >
+                Pega aqu├¡ el contenido Markdown o importa un fichero .md.
+              </p>
+              <textarea
+                class="editor"
+              />
+            </article>
+            <article
+              class="panel panel--status wide"
+            >
+              <div
+                class="panel-header"
+              >
+                <div
+                  class="panel-icon"
+                >
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    viewBox="0 0 16 16"
+                  >
+                    <circle
+                      cx="8"
+                      cy="8"
+                      r="6.5"
+                    />
+                    <path
+                      d="M8 5v3.5l2 1.5"
+                    />
+                  </svg>
+                </div>
+                <h3>
+                  Estado de la conversi├│n
+                </h3>
+              </div>
+              <div
+                class="status-bar"
+              >
+                <div
+                  class="status-dot "
+                />
+                <span
+                  class="status-text"
+                >
+                  En espera
+                </span>
+              </div>
+              
+              <pre
+                class="logs-block"
+              >
+                Sin mensajes todav├¡a.
+              </pre>
+              <div
+                class="footer-actions"
+              >
+                <button
+                  class="btn-primary"
+                  type="button"
+                >
+                  <svg
+                    class="btn-icon"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 18 18"
+                  >
+                    <path
+                      d="M9 2v9"
+                    />
+                    <path
+                      d="M5.5 8l3.5 3.5L12.5 8"
+                    />
+                    <path
+                      d="M2 14h14"
+                    />
+                  </svg>
+                  Convertir y descargar Word
+                </button>
+              </div>
+            </article>
+          </section>
+          <dialog
+            aria-label="Configuraci├│n DOCX"
+            class="settings-modal"
+            open=""
+          >
+            <div
+              class="settings-modal__header"
+            >
+              <div
+                class="panel-header__left"
+              >
+                <div
+                  class="panel-icon"
+                >
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    viewBox="0 0 16 16"
+                  >
+                    <rect
+                      height="13"
+                      rx="2"
+                      width="13"
+                      x="1.5"
+                      y="1.5"
+                    />
+                    <line
+                      x1="4.5"
+                      x2="11.5"
+                      y1="5.5"
+                      y2="5.5"
+                    />
+                    <line
+                      x1="4.5"
+                      x2="9"
+                      y1="8"
+                      y2="8"
+                    />
+                    <line
+                      x1="4.5"
+                      x2="10"
+                      y1="10.5"
+                      y2="10.5"
+                    />
+                  </svg>
+                </div>
+                <h3>
+                  Configuraci├│n 
+                  DOCX
+                </h3>
+              </div>
+              <div
+                class="panel-actions"
+              >
+                <button
+                  class="btn-secondary "
+                  type="button"
+                >
+                  Documento
+                </button>
+              </div>
+            </div>
+            <div
+              class="settings-modal__body"
+            >
+              <label>
+                <span>
+                  Reference DOCX
+                </span>
+                <input
+                  accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  type="file"
+                />
+              </label>
+              <label>
+                <span>
+                  Profundidad del TOC
+                </span>
+                <input
+                  max="6"
+                  min="1"
+                  type="number"
+                />
+              </label>
+              <label
+                class="checkbox"
+              >
+                <input
+                  type="checkbox"
+                />
+                <span>
+                  Incluir tabla de contenidos
+                </span>
+              </label>
+              <label>
+                <span>
+                  Highlight style
+                </span>
+                <select>
+                  <option
+                    value=""
+                  >
+                    Default
+                  </option>
+                  <option
+                    value="pygments"
+                  >
+                    Pygments
+                  </option>
+                  <option
+                    value="zenburn"
+                  >
+                    Zenburn
+                  </option>
+                  <option
+                    value="tango"
+                  >
+                    Tango
+                  </option>
+                </select>
+              </label>
+            </div>
+            <div
+              class="footer-actions settings-modal__footer"
+            >
+              <button
+                class="btn-secondary"
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                class="btn-primary"
+                type="button"
+              >
+                Guardar
+              </button>
+            </div>
+          </dialog>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<html>
+  <head />
+  <body>
+    <div>
+      <div
+        class="app-shell"
+      >
+        <header
+          class="app-shell__header"
+        >
+          <div>
+            <h1>
+              MDconvertix
+            </h1>
+            <p>
+              Convert Markdown files to DOCX, EPUB, HTML
+            </p>
+          </div>
+        </header>
+        <main>
+          <section
+            class="converter-page"
+          >
+            <section
+              class="grid"
+            >
+              <article
+                class="panel panel--editor"
+              >
+                <div
+                  class="panel-header panel-header--between"
+                >
+                  <div
+                    class="panel-header__left"
+                  >
+                    <div
+                      class="panel-icon"
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        viewBox="0 0 16 16"
+                      >
+                        <rect
+                          height="11"
+                          rx="2"
+                          width="14"
+                          x="1"
+                          y="2.5"
+                        />
+                        <path
+                          d="M4 10V6l2 2 2-2v4"
+                        />
+                        <path
+                          d="M11 10V6"
+                        />
+                        <path
+                          d="M9.5 8.5L11 10l1.5-1.5"
+                        />
+                      </svg>
+                    </div>
+                    <h3>
+                      Contenido Markdown
+                    </h3>
+                  </div>
+                  <div
+                    class="panel-actions"
+                  >
+                    <label>
+                      <span
+                        class="visually-hidden"
+                      >
+                        Conversi├│n
+                      </span>
+                      <select
+                        aria-label="Conversi├│n"
+                      >
+                        <option
+                          value="docx-to-markdown"
+                        >
+                          Word (.docx) -&gt; Markdown
+                        </option>
+                        <option
+                          value="epub-to-markdown"
+                        >
+                          EPUB -&gt; Markdown
+                        </option>
+                        <option
+                          value="html-to-markdown"
+                        >
+                          HTML -&gt; Markdown
+                        </option>
+                        <option
+                          value="markdown-to-docx"
+                        >
+                          Markdown -&gt; Word (.docx)
+                        </option>
+                        <option
+                          value="markdown-to-epub"
+                        >
+                          Markdown -&gt; EPUB
+                        </option>
+                        <option
+                          value="markdown-to-html"
+                        >
+                          Markdown -&gt; HTML
+                        </option>
+                      </select>
+                    </label>
+                    <button
+                      class="btn-secondary"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        viewBox="0 0 16 16"
+                      >
+                        <circle
+                          cx="8"
+                          cy="8"
+                          r="1.75"
+                        />
+                        <path
+                          d="M8 2.25v1.5"
+                        />
+                        <path
+                          d="M8 12.25v1.5"
+                        />
+                        <path
+                          d="M12.07 3.93l-1.06 1.06"
+                        />
+                        <path
+                          d="M4.99 11.01l-1.06 1.06"
+                        />
+                        <path
+                          d="M13.75 8h-1.5"
+                        />
+                        <path
+                          d="M3.75 8h-1.5"
+                        />
+                        <path
+                          d="M12.07 12.07l-1.06-1.06"
+                        />
+                        <path
+                          d="M4.99 4.99L3.93 3.93"
+                        />
+                      </svg>
+                      Configuraci├│n
+                    </button>
+                    <input
+                      accept=".md,.markdown,text/markdown,text/plain"
+                      class="visually-hidden"
+                      type="file"
+                    />
+                    <button
+                      class="btn-secondary"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          d="M4 2h6l3 3v9H4V2z"
+                        />
+                        <path
+                          d="M10 2v3h3"
+                        />
+                        <path
+                          d="M6.5 8.5h4"
+                        />
+                        <path
+                          d="M6.5 11h4"
+                        />
+                      </svg>
+                      Importar .md
+                    </button>
+                  </div>
+                </div>
+                <p
+                  class="panel-help"
+                >
+                  Pega aqu├¡ el contenido Markdown o importa un fichero .md.
+                </p>
+                <textarea
+                  class="editor"
+                />
+              </article>
+              <article
+                class="panel panel--status wide"
+              >
+                <div
+                  class="panel-header"
+                >
+                  <div
+                    class="panel-icon"
+                  >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 16 16"
+                    >
+                      <circle
+                        cx="8"
+                        cy="8"
+                        r="6.5"
+                      />
+                      <path
+                        d="M8 5v3.5l2 1.5"
+                      />
+                    </svg>
+                  </div>
+                  <h3>
+                    Estado de la conversi├│n
+                  </h3>
+                </div>
+                <div
+                  class="status-bar"
+                >
+                  <div
+                    class="status-dot "
+                  />
+                  <span
+                    class="status-text"
+                  >
+                    En espera
+                  </span>
+                </div>
+                
+                <pre
+                  class="logs-block"
+                >
+                  Sin mensajes todav├¡a.
+                </pre>
+                <div
+                  class="footer-actions"
+                >
+                  <button
+                    class="btn-primary"
+                    type="button"
+                  >
+                    <svg
+                      class="btn-icon"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 18 18"
+                    >
+                      <path
+                        d="M9 2v9"
+                      />
+                      <path
+                        d="M5.5 8l3.5 3.5L12.5 8"
+                      />
+                      <path
+                        d="M2 14h14"
+                      />
+                    </svg>
+                    Convertir y descargar Word
+                  </button>
+                </div>
+              </article>
+            </section>
+            <dialog
+              aria-label="Configuraci├│n DOCX"
+              class="settings-modal"
+              open=""
+            >
+              <div
+                class="settings-modal__header"
+              >
+                <div
+                  class="panel-header__left"
+                >
+                  <div
+                    class="panel-icon"
+                  >
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 16 16"
+                    >
+                      <rect
+                        height="13"
+                        rx="2"
+                        width="13"
+                        x="1.5"
+                        y="1.5"
+                      />
+                      <line
+                        x1="4.5"
+                        x2="11.5"
+                        y1="5.5"
+                        y2="5.5"
+                      />
+                      <line
+                        x1="4.5"
+                        x2="9"
+                        y1="8"
+                        y2="8"
+                      />
+                      <line
+                        x1="4.5"
+                        x2="10"
+                        y1="10.5"
+                        y2="10.5"
+                      />
+                    </svg>
+                  </div>
+                  <h3>
+                    Configuraci├│n 
+                    DOCX
+                  </h3>
+                </div>
+                <div
+                  class="panel-actions"
+                >
+                  <button
+                    class="btn-secondary "
+                    type="button"
+                  >
+                    Documento
+                  </button>
+                </div>
+              </div>
+              <div
+                class="settings-modal__body"
+              >
+                <label>
+                  <span>
+                    Reference DOCX
+                  </span>
+                  <input
+                    accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    type="file"
+                  />
+                </label>
+                <label>
+                  <span>
+                    Profundidad del TOC
+                  </span>
+                  <input
+                    max="6"
+                    min="1"
+                    type="number"
+                  />
+                </label>
+                <label
+                  class="checkbox"
+                >
+                  <input
+                    type="checkbox"
+                  />
+                  <span>
+                    Incluir tabla de contenidos
+                  </span>
+                </label>
+                <label>
+                  <span>
+                    Highlight style
+                  </span>
+                  <select>
+                    <option
+                      value=""
+                    >
+                      Default
+                    </option>
+                    <option
+                      value="pygments"
+                    >
+                      Pygments
+                    </option>
+                    <option
+                      value="zenburn"
+                    >
+                      Zenburn
+                    </option>
+                    <option
+                      value="tango"
+                    >
+                      Tango
+                    </option>
+                  </select>
+                </label>
+              </div>
+              <div
+                class="footer-actions settings-modal__footer"
+              >
+                <button
+                  class="btn-secondary"
+                  type="button"
+                >
+                  Cancelar
+                </button>
+                <button
+                  class="btn-primary"
+                  type="button"
+                >
+                  Guardar
+                </button>
+              </div>
+            </dialog>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
+ ÔØ» waitForWrapper ../../node_modules/.pnpm/@testing-library+dom@8.20.1/node_modules/@testing-library/dom/dist/wait-for.js:166:27
+ ÔØ» src/app/App.config.test.tsx:55:11
+     53| 
+     54|     // Should load the saved config
+     55|     await waitFor(() => {
+       |           ^
+     56|       console.log('Looking for input with value "DocX Title"');
+     57|       const titleInput = screen.getByDisplayValue('DocX Title') as HTMÔÇª
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/1]ÔÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 15:16:55
+[2m   Duration [22m 5.19s[2m (transform 381ms, setup 923ms, collect 693ms, tests 1.16s, environment 1.62s, prepare 293ms)[22m
+

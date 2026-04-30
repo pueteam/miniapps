@@ -21,66 +21,71 @@ Definir el contrato funcional de la conversion EPUB que hoy ofrece `md-converter
 ## Requirements
 
 ### Requirement: La conversion EPUB ocurre localmente en el navegador
-La aplicacion MUST ejecutar la conversion Markdown -> EPUB sin depender de un backend remoto.
+La aplicacion MUST ejecutar la conversion Markdown -> EPUB sin depender de un backend remoto, incluso cuando ese flujo convive con otros modos de conversion.
 
 #### Scenario: La solicitud de conversion se delega a un worker
-- **WHEN** la persona usuaria pulsa `Convertir y descargar EPUB`
+- **WHEN** la persona usuaria pulsa la accion principal de convertir estando activo `Markdown -> EPUB`
 - **THEN** la app envia un trabajo al `Web Worker`
 - **AND** la ejecucion de `pandoc.wasm` ocurre fuera del hilo principal
 
 #### Scenario: El binario de pandoc se carga desde el propio proyecto
-- **WHEN** el worker necesita ejecutar la conversion
+- **WHEN** el worker necesita ejecutar la conversion `Markdown -> EPUB`
 - **THEN** `pandoc.wasm` se carga desde `${import.meta.env.BASE_URL}pandoc.wasm`
 - **AND** si el binario no esta disponible la app falla con un error legible
 
 ### Requirement: La conversion acepta el conjunto actual de entradas editoriales
-La aplicacion MUST construir el EPUB usando Markdown, CSS, metadatos YAML y una portada opcional.
+La aplicacion MUST construir el EPUB usando Markdown, CSS, metadatos YAML y una portada opcional cuando el modo activo sea `Markdown -> EPUB`.
 
 #### Scenario: Los metadatos se serializan como YAML
-- **WHEN** existen valores para `title`, `author` o `lang`
+- **WHEN** existen valores para `title`, `author` o `lang` y la persona usuaria convierte en modo `Markdown -> EPUB`
 - **THEN** la app genera `metadata.yaml` con un bloque YAML valido
 - **AND** solo incluye los campos no vacios
 
 #### Scenario: La portada es opcional
-- **WHEN** la persona usuaria selecciona un fichero de imagen como portada
+- **WHEN** la persona usuaria selecciona un fichero de imagen como portada en el modo `Markdown -> EPUB`
 - **THEN** ese fichero se monta en el filesystem virtual
 - **AND** la invocacion de `pandoc` incluye `--epub-cover-image=<nombre-saneado>`
 
 #### Scenario: El CSS personalizado se empaqueta en el EPUB
-- **WHEN** se ejecuta la conversion
+- **WHEN** se ejecuta la conversion en modo `Markdown -> EPUB`
 - **THEN** el contenido del editor CSS se escribe como `epub.css`
 - **AND** la invocacion de `pandoc` incluye `--css=epub.css`
 
 ### Requirement: La conversion controla TOC y fragmentacion dentro de rangos seguros
-La aplicacion MUST permitir configurar `toc`, `tocDepth` y `splitLevel` dentro del rango soportado actualmente.
+La aplicacion MUST permitir configurar `toc`, `tocDepth` y `splitLevel` dentro del rango soportado actualmente cuando la salida seleccionada sea EPUB.
 
 #### Scenario: TOC opcional
-- **WHEN** `toc` esta activado
+- **WHEN** `toc` esta activado en modo `Markdown -> EPUB`
 - **THEN** la invocacion de `pandoc` incluye `--toc`
 
 #### Scenario: Profundidad y split se acotan entre 1 y 6
-- **WHEN** la persona usuaria introduce valores fuera de rango para `tocDepth` o `splitLevel`
+- **WHEN** la persona usuaria introduce valores fuera de rango para `tocDepth` o `splitLevel` en modo `Markdown -> EPUB`
 - **THEN** la app acota esos valores al rango `1..6` antes de invocar `pandoc`
 
 ### Requirement: El resultado exitoso se descarga como EPUB nombrado desde el titulo
-La aplicacion MUST descargar el archivo generado localmente cuando la conversion termina correctamente.
+La aplicacion MUST descargar el archivo EPUB generado localmente cuando la conversion `Markdown -> EPUB` termina correctamente.
 
 #### Scenario: Descarga del EPUB generado
-- **WHEN** `pandoc` devuelve bytes validos para `book.epub`
+- **WHEN** `pandoc` devuelve bytes validos para la salida EPUB del modo `Markdown -> EPUB`
 - **THEN** la app crea un `Blob` con MIME `application/epub+zip`
 - **AND** descarga el archivo con nombre `<slug-del-titulo>.epub`
 - **AND** usa `book.epub` si el titulo no produce slug
 
 #### Scenario: El estado de exito queda reflejado en la UI
-- **WHEN** la conversion termina correctamente
+- **WHEN** la conversion `Markdown -> EPUB` termina correctamente
 - **THEN** la UI cambia a estado `success`
 - **AND** muestra logs del proceso o un mensaje de exito por defecto
 
 ### Requirement: Los fallos de conversion se comunican en la UI
-La aplicacion MUST propagar errores del worker o de `pandoc` a la interfaz de conversion.
+La aplicacion MUST propagar errores del worker o de `pandoc` a la interfaz de conversion para cualquier modo soportado, incluido `Markdown -> EPUB`.
 
 #### Scenario: Error de pandoc o del worker
-- **WHEN** el worker responde con error o `pandoc` finaliza sin generar `book.epub`
+- **WHEN** el worker responde con error o `pandoc` finaliza sin generar el archivo esperado para el modo activo
 - **THEN** la app muestra un mensaje de error legible
 - **AND** cambia el estado visual a `error`
 - **AND** no intenta descargar ningun archivo
+
+#### Scenario: La conversion EPUB no queda afectada por validaciones de otros modos
+- **WHEN** la persona usuaria trabaja en modo `Markdown -> EPUB`
+- **THEN** la app mantiene el flujo actual basado en editor Markdown, configuracion EPUB e importacion opcional de `.md`
+- **AND** no exige seleccionar un archivo binario para poder convertir

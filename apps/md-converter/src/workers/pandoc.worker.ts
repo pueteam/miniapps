@@ -32,7 +32,7 @@ self.addEventListener("message", async (event: MessageEvent<WorkerRequest>) => {
       payload: result
     };
 
-    self.postMessage(response, [result.epubBytes.buffer]);
+    self.postMessage(response, [result.outputBytes.buffer]);
   } catch (error) {
     const response: WorkerFailure = {
       id,

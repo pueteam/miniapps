@@ -115,7 +115,7 @@ test('pressing escape closes the dialog and discards unsaved settings changes', 
   expect((screen.getByRole('textbox', { name: 'Título' }) as HTMLInputElement).value).toBe('Mi libro');
 });
 
-test('clicking the backdrop closes the dialog and discards unsaved settings changes', async () => {
+test('pressing escape closes the dialog and discards unsaved settings changes', async () => {
   const user = userEvent.setup();
 
   render(<App />);
@@ -123,12 +123,37 @@ test('clicking the backdrop closes the dialog and discards unsaved settings chan
   await user.click(screen.getByRole('button', { name: 'Configuración' }));
   const titleInput = screen.getByRole('textbox', { name: 'Título' });
   await user.clear(titleInput);
-  await user.type(titleInput, 'Cambio por backdrop');
+  await user.type(titleInput, 'Cambio por escape');
 
-  await user.click(document.querySelector('.modal-backdrop') as HTMLElement);
+  await user.keyboard('{Escape}');
 
   expect(screen.queryByRole('dialog', { name: 'Configuración EPUB' })).toBeNull();
 
   await user.click(screen.getByRole('button', { name: 'Configuración' }));
   expect((screen.getByRole('textbox', { name: 'Título' }) as HTMLInputElement).value).toBe('Mi libro');
+});
+
+test('shows a conversion selector with markdown to epub as the default mode and persists the selected mode', async () => {
+  const user = userEvent.setup();
+
+  render(<App />);
+
+  const modeSelect = screen.getByRole('combobox', { name: 'Conversión' }) as HTMLSelectElement;
+  expect(modeSelect.value).toBe('markdown-to-epub');
+
+  await user.selectOptions(modeSelect, 'docx-to-markdown');
+
+  expect(localStorage.getItem('miniapps:md-converter:conversionMode')).toBe(JSON.stringify('docx-to-markdown'));
+});
+
+test('switching to word to markdown hides epub settings and updates the import and download actions', async () => {
+  const user = userEvent.setup();
+
+  render(<App />);
+
+  await user.selectOptions(screen.getByRole('combobox', { name: 'Conversión' }), 'docx-to-markdown');
+
+  expect(screen.queryByRole('button', { name: 'Configuración' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Importar .docx' })).not.toBeNull();
+  expect(screen.getByRole('button', { name: 'Convertir y descargar Markdown' })).not.toBeNull();
 });

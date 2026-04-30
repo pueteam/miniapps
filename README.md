@@ -77,6 +77,7 @@ Para levantar una app concreta en modo desarrollo:
 ```bash
 pnpm --filter @miniapps/home dev
 pnpm --filter @miniapps/planning-board dev
+pnpm --filter @miniapps/md-converter dev
 ```
 
 ## Crear una nueva miniapp

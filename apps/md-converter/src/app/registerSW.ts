@@ -21,13 +21,13 @@ export function registerSW(): void {
   if (hasRegistered) return;
   hasRegistered = true;
 
-  window.addEventListener('beforeinstallprompt', (event: Event) => {
+  globalThis.addEventListener('beforeinstallprompt', (event: Event) => {
     event.preventDefault();
     installPrompt = event as BeforeInstallPromptEvent;
     notify();
   });
 
-  window.addEventListener('appinstalled', () => {
+  globalThis.addEventListener('appinstalled', () => {
     installed = true;
     installPrompt = null;
     notify();

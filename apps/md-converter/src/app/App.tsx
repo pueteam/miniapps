@@ -3,77 +3,57 @@ import { AppShell } from '../components/AppShell';
 import { registerSW } from './registerSW';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { STORAGE_PREFIX } from '../lib/constants';
-import { buildMetadataYaml } from '../lib/epubMetadata';
-import { downloadBlob, slugify } from '../lib/download';
-import { runPandocInWorker } from '../lib/workerClient';
 import type { BinaryInput } from '../lib/types';
-
-type ConfigSection = 'book' | 'styles';
-
-type ConfigDraft = {
-  title: string;
-  author: string;
-  lang: string;
-  toc: boolean;
-  tocDepth: number;
-  splitLevel: number;
-  css: string;
-};
-
-const sampleMarkdown = `# Capítulo 1
-
-Este libro se genera completamente en el navegador con **pandoc.wasm**.
-
-## Qué incluye
-
-- Entrada en Markdown
-- Salida EPUB3
-- TOC opcional
-- CSS específico para EPUB
-- Metadatos mínimos en YAML
-
-> La conversión ocurre en un worker para no bloquear la interfaz.
-
-# Capítulo 2
-
-## Código
-
-\`\`\`ts
-console.log("Hola, EPUB");
-\`\`\`
-`;
-
-const sampleCss = `html, body {
-  font-family: serif;
-  line-height: 1.55;
-}
-
-h1, h2, h3 {
-  font-family: system-ui, sans-serif;
-}
-
-code, pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-
-blockquote {
-  border-left: 0.25rem solid #999;
-  margin-left: 0;
-  padding-left: 1rem;
-  color: #444;
-}
-`;
+import { CONVERSION_MODES, DEFAULT_CONVERSION_MODE, getConversionModeDefinition, type ConversionMode } from '../lib/conversionModes';
+import { getModeConfig } from '../lib/modeConfig';
+import { useConfigManager } from './useConfigManager';
+import { useConversionHandler } from './useConversionHandler';
+import { sampleMarkdown, sampleCss } from './sampleContent';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-async function toBinaryInput(file: File | null): Promise<BinaryInput | null> {
+function getFileExtension(name: string): string {
+  const index = name.lastIndexOf('.');
+  return index >= 0 ? name.slice(index).toLowerCase() : '';
+}
+
+export function getBaseFilename(name: string): string {
+  const index = name.lastIndexOf('.');
+  return index >= 0 ? name.slice(0, index) : name;
+}
+
+function isAcceptedFile(name: string, accept: string): boolean {
+  const extension = getFileExtension(name);
+  return accept
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter((entry) => entry.startsWith('.'))
+    .includes(extension);
+}
+
+export async function toBinaryInput(file: File | null): Promise<BinaryInput | null> {
   if (!file) return null;
+
+  const buffer = await readFileArrayBuffer(file);
+
   return {
     name: file.name,
-    bytes: new Uint8Array(await file.arrayBuffer())
+    bytes: new Uint8Array(buffer)
   };
+}
+
+function readFileArrayBuffer(file: File): Promise<ArrayBuffer> {
+  if (typeof file.arrayBuffer === 'function') {
+    return file.arrayBuffer();
+  }
+
+  if (typeof Blob !== 'undefined' && typeof Blob.prototype.arrayBuffer === 'function') {
+    return new Blob([file], { type: file.type }).arrayBuffer();
+  }
+
+  return new Response(file).arrayBuffer();
 }
 
 function readTextFile(file: File): Promise<string> {
@@ -81,11 +61,7 @@ function readTextFile(file: File): Promise<string> {
     return file.text();
   }
 
-  if (typeof file.arrayBuffer === 'function') {
-    return file.arrayBuffer().then((buffer) => new TextDecoder().decode(buffer));
-  }
-
-  return file.text();
+  return readFileArrayBuffer(file).then((buffer) => new TextDecoder().decode(buffer));
 }
 
 function IconFile() {
@@ -93,8 +69,8 @@ function IconFile() {
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 2h6l3 3v9H4V2z" />
       <path d="M10 2v3h3" />
-      <path d="M6 8h4" />
-      <path d="M6 10.5h4" />
+      <path d="M6.5 8.5h4" />
+      <path d="M6.5 11h4" />
     </svg>
   );
 }
@@ -188,74 +164,123 @@ export function App() {
   const [splitLevel, setSplitLevel] = useLocalStorage(`${STORAGE_PREFIX}splitLevel`, 1);
   const [markdown, setMarkdown] = useLocalStorage(`${STORAGE_PREFIX}markdown`, sampleMarkdown);
   const [css, setCss] = useLocalStorage(`${STORAGE_PREFIX}css`, sampleCss);
+  const [conversionMode, setConversionMode] = useLocalStorage<ConversionMode>(`${STORAGE_PREFIX}conversionMode`, DEFAULT_CONVERSION_MODE);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
+  const [referenceDoc, setReferenceDoc] = useState<File | null>(null);
+  const [mathRendering, setMathRendering] = useState('');
+  const [highlightStyle, setHighlightStyle] = useState('');
+  const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [logs, setLogs] = useState('Sin mensajes todavía.');
   const [error, setError] = useState('');
-  const [statusState, setStatusState] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [configSection, setConfigSection] = useState<ConfigSection>('book');
-  const [configDraft, setConfigDraft] = useState<ConfigDraft | null>(null);
-  const [coverDraft, setCoverDraft] = useState<File | null>(null);
 
   useEffect(() => {
-    if (!isConfigOpen) return;
+    const modeConfig = getModeConfig(conversionMode) ?? {};
+    setTitle(modeConfig.title ?? 'Mi libro');
+    setAuthor(modeConfig.author ?? 'Autor/a');
+    setLang(modeConfig.lang ?? 'es-ES');
+    setToc(modeConfig.toc ?? true);
+    setTocDepth(modeConfig.tocDepth ?? 3);
+    setSplitLevel(modeConfig.splitLevel ?? 1);
+    setCss(modeConfig.css ?? (conversionMode === 'markdown-to-epub' ? sampleCss : ''));
+    setReferenceDoc(null);
+    setMathRendering(modeConfig.mathRendering ?? '');
+    setHighlightStyle(modeConfig.highlightStyle ?? '');
+  }, [conversionMode]);
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeConfig();
-      }
-    };
+  const {
+    isConfigOpen,
+    configSection,
+    setConfigSection,
+    configDraft,
+    setConfigDraft,
+    openConfig: openConfigModal,
+    closeConfig,
+    saveConfig: saveConfigDraft,
+  } = useConfigManager(conversionMode, coverFile, referenceDoc);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isConfigOpen]);
+  const {
+    isRunning,
+    statusState,
+    handleGenerate,
+  } = useConversionHandler({
+    conversionMode,
+    markdown,
+    sourceFile,
+    coverFile,
+    referenceDoc,
+    css,
+    title,
+    author,
+    lang,
+    toc,
+    tocDepth,
+    splitLevel,
+    mathRendering,
+    highlightStyle,
+    setLogs,
+    setError,
+  });
 
   const markdownInputRef = useRef<HTMLInputElement>(null);
   const cssInputRef = useRef<HTMLInputElement>(null);
 
-  const metadataYaml = useMemo(() => buildMetadataYaml({ title, author, lang }), [title, author, lang]);
+  const modeDefinition = useMemo(() => getConversionModeDefinition(conversionMode), [conversionMode]);
+
+  const outputLabel = {
+    markdown: 'Markdown',
+    html: 'HTML',
+    docx: 'Word',
+    epub3: 'EPUB'
+  }[modeDefinition.outputFormat];
+
+  const statusDotClass = useMemo(() => {
+    if (statusState === 'running') return 'running';
+    if (statusState === 'success') return 'success';
+    if (statusState === 'error') return 'error';
+    return '';
+  }, [statusState]);
+
+  const configTitle = useMemo(() => {
+    if (modeDefinition.outputFormat === 'epub3') return 'EPUB';
+    if (modeDefinition.outputFormat === 'docx') return 'DOCX';
+    return 'HTML';
+  }, [modeDefinition.outputFormat]);
+
+  const sectionLabel = useMemo(() => {
+    return modeDefinition.outputFormat === 'epub3' ? 'Libro' : 'Documento';
+  }, [modeDefinition.outputFormat]);
 
   const statusLabel = {
     idle: 'En espera',
-    running: 'Generando EPUB…',
-    success: 'EPUB generado correctamente',
+    running: `Generando ${outputLabel}…`,
+    success: `${outputLabel} generado correctamente`,
     error: 'Error en la conversión'
   }[statusState];
 
-  function openConfig() {
-    setConfigDraft({ title, author, lang, toc, tocDepth, splitLevel, css });
-    setCoverDraft(coverFile);
-    setConfigSection('book');
-    setIsConfigOpen(true);
-  }
-
-  function closeConfig() {
-    setIsConfigOpen(false);
-    setConfigDraft(null);
-    setCoverDraft(null);
-    setConfigSection('book');
-  }
-
-  function saveConfig() {
-    if (!configDraft) return;
-
-    setTitle(configDraft.title);
-    setAuthor(configDraft.author);
-    setLang(configDraft.lang);
-    setToc(configDraft.toc);
-    setTocDepth(configDraft.tocDepth);
-    setSplitLevel(configDraft.splitLevel);
-    setCss(configDraft.css);
-    setCoverFile(coverDraft);
-    closeConfig();
-  }
+  const primaryConfigSection = modeDefinition.outputFormat === 'epub3' ? 'book' : 'document';
 
   async function handleMarkdownImport(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const text = await readTextFile(file);
-    setMarkdown(text);
+
+    if (!isAcceptedFile(file.name, modeDefinition.importAccept)) {
+      setError('El archivo seleccionado no es compatible con la conversión activa.');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
+    if (modeDefinition.sourceKind === 'markdown') {
+      const text = await readTextFile(file);
+      setMarkdown(text);
+      setSourceFile(null);
+      setError('');
+      setLogs(`Markdown importado desde ${file.name}.`);
+    } else {
+      setSourceFile(file);
+      setError('');
+      setLogs(`Archivo cargado: ${file.name}. Listo para convertir a Markdown.`);
+    }
+
     (event.target as HTMLInputElement).value = '';
   }
 
@@ -271,48 +296,172 @@ export function App() {
     (event.target as HTMLInputElement).value = '';
   }
 
-  async function handleGenerate() {
-    setIsRunning(true);
-    setError('');
-    setStatusState('running');
-    setLogs('Iniciando conversión con pandoc.wasm…');
+  function renderConfigSection() {
+    if (configSection === 'book') {
+      return (
+        <div class="settings-modal__body">
+          <label>
+            <span>Título</span>
+            <input type="text" value={configDraft!.title} onInput={(e) => setConfigDraft({ ...configDraft!, title: (e.target as HTMLInputElement).value })} />
+          </label>
 
-    try {
-      const cover = await toBinaryInput(coverFile);
-      const result = await runPandocInWorker({
-        markdown,
-        css,
-        metadataYaml,
-        toc,
-        tocDepth,
-        splitLevel,
-        cover,
-        wasmBytes: null
-      });
+          <label>
+            <span>Autor / Autora</span>
+            <input type="text" value={configDraft!.author} onInput={(e) => setConfigDraft({ ...configDraft!, author: (e.target as HTMLInputElement).value })} />
+          </label>
 
-      const filename = `${slugify(title) || 'book'}.epub`;
-      downloadBlob(new Blob([new Uint8Array(result.epubBytes)], { type: 'application/epub+zip' }), filename);
-      setLogs(result.logs || `EPUB generado correctamente → ${filename}`);
-      setStatusState('success');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error desconocido al generar el EPUB.';
-      setError(message);
-      setLogs('La conversión ha fallado. Revisa el detalle del error.');
-      setStatusState('error');
-    } finally {
-      setIsRunning(false);
+          <div class="row">
+            <label>
+              <span>Idioma (BCP 47)</span>
+              <input type="text" value={configDraft!.lang} onInput={(e) => setConfigDraft({ ...configDraft!, lang: (e.target as HTMLInputElement).value })} />
+            </label>
+
+            {modeDefinition.outputFormat === 'epub3' && (
+              <label>
+                <span>Split level</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="6"
+                  value={configDraft!.splitLevel}
+                  onInput={(e) => setConfigDraft({ ...configDraft!, splitLevel: clamp(Number((e.target as HTMLInputElement).value || '1'), 1, 6) })}
+                />
+              </label>
+            )}
+          </div>
+
+          <div class="divider" />
+          <div class="field-group-title">Tabla de contenidos</div>
+
+          <label>
+            <span>Profundidad del TOC</span>
+            <input
+              type="number"
+              min="1"
+              max="6"
+              value={configDraft!.tocDepth}
+              onInput={(e) => setConfigDraft({ ...configDraft!, tocDepth: clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6) })}
+            />
+          </label>
+
+          <label class="checkbox">
+            <input type="checkbox" checked={configDraft!.toc} onChange={(e) => setConfigDraft({ ...configDraft!, toc: (e.target as HTMLInputElement).checked })} />
+            <span>Incluir tabla de contenidos</span>
+          </label>
+
+          <div class="divider" />
+          <div class="field-group-title">Archivos</div>
+
+          {modeDefinition.outputFormat === 'docx' && (
+            <label>
+              <span>Reference DOCX</span>
+              <input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => setConfigDraft({ ...configDraft!, referenceDoc: (e.target as HTMLInputElement).files?.[0] ?? null })} />
+            </label>
+          )}
+
+          {modeDefinition.outputFormat === 'epub3' && (
+            <label>
+              <span>Portada</span>
+              <input type="file" accept="image/*" onChange={(e) => setCoverFile((e.target as HTMLInputElement).files?.[0] ?? null)} />
+            </label>
+          )}
+
+          {modeDefinition.outputFormat !== 'epub3' && modeDefinition.outputFormat !== 'docx' && (
+            <label>
+              <span>Math rendering</span>
+              <select value={configDraft!.mathRendering} onInput={(e) => setConfigDraft({ ...configDraft!, mathRendering: (e.target as HTMLSelectElement).value })}>
+                <option value="">None</option>
+                <option value="mathjax">MathJax</option>
+                <option value="katex">KaTeX</option>
+              </select>
+            </label>
+          )}
+
+          <label>
+            <span>Highlight style</span>
+            <select value={configDraft!.highlightStyle} onInput={(e) => setConfigDraft({ ...configDraft!, highlightStyle: (e.target as HTMLSelectElement).value })}>
+              <option value="">Default</option>
+              <option value="pygments">Pygments</option>
+              <option value="zenburn">Zenburn</option>
+              <option value="tango">Tango</option>
+            </select>
+          </label>
+        </div>
+      );
     }
+
+    if (configSection === 'document') {
+      return (
+        <div class="settings-modal__body">
+          {modeDefinition.outputFormat === 'docx' && (
+            <label>
+              <span>Reference DOCX</span>
+              <input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => setConfigDraft({ ...configDraft!, referenceDoc: (e.target as HTMLInputElement).files?.[0] ?? null })} />
+            </label>
+          )}
+
+          <label>
+            <span>Profundidad del TOC</span>
+            <input
+              type="number"
+              min="1"
+              max="6"
+              value={configDraft!.tocDepth}
+              onInput={(e) => setConfigDraft({ ...configDraft!, tocDepth: clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6) })}
+            />
+          </label>
+
+          <label class="checkbox">
+            <input type="checkbox" checked={configDraft!.toc} onChange={(e) => setConfigDraft({ ...configDraft!, toc: (e.target as HTMLInputElement).checked })} />
+            <span>Incluir tabla de contenidos</span>
+          </label>
+
+          <label>
+            <span>Highlight style</span>
+            <select value={configDraft!.highlightStyle} onInput={(e) => setConfigDraft({ ...configDraft!, highlightStyle: (e.target as HTMLSelectElement).value })}>
+              <option value="">Default</option>
+              <option value="pygments">Pygments</option>
+              <option value="zenburn">Zenburn</option>
+              <option value="tango">Tango</option>
+            </select>
+          </label>
+
+          {modeDefinition.outputFormat === 'html' && (
+            <label>
+              <span>Math rendering</span>
+              <select value={configDraft!.mathRendering} onInput={(e) => setConfigDraft({ ...configDraft!, mathRendering: (e.target as HTMLSelectElement).value })}>
+                <option value="">None</option>
+                <option value="mathjax">MathJax</option>
+                <option value="katex">KaTeX</option>
+              </select>
+            </label>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div class="settings-modal__body">
+        <div class="panel-actions settings-modal__import">
+          <input ref={cssInputRef} class="visually-hidden" type="file" accept=".css,text/css,text/plain" onChange={handleCssImport} />
+          <button type="button" class="btn-secondary" onClick={() => cssInputRef.current?.click()}>
+            <IconFile />
+            Importar .css
+          </button>
+        </div>
+        <textarea class="editor editor--css" value={configDraft!.css} onInput={(e) => setConfigDraft({ ...configDraft!, css: (e.target as HTMLTextAreaElement).value })} spellcheck={false} />
+      </div>
+    );
   }
 
   return (
     <AppShell>
       <section class="converter-page">
-        {/* <div class="hero-compact">
-          <div class="hero-compact__copy">
-            <h2>Markdown → EPUB</h2>
-            <p>Conversión local en el navegador. Sin servidor. Sin backend.</p>
-          </div>
-        </div> */}
+        <section class="hero-compact" aria-labelledby="converter-title">
+          <p class="hero-compact__eyebrow">MDconvertix</p>
+          <h2 id="converter-title">Convierte Markdown en documentos listos para publicar</h2>
+          <p>Prepara EPUB, Word o HTML con configuración por formato, estilos propios y feedback claro del proceso.</p>
+        </section>
 
         <section class="grid">
           <article class="panel panel--editor">
@@ -322,29 +471,39 @@ export function App() {
                 <h3>Contenido Markdown</h3>
               </div>
               <div class="panel-actions">
-                <button type="button" class="btn-secondary" onClick={openConfig}>
-                  <IconSettings />
-                  Configuración
-                </button>
-                <input ref={markdownInputRef} class="visually-hidden" type="file" accept=".md,.markdown,text/markdown,text/plain" onChange={handleMarkdownImport} />
+                <label>
+                  <span class="visually-hidden">Conversión</span>
+                  <select aria-label="Conversión" value={conversionMode} onChange={(event) => setConversionMode((event.target as HTMLSelectElement).value as ConversionMode)}>
+                    {CONVERSION_MODES.map((mode) => (
+                      <option key={mode.value} value={mode.value}>{mode.label}</option>
+                    ))}
+                  </select>
+                </label>
+                {modeDefinition.supportsConfig && (
+                  <button type="button" class="btn-secondary" onClick={openConfigModal}>
+                    <IconSettings />
+                    Configuración
+                  </button>
+                )}
+                <input ref={markdownInputRef} class="visually-hidden" type="file" accept={modeDefinition.importAccept} onChange={handleMarkdownImport} />
                 <button type="button" class="btn-secondary" onClick={() => markdownInputRef.current?.click()}>
                   <IconFile />
-                  Importar .md
+                  {modeDefinition.importLabel}
                 </button>
               </div>
             </div>
-            <p class="panel-help">Pega aquí el contenido Markdown o importa un fichero .md.</p>
+            <p class="panel-help">{modeDefinition.sourceKind === 'markdown' ? 'Pega aquí el contenido Markdown o importa un fichero .md.' : 'Importa un fichero compatible y convierte su contenido a Markdown editable.'}</p>
             <textarea class="editor" value={markdown} onInput={(e) => setMarkdown((e.target as HTMLTextAreaElement).value)} spellcheck={false} />
           </article>
 
-          <article class="panel panel--status wide">
+          <article class="panel panel--status">
             <div class="panel-header">
               <div class="panel-icon"><IconStatus /></div>
               <h3>Estado de la conversión</h3>
             </div>
 
             <div class="status-bar">
-              <div class={`status-dot ${statusState === 'running' ? 'running' : statusState === 'success' ? 'success' : statusState === 'error' ? 'error' : ''}`} />
+              <div class={`status-dot ${statusDotClass}`} />
               <span class="status-text">{statusLabel}</span>
             </div>
 
@@ -359,110 +518,41 @@ export function App() {
             <div class="footer-actions">
               <button type="button" class="btn-primary" disabled={isRunning} onClick={handleGenerate}>
                 {isRunning ? <IconLoading /> : <IconDownload />}
-                {isRunning ? 'Generando…' : 'Convertir y descargar EPUB'}
+                {isRunning ? `Generando ${outputLabel}…` : modeDefinition.downloadLabel}
               </button>
             </div>
           </article>
         </section>
 
         {isConfigOpen && configDraft && (
-          <div class="modal-backdrop" onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              closeConfig();
-            }
-          }}>
-            <div class="settings-modal" role="dialog" aria-modal="true" aria-label="Configuración EPUB">
-              <div class="panel-header panel-header--between settings-modal__header">
-                <div class="panel-header__left">
-                  <div class="panel-icon"><IconMetadata /></div>
-                  <h3>Configuración EPUB</h3>
-                </div>
-                <div class="panel-actions">
-                  <button type="button" class={`btn-secondary ${configSection === 'book' ? 'is-active' : ''}`} onClick={() => setConfigSection('book')}>
-                    Libro
-                  </button>
+          <dialog class="settings-modal" open aria-label={`Configuración ${configTitle}`}>
+            <div class="settings-modal__header">
+              <div class="panel-header__left">
+                <div class="panel-icon"><IconMetadata /></div>
+                <h3>Configuración {configTitle}</h3>
+              </div>
+
+              <div class="panel-actions">
+                <button type="button" class={`btn-secondary ${configSection === primaryConfigSection ? 'is-active' : ''}`} onClick={() => setConfigSection(primaryConfigSection)}>
+                  {sectionLabel}
+                </button>
+                {(modeDefinition.outputFormat === 'epub3' || modeDefinition.outputFormat === 'html') && (
                   <button type="button" class={`btn-secondary ${configSection === 'styles' ? 'is-active' : ''}`} onClick={() => setConfigSection('styles')}>
                     Estilos
                   </button>
-                </div>
-              </div>
-
-              {configSection === 'book' ? (
-                <div class="settings-modal__body">
-                  <label>
-                    <span>Título</span>
-                    <input type="text" value={configDraft.title} onInput={(e) => setConfigDraft({ ...configDraft, title: (e.target as HTMLInputElement).value })} />
-                  </label>
-
-                  <label>
-                    <span>Autor / Autora</span>
-                    <input type="text" value={configDraft.author} onInput={(e) => setConfigDraft({ ...configDraft, author: (e.target as HTMLInputElement).value })} />
-                  </label>
-
-                  <div class="row">
-                    <label>
-                      <span>Idioma (BCP 47)</span>
-                      <input type="text" value={configDraft.lang} onInput={(e) => setConfigDraft({ ...configDraft, lang: (e.target as HTMLInputElement).value })} />
-                    </label>
-
-                    <label>
-                      <span>Split level</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="6"
-                        value={configDraft.splitLevel}
-                        onInput={(e) => setConfigDraft({ ...configDraft, splitLevel: clamp(Number((e.target as HTMLInputElement).value || '1'), 1, 6) })}
-                      />
-                    </label>
-                  </div>
-
-                  <div class="divider" />
-                  <div class="field-group-title">Tabla de contenidos</div>
-
-                  <label>
-                    <span>Profundidad del TOC</span>
-                    <input
-                      type="number"
-                      min="1"
-                      max="6"
-                      value={configDraft.tocDepth}
-                      onInput={(e) => setConfigDraft({ ...configDraft, tocDepth: clamp(Number((e.target as HTMLInputElement).value || '3'), 1, 6) })}
-                    />
-                  </label>
-
-                  <label class="checkbox">
-                    <input type="checkbox" checked={configDraft.toc} onChange={(e) => setConfigDraft({ ...configDraft, toc: (e.target as HTMLInputElement).checked })} />
-                    <span>Incluir tabla de contenidos</span>
-                  </label>
-
-                  <div class="divider" />
-                  <div class="field-group-title">Archivos</div>
-
-                  <label>
-                    <span>Portada</span>
-                    <input type="file" accept="image/*" onChange={(e) => setCoverDraft((e.target as HTMLInputElement).files?.[0] ?? null)} />
-                  </label>
-                </div>
-              ) : (
-                <div class="settings-modal__body">
-                  <div class="panel-actions settings-modal__import">
-                    <input ref={cssInputRef} class="visually-hidden" type="file" accept=".css,text/css,text/plain" onChange={handleCssImport} />
-                    <button type="button" class="btn-secondary" onClick={() => cssInputRef.current?.click()}>
-                      <IconFile />
-                      Importar .css
-                    </button>
-                  </div>
-                  <textarea class="editor editor--css" value={configDraft.css} onInput={(e) => setConfigDraft({ ...configDraft, css: (e.target as HTMLTextAreaElement).value })} spellcheck={false} />
-                </div>
-              )}
-
-              <div class="footer-actions settings-modal__footer">
-                <button type="button" class="btn-secondary" onClick={closeConfig}>Cancelar</button>
-                <button type="button" class="btn-primary" onClick={saveConfig}>Guardar</button>
+                )}
               </div>
             </div>
-          </div>
+
+            {renderConfigSection()}
+
+            <div class="footer-actions settings-modal__footer">
+              <button type="button" class="btn-secondary" onClick={closeConfig}>Cancelar</button>
+              <button type="button" class="btn-primary" onClick={() => saveConfigDraft({
+                setTitle, setAuthor, setLang, setToc, setTocDepth, setSplitLevel, setCss, setCoverFile, setReferenceDoc, setMathRendering, setHighlightStyle
+              })}>Guardar</button>
+            </div>
+          </dialog>
         )}
       </section>
     </AppShell>
