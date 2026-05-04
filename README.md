@@ -162,6 +162,19 @@ pnpm new:miniapp habit-tracker \
 7. Valida el resultado. Si falla por un problema global del repositorio, conserva la nueva app para revisión.
 
 La plantilla base comparte estilos desde `styles/base.css`. La miniapp nueva solo redefine las variables necesarias para su identidad visual y ajustes locales.
+ 
+### Uso de la skill `miniapp-monorepo-builder`
+
+Si prefieres usar el asistente/skill del repositorio para proponer y generar la miniapp, sigue este flujo resumido (la definición completa está en [.agents/skills/miniapp-monorepo-builder/SKILL.md](.agents/skills/miniapp-monorepo-builder/SKILL.md)).
+
+- **Verifica el contrato del repo:** asegúrate de tener `package.json` con `pnpm new:miniapp`, `tooling/create-miniapp/src/cli.js`, y los scripts de validación (`scripts/validate-miniapps.mjs`, `scripts/generate-home-registry.mjs`).
+- **Recoge los datos mínimos:** `slug`, `title`, `desc`, si necesita rutas cliente (`--router`) y si será PWA (`--no-pwa`).
+- **Propón antes de ejecutar:** la skill exige una propuesta que incluya el `slug`, el comando exacto `pnpm new:miniapp ...`, el alcance funcional inicial y los tests previstos; sólo se ejecuta tras tu aprobación.
+- **Genera con el CLI del repo:** la skill invoca `pnpm new:miniapp <slug> [flags]` (usa siempre el entrypoint `pnpm` en vez de llamar al CLI por `node` salvo motivo concreto).
+- **Implementa la primera versión:** tras el scaffold, la skill sugiere reemplazar los placeholders por la primera funcionalidad (estructura recomendada: `src/features`, `src/lib`, `src/hooks`).
+- **Valida y documenta:** ejecutar tests relevantes, `pnpm validate:miniapps` y describir explícitamente qué fue generado por el CLI y qué se implementó manualmente.
+
+Usa la skill cuando quieras que el agente proponga, genere y aterrice una miniapp coherente con las convenciones del monorepo; para detalles y criterios de decisión revisa el archivo de la skill enlazado arriba.
 
 ### Flujo recomendado tras crear una app
 

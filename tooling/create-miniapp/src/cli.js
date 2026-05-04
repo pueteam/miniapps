@@ -225,16 +225,17 @@ function buildAppShellTsx({ title, description, pwa }) {
 
   return `import type { ComponentChildren } from 'preact';
 ${importLine}
-export function AppShell(props: { children: ComponentChildren }) {
+export function AppShell({ children }: Readonly<{ children: ComponentChildren }>) {
   return (
     <div class="app-shell">
       <header class="app-shell__header">
-        <div>
-          <h1>${title}</h1>
+        <section class="hero-compact" aria-labelledby="converter-title">
+          <h2 id="converter-title">${title}</h2>
           <p>${description}</p>
-        </div>${installButton}
+        </section>
+        ${installButton}
       </header>
-      <main>{props.children}</main>
+      <main>{children}</main>
     </div>
   );
 }

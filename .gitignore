@@ -74,3 +74,8 @@ node-repl-history
 .github/prompts/
 changes/
 skills-lock.json
+
+# Keep most .agents ignored but allow tracking the miniapp-monorepo-builder skill
+!/.agents/skills/
+!/.agents/skills/miniapp-monorepo-builder/
+!/.agents/skills/miniapp-monorepo-builder/**
