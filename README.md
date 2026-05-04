@@ -78,6 +78,7 @@ Para levantar una app concreta en modo desarrollo:
 pnpm --filter @miniapps/home dev
 pnpm --filter @miniapps/planning-board dev
 pnpm --filter @miniapps/md-converter dev
+pnpm --filter @miniapps/sticky-board dev
 ```
 
 ## Crear una nueva miniapp

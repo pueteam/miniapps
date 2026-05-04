@@ -4,7 +4,7 @@ export const appsRegistry = [
   {
     "name": "md-converter",
     "title": "MDconvertix",
-    "description": "Convert Markdown files to DOCX, EPUB, HTML (and back)",
+    "description": "Convert Markdown files to DOCX, EPUB, HTML",
     "href": "/miniapps/md-converter/",
     "category": "utilities"
   },
@@ -14,5 +14,18 @@ export const appsRegistry = [
     "description": "Resource planning board",
     "href": "/miniapps/planning-board/",
     "category": "utilities"
+  },
+  {
+    "name": "sticky-board",
+    "title": "Sticky Board",
+    "description": "Tablero PWA de notas post-it con autoguardado local",
+    "href": "/miniapps/sticky-board/",
+    "category": "productivity",
+    "tags": [
+      "notes",
+      "board",
+      "pwa",
+      "indexeddb"
+    ]
   }
 ] as const;

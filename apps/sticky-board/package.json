@@ -1,0 +1,33 @@
+{
+  "name": "@miniapps/sticky-board",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.9.0",
+    "dexie": "^4.4.2",
+    "nanoid": "^5.1.7",
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "@playwright/test": "^1.57.0",
+    "@testing-library/preact": "^3.2.4",
+    "@types/node": "^25.6.0",
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^29.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0",
+    "vite-plugin-pwa": "^1.0.0",
+    "vitest": "^4.1.2"
+  }
+}

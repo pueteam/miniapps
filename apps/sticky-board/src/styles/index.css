@@ -1,0 +1,26 @@
+/* Shared base identity (imported) */
+@import "../../../../styles/base.css";
+@import "../features/sticky-board/styles/board.css";
+
+:root {
+  /* App accent token (customizable) */
+  --app-accent: #004F87;
+
+  /* App semantic tokens (local mapping) */
+  --color-bg-page: var(--color-background-default);
+  --color-bg-surface: var(--color-background-default);
+  --color-text-primary: var(--color-brand-blue-900);
+  --color-text-secondary: var(--color-neutral-700);
+  --color-text-muted: var(--color-neutral-500);
+  --color-border-subtle: var(--color-neutral-100);
+  --color-border-default: var(--color-neutral-300);
+  --color-accent-primary: var(--app-accent);
+  --color-accent-hover: var(--app-accent);
+
+  --card-radius: var(--radius-md);
+  --card-padding: var(--space-6);
+  --button-height-md: 48px;
+  --button-radius: var(--radius-pill);
+  --input-height: 48px;
+  --input-radius: var(--radius-md);
+}

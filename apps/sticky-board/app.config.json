@@ -1,0 +1,17 @@
+{
+  "name": "sticky-board",
+  "title": "Sticky Board",
+  "description": "Tablero PWA de notas post-it con autoguardado local",
+  "listed": true,
+  "pwa": true,
+  "router": false,
+  "themeColor": "#004F87",
+  "backgroundColor": "#FFFFFF",
+  "tags": [
+    "notes",
+    "board",
+    "pwa",
+    "indexeddb"
+  ],
+  "category": "productivity"
+}
