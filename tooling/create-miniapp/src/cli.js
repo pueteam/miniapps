@@ -218,20 +218,20 @@ ${setup}  return (
 
 function buildAppShellTsx({ title, description, pwa }) {
   const importLine = pwa
-    ? `import { InstallButton } from './InstallButton';
-`
+    ? `import { InstallButton } from './InstallButton';\n`
     : '';
   const installButton = pwa ? '\n        <InstallButton />' : '';
 
   return `import type { ComponentChildren } from 'preact';
+import appConfig from '../../app.config.json';  
 ${importLine}
 export function AppShell({ children }: Readonly<{ children: ComponentChildren }>) {
   return (
     <div class="app-shell">
       <header class="app-shell__header">
         <section class="hero-compact" aria-labelledby="converter-title">
-          <h2 id="converter-title">${title}</h2>
-          <p>${description}</p>
+          <h2 id="converter-title">{appConfig.title}</h2>
+          <p>{appConfig.description}</p>
         </section>
         ${installButton}
       </header>
