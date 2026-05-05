@@ -1,17 +1,14 @@
 {
   "name": "sticky-board",
-  "title": "Sticky Board",
-  "description": "Tablero PWA de notas post-it con autoguardado local",
+  "title": "Post-ix",
+  "description": "Post-it notes board to organize your ideas and tasks visually",
   "listed": true,
   "pwa": true,
   "router": false,
   "themeColor": "#004F87",
   "backgroundColor": "#FFFFFF",
   "tags": [
-    "notes",
-    "board",
-    "pwa",
-    "indexeddb"
+    "notes"
   ],
   "category": "productivity"
 }

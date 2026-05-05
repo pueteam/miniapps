@@ -103,7 +103,7 @@
 .profile-edit-popover__btn--primary {
   border: 1px solid var(--board-accent);
   background: var(--board-accent);
-  color: var(--color-neutral-white);
+  color: var(--btn-text);
 }
 
 .profile-edit-popover__btn--primary:hover {

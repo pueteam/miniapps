@@ -17,15 +17,12 @@ export const appsRegistry = [
   },
   {
     "name": "sticky-board",
-    "title": "Sticky Board",
-    "description": "Tablero PWA de notas post-it con autoguardado local",
+    "title": "Post-ix",
+    "description": "Post-it notes board to organize your ideas and tasks visually",
     "href": "/miniapps/sticky-board/",
     "category": "productivity",
     "tags": [
-      "notes",
-      "board",
-      "pwa",
-      "indexeddb"
+      "notes"
     ]
   }
 ] as const;

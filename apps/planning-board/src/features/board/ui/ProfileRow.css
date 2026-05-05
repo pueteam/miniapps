@@ -53,7 +53,7 @@
   font-weight: 800;
   font-size: 11px;
   letter-spacing: 0.5px;
-  color: var(--color-neutral-white);
+  color: var(--btn-text);
   flex-shrink: 0;
   overflow: hidden;
 }

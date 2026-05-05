@@ -55,7 +55,7 @@
 .toolbar__btn--primary {
   background: var(--board-accent);
   border-color: var(--board-accent-2);
-  color: var(--color-neutral-white);
+  color: var(--btn-text);
   box-shadow: 0 0 14px var(--board-accent-glow);
 }
 .toolbar__btn--primary:hover:not(:disabled) {
