@@ -1,7 +1,15 @@
-@import '../../../../styles/base.css';
+@import "../../../../styles/base.css";
+
+:root {
+  --color-bg-page: var(--color-background-soft);
+  --color-bg-surface: var(--color-background-default);
+  --color-text-primary: var(--color-brand-blue-900);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-accent-primary: var(--color-accent-primary);
+}
 
 body {
-  background: var(--color-bg-subtle);
+  background: var(--color-bg-page);
 }
 
 .home-layout {
