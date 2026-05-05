@@ -6,7 +6,9 @@ test('creates, drags and persists a sticky note', async ({ page }, testInfo) => 
 
   await page.getByRole('button', { name: /nueva nota/i }).click();
   const editor = page.getByLabel(/contenido de la nota/i);
+  await editor.dblclick();
   await editor.fill('Persistir despues de mover');
+  await page.locator('[data-testid="sticky-canvas"]').click({ position: { x: 20, y: 20 } });
 
   const note = page.locator('.sticky-note').first();
   const before = await note.boundingBox();
@@ -15,9 +17,9 @@ test('creates, drags and persists a sticky note', async ({ page }, testInfo) => 
   expect(before).not.toBeNull();
   expect(gripBox).not.toBeNull();
 
-  await page.mouse.move((gripBox?.x ?? 0) + 20, (gripBox?.y ?? 0) + 12);
+  await page.mouse.move((gripBox?.x ?? 0) + 110, (gripBox?.y ?? 0) + 12);
   await page.mouse.down();
-  await page.mouse.move((gripBox?.x ?? 0) + 100, (gripBox?.y ?? 0) + 72);
+  await page.mouse.move((gripBox?.x ?? 0) + 190, (gripBox?.y ?? 0) + 72);
   await page.mouse.up();
 
   const after = await note.boundingBox();

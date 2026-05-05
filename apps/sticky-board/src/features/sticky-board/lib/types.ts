@@ -1,4 +1,4 @@
-export type StickyNoteColor = '#fff3a3' | '#ffd6a5' | '#caffbf' | '#a0c4ff' | '#ffc6ff';
+export type StickyNoteColor = '#FFF176' | '#A5D6A7' | '#90CAF9' | '#FFAB91' | '#CE93D8' | '#F48FB1';
 
 export type StickyNote = {
   id: string;
@@ -12,7 +12,6 @@ export type StickyNote = {
   content: string;
   zIndex: number;
   pinned: boolean;
-  locked: boolean;
   tags: string[];
   createdAt: number;
   updatedAt: number;

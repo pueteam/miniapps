@@ -7,7 +7,7 @@ export class StickyBoardDB extends Dexie {
   constructor(dbName = 'sticky-board') {
     super(dbName);
     this.version(1).stores({
-      notes: 'id, boardId, updatedAt, pinned, locked',
+      notes: 'id, boardId, updatedAt, pinned',
     });
   }
 }

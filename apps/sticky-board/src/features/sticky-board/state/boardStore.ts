@@ -52,6 +52,7 @@ export function createStickyBoardStore(options: StoreOptions = {}) {
 
   function createNote(input: CreateNoteInput = {}) {
     const timestamp = now();
+    const maxZ = notes.value.reduce((max, note) => Math.max(max, note.zIndex), 0);
     const note: StickyNote = {
       id: idFactory(),
       boardId,
@@ -62,9 +63,8 @@ export function createStickyBoardStore(options: StoreOptions = {}) {
       height: NOTE_HEIGHT,
       color: input.color ?? DEFAULT_NOTE_COLOR,
       content: input.content ?? '',
-      zIndex: notes.value.length + 1,
+      zIndex: maxZ + 1,
       pinned: false,
-      locked: false,
       tags: input.tags ?? [],
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -80,7 +80,7 @@ export function createStickyBoardStore(options: StoreOptions = {}) {
 
   function updateGeometry(id: string, patch: NoteGeometryPatch) {
     return replaceNote(id, (note) => {
-      if (note.locked) return note;
+      if (note.pinned) return note;
       return { ...note, ...patch, updatedAt: now() };
     });
   }

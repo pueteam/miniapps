@@ -19,7 +19,6 @@ function isStickyNote(value: unknown): value is StickyNote {
     typeof note.content === 'string' &&
     isNumber(note.zIndex) &&
     typeof note.pinned === 'boolean' &&
-    typeof note.locked === 'boolean' &&
     Array.isArray(note.tags) &&
     note.tags.every((tag) => typeof tag === 'string') &&
     isNumber(note.createdAt) &&

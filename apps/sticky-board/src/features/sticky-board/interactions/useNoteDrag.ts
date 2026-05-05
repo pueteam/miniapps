@@ -34,7 +34,7 @@ export function useNoteDrag(note: StickyNote, handlers: DragHandlers) {
   }, [handlers, note.id]);
 
   function onPointerDown(event: PointerEvent) {
-    if (note.locked) return;
+    if (note.pinned) return;
     event.preventDefault();
     handlers.onSelect(note.id);
     dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, originX: note.x, originY: note.y };

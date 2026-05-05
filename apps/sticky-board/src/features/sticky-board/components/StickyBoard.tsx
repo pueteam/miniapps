@@ -32,7 +32,7 @@ export function StickyBoard() {
               key={note.id}
               note={note}
               selected={store.selectedNoteId.value === note.id}
-              onSelect={(noteId) => { store.selectedNoteId.value = noteId; void controller.updateNote(noteId, { zIndex: note.zIndex + 100 }); }}
+              onSelect={(noteId) => { store.selectedNoteId.value = noteId; void store.bringToFront(noteId); }}
               onContent={controller.updateContent}
               onPatch={(noteId, patch) => { void controller.updateNote(noteId, patch); }}
               onGeometry={controller.updateGeometry}

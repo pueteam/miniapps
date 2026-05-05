@@ -12,7 +12,7 @@ describe('sticky note geometry interactions', () => {
   });
 
   it('limits rotation to a subtle post-it range', () => {
-    expect(getRotationPatch(45)).toEqual({ rotation: 18 });
-    expect(getRotationPatch(-30)).toEqual({ rotation: -18 });
+    expect(getRotationPatch(45)).toEqual({ rotation: 35 });
+    expect(getRotationPatch(-40)).toEqual({ rotation: -35 });
   });
 });
