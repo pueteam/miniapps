@@ -28,7 +28,7 @@ export function createStickyBoardController() {
     const notes = await repository.list(store.boardId);
     store.importNotes(notes);
     loading.value = false;
-    statusMessage.value = notes.length === 0 ? 'Tablero listo. Crea tu primera nota.' : `${notes.length} notas cargadas desde IndexedDB.`;
+    statusMessage.value = notes.length === 0 ? 'Tablero listo. Crea tu primera nota.' : `${notes.length} notas cargadas.`;
   }
 
   async function createNote() {
@@ -57,7 +57,7 @@ export function createStickyBoardController() {
     const note = store.findNote(noteId);
     if (!note) return;
     await repository.save(note);
-    statusMessage.value = 'Cambios guardados en IndexedDB.';
+    statusMessage.value = 'Cambios guardados.';
   }
 
   async function deleteNote(noteId: string) {

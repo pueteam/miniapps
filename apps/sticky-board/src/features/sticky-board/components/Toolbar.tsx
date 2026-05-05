@@ -39,10 +39,9 @@ export function Toolbar({ noteCount, query, status, onCreate, onSearch, onExport
         <input ref={fileInputRef} class="visually-hidden" type="file" accept="application/json" onChange={handleImport} />
       </div>
       <label class="search-box">
-        <span>Buscar notas</span>
-        <input value={query} type="search" aria-label="Buscar notas" placeholder="Texto o tag" onInput={(event) => onSearch((event.currentTarget as HTMLInputElement).value)} />
+        <input value={query} type="search" aria-label="Buscar notas" placeholder="Buscar notas" onInput={(event) => onSearch((event.currentTarget as HTMLInputElement).value)} />
       </label>
-      <p class="board-status" aria-live="polite">{status} {noteCount} notas en el tablero.</p>
+      <p class="board-status" aria-live="polite">{status}<br />{noteCount} notas en el tablero.</p>
     </section>
   );
 }
