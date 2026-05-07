@@ -370,3 +370,51 @@ git add .
 git commit -m "Add weekly-planner miniapp"
 git push
 ```
+
+TODO
+- dir openspec al crear andamiaje
+- skill con openspec
+- md con imagenes
+- versionar
+
+### ✨ Sugerencias de Funcionalidades
+
+**Alta prioridad (impacto inmediato):**
+- **Undo/Redo** (`Ctrl+Z`) — imprescindible para un tablero creativo
+- **Duplicar nota** — botón en el header o `Ctrl+D`
+- **Keyboard shortcuts** — `N` para nueva nota, `Del` para borrar seleccionada, `Esc` para deseleccionar
+- **Selección múltiple** — arrastrar para seleccionar un área, mover/borrar en bloque
+
+**Media prioridad:**
+- **formato texto** - permite ajustar formatos básicos tamaño, negrita
+
+**Ideas más ambiciosas:**
+- **Tableros múltiples** — el schema ya tiene `boardId`, solo falta la UI de navegación entre tableros
+- **Conectores entre notas** — flechas SVG arrastrables para mapas mentales
+- **Plantillas de nota** — nota de lista de tareas con checkboxes, nota de código con monoespaciado
+
+
+
+
+
+---
+
+**① Formato de texto**
+
+La toolbar aparece en la nota al detectar selección de texto (`mouseup` + `getSelection().toString() !== ''`). Se puede anclar flotante sobre la selección usando `getBoundingClientRect()`. La implementación más robusta combina `document.execCommand` (bold, italic, underline) con CSS custom properties para el tamaño. Para proyectos nuevos, la alternativa moderna es la **Selection API + `Range`** para aplicar estilos directamente sobre nodos, evitando la deprecación de `execCommand`.
+
+UX clave: la toolbar desaparece al hacer click fuera, y los botones se activan visualmente con `document.queryCommandState()` para reflejar el estado real del cursor.
+
+---
+
+**② Conectores entre notas**
+
+Cada nota expone puntos de anclaje (`connector-dot`) en sus 4 bordes. Al arrastrar uno, se dibuja un path SVG Bézier cúbico (`C`) provisional. Al soltar sobre otra nota, el conector queda vinculado. La curva se recalcula en cada `mousemove` durante el drag de una nota, usando `getBoundingClientRect()` relativo al tablero. Los conectores se guardan en un array como `{ from: noteId, fromAnchor: 'right', to: noteId, toAnchor: 'left', label: '' }`. La etiqueta central es un `<foreignObject>` o `<text>` clickeable para editar.
+
+---
+
+**③ Plantillas de nota**
+
+La nota tiene un campo `type` en su modelo de datos (`blank | todo | code`). El selector aparece justo al crear la nota (bottom bar), antes de confirmar. Cada tipo renderiza un componente diferente: la todo-list guarda `items[]` con `{ text, done }` y muestra checkboxes reactivos; la nota código activa fuente monoespaciada, un selector de lenguaje y puede integrar un **syntax highlighter** ligero como Prism.js sólo en ese contexto.
+
+

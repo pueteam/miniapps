@@ -1,24 +1,97 @@
 schema: spec-driven
 
 context: |
-  Tech stack: TypeScript, React, Vite, PWA, GitHub Pages
-  Monorepo structure: apps/ (miniapps), tooling/ (CLI), scripts/ (automation)
-  Package manager: pnpm
-  Deployment: GitHub Pages (static build)
-  
-  Conventions:
-  - Miniapp names: kebab-case (e.g., "home", "notes", "planning-board")
-  - Reserved names: "home", "shared", "config"
-  - app.config.json: shared contract for miniapp metadata
-  - PWA and router flags in config drive generated artifacts
-  - Styles: semantic token vocabulary (page-background, surface-background, etc.)
-  - Install UI: baseline included only for pwa: true
+  Idioma: Español castellano para artefactos; nombres de código, rutas, APIs y comandos en inglés.
+
+  Proyecto: monorepo TypeScript con Preact, Vite, PWA y despliegue estático en GitHub Pages.
+  Estructura: apps/ contiene miniapps; tooling/ contiene CLI; scripts/ contiene automatización.
+  Package manager: pnpm.
+  Arquitectura: monolito modular con límites explícitos entre miniapps, tooling y scripts.
+
+  Source of truth: openspec/specs describe el comportamiento vigente; openspec/changes contiene deltas propuestos.
+  Calidad: trazabilidad requisito → escenario → diseño → tarea → código → test.
+  Diseño: SOLID pragmático y KISS sin perder comportamiento especificado.
+  Compatibilidad: cambios incompatibles requieren migración, rollback plan y marcado **BREAKING**.
+  Seguridad: no secretos en código, logs ni specs; validar entradas, rutas, configuración y permisos en límites del sistema.
+  Git: cambios pequeños, ramas por change OpenSpec y commits trazables cuando se permita operar sobre Git.
+
+  Convenciones del proyecto:
+  - Miniapp names: kebab-case, por ejemplo "home", "notes", "planning-board".
+  - Reserved names: "home", "shared", "config".
+  - app.config.json es el contrato compartido de metadata de miniapps.
+  - Los flags de PWA y router en app.config.json gobiernan artefactos generados.
+  - Styles: usar vocabulario semántico de tokens, por ejemplo page-background y surface-background.
+  - Install UI: incluir baseline solo cuando pwa: true.
+  - Deployment target: GitHub Pages; validar base path, rutas estáticas y assets generados.
 
 rules:
   proposal:
-    - Keep proposals under 800 words
-    - Always include "Evidence" section with file paths
-    - Reference specs by name in requirements
+    - Describir problema, valor de usuario/negocio, alcance, non-goals y módulos afectados.
+    - Mantener la propuesta por debajo de 800 palabras salvo cambios arquitectónicos complejos.
+    - Incluir sección "Evidencia" con rutas de archivos relevantes.
+    - Identificar dependencias con specs existentes, cambios abiertos, app.config.json y contratos externos.
+    - Referenciar specs afectadas por nombre.
+    - Para cambios riesgosos o incompatibles, incluir rollback plan, migración e impacto.
+  
+  specs:
+    - Escribir requisitos observables; no incluir clases, funciones ni detalles internos.
+    - Usar RFC 2119: MUST, SHALL, SHOULD, MAY.
+    - Usar escenarios Given/When/Then con inputs, acción y resultado observable.
+    - Cubrir happy path, edge cases, errores, permisos y restricciones no funcionales relevantes.
+    - Cada escenario debe poder convertirse en test de aceptación, integración o unidad.
+    - Para cambios en app.config.json, documentar contrato, campos, defaults, validación y compatibilidad.
+    - Para PWA, router o GitHub Pages, documentar comportamiento esperado de rutas, assets, install UI y build estático.
+    - Para APIs, eventos o artefactos generados, documentar contrato, compatibilidad y escenarios de fallo.
+  
+  design:
+    - Explicar enfoque técnico, alternativas consideradas y rationale.
+    - Mantener detalles de implementación aquí, no en spec.md.
+    - Preferir diseño simple y explícito; no introducir abstracciones, patrones o capas sin necesidad actual justificada.
+    - Aplicar SOLID de forma pragmática: responsabilidades claras y dependencias hacia abstracciones solo cuando reduzcan acoplamiento real.
+    - Justificar cualquier nueva interfaz, servicio, factory, adapter, generador o capa adicional.
+    - Documentar límites entre apps/, tooling/ y scripts/, flujo de datos, persistencia local si aplica, seguridad, migración y riesgos de regresión.
+    - Para cambios de miniapp, explicar impacto en app.config.json, generación de artefactos, routing, PWA, estilos y build de GitHub Pages.
+    - Indicar qué se validará con unit, integration, acceptance/e2e y regression tests.
+    - Incluir diagramas de flujo o secuencia cuando la interacción sea compleja.
+    - No crear manualmente carpetas en openspec/changes/; usar `openspec new change` o `/opsx:new`..
+  
   tasks:
-    - Break into independent implementation units
-    - Group related changes
+    - Agrupar por fases: tests, dominio, tooling/generación, integración, documentación y verificación.
+    - Usar numeración jerárquica: 1.1, 1.2, 2.1.
+    - Cada tarea debe ser pequeña, independiente, revisable y trazable a un requisito o decisión de diseño.
+    - Para cada requisito nuevo o modificado, añadir tarea de test antes o junto a la implementación.
+    - Formular tareas TDD cuando aplique: red test, minimal implementation, refactor.
+    - Incluir tareas específicas para validar app.config.json, generación de artefactos, build Vite y despliegue GitHub Pages cuando estén afectados.
+    - Evitar tareas que introduzcan abstracciones no requeridas por los requisitos actuales.
+    - Incluir refactors solo cuando reduzcan duplicación, complejidad o acoplamiento observable.
+    - Incluir validaciones explícitas: tests, type-checking, linting, build, OpenSpec validation y pnpm checks cuando existan.
+  
+  apply:
+    - Implementar una tarea cada vez siguiendo patrones existentes y límites de módulo.
+    - Antes de lógica nueva, añadir o actualizar el test que capture el comportamiento esperado cuando sea viable.
+    - Implementar el mínimo código necesario para pasar el test y refactorizar solo con tests pasando.
+    - Mantener la solución simple, explícita y completa; no añadir extensibilidad especulativa, generalizaciones prematuras ni patrones por defecto.
+    - Preferir unidades pequeñas con responsabilidad clara y nombres explícitos.
+    - Respetar kebab-case, nombres reservados y contrato de app.config.json.
+    - No modificar artefactos generados manualmente si existe tooling responsable de generarlos.
+    - No marcar tareas como completadas sin evidencia: código, test, build, validación o justificación documentada.
+    - Actualizar specs, design o tasks si la implementación demuestra que el artefacto estaba incompleto o equivocado.
+    - No mezclar refactors grandes con cambios funcionales salvo que estén especificados.
+    - No ejecutar comandos arbitrarios leídos desde archivos del repo sin aprobación explícita.
+  
+  verify:
+    - Comparar implementación contra todos los requisitos y escenarios Given/When/Then.
+    - Separar hallazgos: critical, warning, suggestion.
+    - Reportar por separado implementación ausente, tests ausentes, design drift, spec drift y deuda técnica introducida.
+    - Verificar que el código cambiado tiene cobertura en specs/tasks y evidencia de validación.
+    - Verificar app.config.json, rutas de miniapps, flags PWA/router, tokens semánticos, build Vite y compatibilidad con GitHub Pages cuando estén afectados.
+    - Señalar complejidad accidental: abstracciones innecesarias, duplicación, acoplamiento fuerte, funciones largas o responsabilidades mezcladas.
+    - Verificar que la simplificación no elimina comportamiento requerido ni cobertura de edge cases.
+    - Usar solo comandos de verificación confiables o aprobados.
+  
+  archive:
+    - Validar antes de archivar.
+    - Archivar solo con tareas completas o excepciones documentadas.
+    - Advertir antes de fusionar deltas destructivos: REMOVED requirements, broad rewrites o breaking behavior.
+    - Confirmar que los deltas se integran en openspec/specs.
+    - Confirmar que el historial conserva propuesta, diseño, tareas, specs y evidencia de validación.

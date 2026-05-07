@@ -33,7 +33,32 @@ describe('Sticky Board app', () => {
     await waitFor(() => expect(screen.queryByText(/sin resultados/i)).toBeNull());
   });
 
-  it('shows rotation popover, updates degrees, and closes when clicking outside', async () => {
+  it('keeps non-matching notes visible but dimmed while highlighting matches', async () => {
+    render(<App />);
+    await screen.findByText(/tablero listo/i);
+
+    fireEvent.click(await screen.findByRole('button', { name: /nueva nota/i }));
+    let editor = await screen.findByLabelText(/contenido de la nota/i);
+    fireEvent.dblClick(editor);
+    fireEvent.input(editor, { target: { value: 'Prioridad semanal' } });
+    fireEvent.mouseDown(document.body);
+
+    fireEvent.click(screen.getByRole('button', { name: /nueva nota/i }));
+    const editors = await screen.findAllByLabelText(/contenido de la nota/i);
+    editor = editors[editors.length - 1];
+    fireEvent.dblClick(editor);
+    fireEvent.input(editor, { target: { value: 'Comprar cafe' } });
+    fireEvent.mouseDown(document.body);
+
+    fireEvent.input(screen.getByLabelText(/buscar notas/i), { target: { value: 'semanal' } });
+
+    expect(await screen.findByDisplayValue('Prioridad semanal')).toBeTruthy();
+    expect(screen.getByDisplayValue('Comprar cafe')).toBeTruthy();
+    expect(screen.getByText('semanal').tagName.toLowerCase()).toBe('mark');
+    expect(screen.getByLabelText('Nota sticky sin coincidencia de busqueda')).toBeTruthy();
+  });
+
+  it('shows a circular rotation dial instead of a slider', async () => {
     render(<App />);
     await screen.findByText(/tablero listo/i);
 
@@ -41,15 +66,35 @@ describe('Sticky Board app', () => {
     const rotateButton = await screen.findByRole('button', { name: /girar nota/i });
 
     fireEvent.click(rotateButton);
-    const slider = screen.getByLabelText(/rotacion de la nota/i);
-    expect(slider.getAttribute('min')).toBe('-35');
-    expect(slider.getAttribute('max')).toBe('35');
-
-    fireEvent.input(slider, { target: { value: '22' } });
-    expect(screen.getByText('+22°')).toBeTruthy();
+    expect(screen.getByLabelText(/dial de rotacion de la nota/i)).toBeTruthy();
+    expect(screen.queryByRole('slider')).toBeNull();
 
     fireEvent.mouseDown(document.body);
-    expect(screen.queryByLabelText(/rotacion de la nota/i)).toBeNull();
+    expect(screen.queryByLabelText(/dial de rotacion de la nota/i)).toBeNull();
+  });
+
+  it('closes the rotation dial on outside pointer down', async () => {
+    render(<App />);
+    await screen.findByText(/tablero listo/i);
+
+    fireEvent.click(await screen.findByRole('button', { name: /nueva nota/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /girar nota/i }));
+    expect(screen.getByLabelText(/dial de rotacion de la nota/i)).toBeTruthy();
+
+    fireEvent.pointerDown(document.body);
+
+    expect(screen.queryByLabelText(/dial de rotacion de la nota/i)).toBeNull();
+  });
+
+  it('uses only the header button to show the rotation dial', async () => {
+    render(<App />);
+    await screen.findByText(/tablero listo/i);
+
+    fireEvent.click(await screen.findByRole('button', { name: /nueva nota/i }));
+
+    expect(screen.queryByRole('button', { name: /rotar nota arrastrando/i })).toBeNull();
+    fireEvent.click(await screen.findByRole('button', { name: /girar nota/i }));
+    expect(screen.getByLabelText(/dial de rotacion de la nota/i)).toBeTruthy();
   });
 
   it('hides rotation and controls while pinned and allows unpinning from the lock button', async () => {
@@ -84,5 +129,36 @@ describe('Sticky Board app', () => {
 
     expect(confirm).toHaveBeenCalledWith('Quieres eliminar este post-it?');
     expect(screen.getByDisplayValue('No borrar todavia')).toBeTruthy();
+  });
+
+  it('shows a subtle empty board hint before the first note is created', async () => {
+    render(<App />);
+
+    expect(await screen.findByText(/haz clic para crear tu primera nota/i)).toBeTruthy();
+    expect(screen.queryByText(/sin resultados/i)).toBeNull();
+  });
+
+  it('marks the active color swatch with a checkmark and accessible color name', async () => {
+    render(<App />);
+    await screen.findByText(/tablero listo/i);
+
+    fireEvent.click(await screen.findByRole('button', { name: /nueva nota/i }));
+    const activeSwatch = await screen.findByRole('button', { name: /color amarillo activo/i });
+
+    expect(activeSwatch.getAttribute('aria-pressed')).toBe('true');
+    expect(activeSwatch.getAttribute('title')).toBe('Amarillo');
+    expect(activeSwatch.textContent).toContain('✓');
+  });
+
+  it('deselects the active sticky note when clicking outside it', async () => {
+    render(<App />);
+    await screen.findByText(/tablero listo/i);
+
+    fireEvent.click(await screen.findByRole('button', { name: /nueva nota/i }));
+    expect(await screen.findByLabelText(/cambiar color de la nota/i)).toBeTruthy();
+
+    fireEvent.pointerDown(screen.getByTestId('sticky-canvas'));
+
+    expect(screen.queryByLabelText(/cambiar color de la nota/i)).toBeNull();
   });
 });

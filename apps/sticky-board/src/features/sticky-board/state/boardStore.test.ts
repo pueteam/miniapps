@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createStickyBoardStore } from './boardStore';
 
 describe('sticky board store', () => {
@@ -6,7 +6,12 @@ describe('sticky board store', () => {
     vi.useRealTimers();
   });
 
-  it('creates notes with the required model defaults', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('creates notes with the required model defaults and a subtle random rotation', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.75);
     const store = createStickyBoardStore({ idFactory: () => 'note-a', now: () => 1_700_000_000_000 });
 
     const note = store.createNote({ x: 120, y: 80, content: 'Idea inicial' });
@@ -16,7 +21,7 @@ describe('sticky board store', () => {
       boardId: 'default',
       x: 120,
       y: 80,
-      rotation: 0,
+      rotation: 2,
       width: 220,
       height: 180,
       color: '#FFF176',
@@ -30,6 +35,15 @@ describe('sticky board store', () => {
     expect(store.notes.value).toHaveLength(1);
   });
 
+  it('uses an explicit initial rotation when provided', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.75);
+    const store = createStickyBoardStore({ idFactory: () => 'note-a', now: () => 1_700_000_000_000 });
+
+    const note = store.createNote({ rotation: -3 });
+
+    expect(note.rotation).toBe(-3);
+  });
+
   it('updates geometry without moving pinned notes', () => {
     const store = createStickyBoardStore({ idFactory: () => 'pinned-note', now: () => 10 });
     const note = store.createNote({ x: 0, y: 0 });
@@ -37,10 +51,10 @@ describe('sticky board store', () => {
     store.updateNote(note.id, { pinned: true });
     store.updateGeometry(note.id, { x: 80, y: 60, width: 260, height: 210, rotation: 8 });
 
-    expect(store.findNote(note.id)).toMatchObject({ x: 0, y: 0, width: 220, height: 180, rotation: 0, pinned: true });
+    expect(store.findNote(note.id)).toMatchObject({ x: 0, y: 0, width: 220, height: 180, rotation: note.rotation, pinned: true });
   });
 
-  it('filters notes by search text and tags', () => {
+  it('keeps all notes visible while a search query is active', () => {
     const ids = ['n1', 'n2'];
     const store = createStickyBoardStore({ idFactory: () => ids.shift() ?? 'n', now: () => 10 });
     store.createNote({ content: 'Revisar contrato', tags: ['legal'] });
@@ -48,7 +62,7 @@ describe('sticky board store', () => {
 
     store.searchQuery.value = 'trato';
 
-    expect(store.filteredNotes.value.map((note) => note.id)).toEqual(['n1']);
+    expect(store.filteredNotes.value.map((note) => note.id)).toEqual(['n1', 'n2']);
   });
 
   it('imports a board snapshot and normalizes z-index ordering', () => {
@@ -74,5 +88,18 @@ describe('sticky board store', () => {
     const note = store.createNote({ content: 'New' });
 
     expect(note.zIndex).toBeGreaterThan(20);
+  });
+
+  it('stacks new notes away from the default origin when no position is provided', () => {
+    const ids = ['first', 'second', 'third'];
+    const store = createStickyBoardStore({ idFactory: () => ids.shift() ?? 'n', now: () => 99 });
+
+    const first = store.createNote();
+    const second = store.createNote();
+    const third = store.createNote();
+
+    expect([first.x, first.y]).toEqual([96, 96]);
+    expect([second.x, second.y]).toEqual([124, 124]);
+    expect([third.x, third.y]).toEqual([152, 152]);
   });
 });

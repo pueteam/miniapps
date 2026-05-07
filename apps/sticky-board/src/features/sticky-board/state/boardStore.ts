@@ -9,7 +9,7 @@ type StoreOptions = {
   now?: () => number;
 };
 
-type CreateNoteInput = Partial<Pick<StickyNote, 'x' | 'y' | 'content' | 'color' | 'tags'>>;
+type CreateNoteInput = Partial<Pick<StickyNote, 'x' | 'y' | 'rotation' | 'content' | 'color' | 'tags'>>;
 
 function normalizeNotes(notes: StickyNote[]) {
   return [...notes]
@@ -26,14 +26,8 @@ export function createStickyBoardStore(options: StoreOptions = {}) {
   const selectedNoteId = signal<string | null>(null);
 
   const filteredNotes = computed(() => {
-    const query = searchQuery.value.trim().toLocaleLowerCase();
     const ordered = [...notes.value].sort((a, b) => a.zIndex - b.zIndex);
-    if (!query) return ordered;
-    return ordered.filter((note) => {
-      const contentMatches = note.content.toLocaleLowerCase().includes(query);
-      const tagMatches = note.tags.some((tag) => tag.toLocaleLowerCase().includes(query));
-      return contentMatches || tagMatches;
-    });
+    return ordered;
   });
 
   function findNote(id: string) {
@@ -53,12 +47,13 @@ export function createStickyBoardStore(options: StoreOptions = {}) {
   function createNote(input: CreateNoteInput = {}) {
     const timestamp = now();
     const maxZ = notes.value.reduce((max, note) => Math.max(max, note.zIndex), 0);
+    const defaultOffset = notes.value.length * 28;
     const note: StickyNote = {
       id: idFactory(),
       boardId,
-      x: input.x ?? 96,
-      y: input.y ?? 96,
-      rotation: 0,
+      x: input.x ?? 96 + defaultOffset,
+      y: input.y ?? 96 + defaultOffset,
+      rotation: input.rotation ?? Math.random() * 8 - 4,
       width: NOTE_WIDTH,
       height: NOTE_HEIGHT,
       color: input.color ?? DEFAULT_NOTE_COLOR,

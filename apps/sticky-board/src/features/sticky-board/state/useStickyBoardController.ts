@@ -32,8 +32,7 @@ export function createStickyBoardController() {
   }
 
   async function createNote() {
-    const offset = store.notes.value.length * 24;
-    const note = store.createNote({ x: 96 + offset, y: 96 + offset, content: 'Nueva nota' });
+    const note = store.createNote({ content: 'Nueva nota' });
     await repository.save(note);
     statusMessage.value = 'Nota creada y guardada.';
   }
