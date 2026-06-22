@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(pnpm --filter @miniapps/template-mgr install 2>&1)",
+      "PowerShell(pnpm --filter @miniapps/template-mgr run test:run 2>&1)",
+      "PowerShell(pnpm validate:miniapps 2>&1)"
+    ]
+  }
+}

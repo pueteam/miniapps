@@ -1,0 +1,320 @@
+/* Shared base identity (imported) */
+@import '../../../../styles/base.css';
+
+:root {
+  --app-accent: #172c63;
+  --tm-primary: #172c63;
+  --tm-secondary: #7e9abb;
+  --tm-accent: #fdd500;
+  --tm-bg: #d8dade;
+  --tm-surface: #fefefe;
+  --tm-success: #70dd89;
+  --tm-error: #dc5360;
+
+  /* App semantic tokens */
+  --color-bg-page: var(--tm-bg);
+  --color-bg-surface: var(--tm-surface);
+  --color-text-primary: var(--tm-primary);
+  --color-text-secondary: var(--color-neutral-700);
+  --color-text-muted: var(--color-neutral-500);
+  --color-border-subtle: var(--color-neutral-100);
+  --color-border-default: var(--color-neutral-300);
+  --color-accent-primary: var(--app-accent);
+  --color-accent-hover: var(--app-accent);
+
+  --card-radius: var(--radius-md);
+  --card-padding: var(--space-6);
+  --button-height-md: 48px;
+  --button-radius: var(--radius-pill);
+  --input-height: 48px;
+  --input-radius: var(--radius-md);
+}
+
+/* ── Layout ── */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ── Card ── */
+.tm-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Select group ── */
+.tm-select-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.tm-select {
+  flex: 1;
+  min-width: 200px;
+  height: var(--input-height);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--tm-secondary);
+  border-radius: var(--input-radius);
+  background-color: var(--tm-surface);
+  color: var(--tm-primary);
+  font-size: 1rem;
+}
+
+.tm-select:focus {
+  outline: none;
+  border-color: var(--tm-primary);
+}
+
+/* ── Action group ── */
+.tm-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* ── Buttons ── */
+.tm-btn {
+  height: var(--button-height-md);
+  padding: 0 var(--space-5);
+  border-radius: var(--button-radius);
+  border: 1px solid var(--tm-secondary);
+  background-color: var(--tm-secondary);
+  color: var(--tm-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+  white-space: nowrap;
+}
+
+.tm-btn:hover {
+  background-color: var(--tm-primary);
+  border-color: var(--tm-primary);
+}
+
+.tm-btn--outline {
+  background-color: transparent;
+  color: var(--tm-secondary);
+}
+
+.tm-btn--outline:hover {
+  background-color: var(--tm-secondary);
+  color: var(--tm-surface);
+}
+
+.tm-btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-neutral-500);
+}
+
+.tm-btn--ghost:hover {
+  background-color: var(--color-neutral-100);
+  border-color: var(--color-neutral-100);
+  color: var(--tm-primary);
+}
+
+/* Help button */
+.tm-btn-help {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--tm-accent);
+  color: var(--tm-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.tm-btn-help:hover {
+  background-color: var(--tm-bg);
+}
+
+/* ── Message ── */
+.tm-message {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.tm-message--success {
+  background-color: var(--tm-success);
+  color: var(--tm-surface);
+}
+
+.tm-message--error {
+  background-color: var(--tm-error);
+  color: var(--tm-surface);
+}
+
+/* ── Form ── */
+.tm-form-container {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: var(--space-2);
+}
+
+.tm-form-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tm-form-container::-webkit-scrollbar-thumb {
+  background-color: var(--tm-secondary);
+  border-radius: 3px;
+}
+
+.tm-form-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.tm-form-group label {
+  min-width: 140px;
+  text-align: right;
+  color: var(--tm-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.tm-form-group input {
+  flex: 1;
+  height: var(--input-height);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--tm-secondary);
+  border-radius: var(--input-radius);
+  background-color: var(--tm-surface);
+  font-size: 1rem;
+}
+
+.tm-form-group input:focus {
+  outline: none;
+  border-color: var(--tm-primary);
+}
+
+/* ── Generate row ── */
+.tm-generate-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.tm-input {
+  flex: 1;
+  min-width: 200px;
+  height: var(--input-height);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--tm-secondary);
+  border-radius: var(--input-radius);
+  background-color: var(--tm-surface);
+  font-size: 1rem;
+}
+
+.tm-input:focus {
+  outline: none;
+  border-color: var(--tm-primary);
+}
+
+/* ── Help modal ── */
+.tm-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(23, 44, 99, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  animation: tm-fade-in 0.2s ease;
+}
+
+.tm-modal__content {
+  background: var(--tm-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  animation: tm-slide-in 0.25s ease;
+}
+
+.tm-modal__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--tm-secondary);
+  line-height: 1;
+  padding: var(--space-1);
+}
+
+.tm-modal__close:hover {
+  color: var(--tm-primary);
+}
+
+.tm-modal__content h3 {
+  color: var(--tm-primary);
+  margin-top: 0;
+}
+
+.tm-modal__content h4 {
+  color: var(--tm-primary);
+  margin-top: var(--space-4);
+}
+
+.tm-modal__content code {
+  background: var(--color-neutral-100);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+}
+
+.tm-modal__content ol,
+.tm-modal__content ul {
+  padding-left: var(--space-5);
+}
+
+.tm-modal__content li {
+  margin-bottom: var(--space-2);
+}
+
+@keyframes tm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tm-slide-in {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

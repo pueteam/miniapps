@@ -1,0 +1,17 @@
+{
+  "name": "template-mgr",
+  "title": "Gestor de Plantillas",
+  "description": "Genera documentos .docx y .pptx rellenando plantillas con variables",
+  "listed": true,
+  "pwa": true,
+  "router": false,
+  "themeColor": "#172c63",
+  "backgroundColor": "#d8dade",
+  "tags": [
+    "templates",
+    "docx",
+    "pptx",
+    "offline"
+  ],
+  "category": "utilities"
+}
