@@ -1,0 +1,15 @@
+{
+  "name": "platon-editor",
+  "title": "Editor PLATON",
+  "description": "Dibuja, edita y exporta cadenas PLATON",
+  "listed": true,
+  "pwa": true,
+  "router": false,
+  "themeColor": "#004F87",
+  "backgroundColor": "#FFFFFF",
+  "tags": [
+    "platon",
+    "grafos",
+    "diagramas"
+  ]
+}

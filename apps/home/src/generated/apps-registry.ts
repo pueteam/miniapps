@@ -2,6 +2,17 @@
 // Ejecuta scripts/generate-home-registry.mjs para regenerar
 export const appsRegistry = [
   {
+    "name": "platon-editor",
+    "title": "Editor PLATON",
+    "description": "Dibuja, edita y exporta cadenas PLATON",
+    "href": "/miniapps/platon-editor/",
+    "tags": [
+      "platon",
+      "grafos",
+      "diagramas"
+    ]
+  },
+  {
     "name": "template-mgr",
     "title": "Gestor de Plantillas",
     "description": "Genera documentos .docx y .pptx rellenando plantillas con variables",

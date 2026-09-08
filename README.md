@@ -80,6 +80,7 @@ pnpm --filter @miniapps/planning-board dev
 pnpm --filter @miniapps/md-converter dev
 pnpm --filter @miniapps/sticky-board dev
 pnpm --filter @miniapps/template-mgr dev
+pnpm --filter @miniapps/platon-editor dev
 ```
 
 ## Crear una nueva miniapp

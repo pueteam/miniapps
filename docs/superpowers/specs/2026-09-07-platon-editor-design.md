@@ -2,7 +2,7 @@
 
 Fecha: 2026-09-07
 
-Estado: alcance funcional aprobado en conversación; especificación escrita pendiente de revisión del usuario.
+Estado: alcance funcional y especificación escrita aprobados por el usuario en conversación el 2026-09-07.
 
 ## Objetivo y límites
 
