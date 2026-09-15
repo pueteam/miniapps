@@ -1,18 +1,41 @@
-import init, { toMarkdownBytes, type ConvertErrorCode, type InitOutput } from '@firecrawl/anydoc-wasm';
+import init, { toMarkdownBytes, type ConvertErrorCode, type Format, type InitOutput } from '@firecrawl/anydoc-wasm';
 import type { ConversionMode } from './conversionModes';
-import { getBaseFilename } from './fileUtils';
+import { getBaseFilename, getFileExtension } from './fileUtils';
 
-export type AnydocHint = 'docx' | 'epub';
+export type AnydocHint = Format;
+
+const EXTENSION_HINTS: Record<string, Format> = {
+  '.doc': 'doc',
+  '.docm': 'docx',
+  '.docx': 'docx',
+  '.epub': 'epub',
+  '.pdf': 'pdf',
+  '.ppt': 'ppt',
+  '.pps': 'pptx',
+  '.ppsm': 'pptx',
+  '.ppsx': 'pptx',
+  '.pot': 'pptx',
+  '.potm': 'pptx',
+  '.potx': 'pptx',
+  '.pptm': 'pptx',
+  '.pptx': 'pptx',
+  '.xls': 'xlsx',
+  '.xlsb': 'xlsx',
+  '.xlsm': 'xlsx',
+  '.xlsx': 'xlsx',
+  '.odp': 'odp',
+  '.ods': 'ods',
+  '.odt': 'odt',
+  '.rtf': 'rtf',
+  '.csv': 'csv'
+};
 
 export function isAnydocMode(mode: ConversionMode): boolean {
-  return mode === 'docx-to-markdown' || mode === 'epub-to-markdown';
+  return mode.endsWith('-to-markdown') && mode !== 'html-to-markdown';
 }
 
 export function getAnydocHint(filename: string): AnydocHint | undefined {
-  const lower = filename.toLowerCase();
-  if (lower.endsWith('.docx')) return 'docx';
-  if (lower.endsWith('.epub')) return 'epub';
-  return undefined;
+  return EXTENSION_HINTS[getFileExtension(filename)];
 }
 
 export function anydocErrorToSpanish(error: unknown): string {
@@ -25,7 +48,7 @@ export function anydocErrorToSpanish(error: unknown): string {
     case 'encrypted':
       return `El documento está cifrado o protegido con contraseña.${detail}`;
     case 'unsupported':
-      return `Formato no soportado por el conversor offline (solo .docx y .epub).${detail}`;
+      return `Formato no soportado por el conversor offline.${detail}`;
     case 'malformed':
       return `El archivo está dañado o no contiene contenido aprovechable.${detail}`;
     case 'resourceLimit':

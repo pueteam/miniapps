@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import { initSync, toMarkdownBytes } from '@firecrawl/anydoc-wasm';
+import { initSync, toMarkdownBytes, type Format } from '@firecrawl/anydoc-wasm';
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), '../../tests/fixtures');
 const wasmBytes = readFileSync(
@@ -10,16 +10,20 @@ const wasmBytes = readFileSync(
 );
 initSync({ module: wasmBytes });
 
-describe('anydoc fixtures', () => {
-  test('converts minimal docx to markdown offline', () => {
-    const bytes = new Uint8Array(readFileSync(join(dir, 'draft.docx')));
-    const md = toMarkdownBytes(bytes, 'docx');
-    expect(md).toMatch(/Hola AnyDoc/);
-  });
+const cases: Array<[string, Format, RegExp]> = [
+  ['draft.docx', 'docx', /Hola AnyDoc/],
+  ['book.epub', 'epub', /Hola Epub/],
+  ['sample.csv', 'csv', /Hola CSV/],
+  ['sample.rtf', 'rtf', /Hola RTF/],
+  ['sample.odt', 'odt', /Hola ODT/],
+  ['sample.pptx', 'pptx', /Hola Slide/],
+  ['sample.xlsx', 'xlsx', /Hola Celda/],
+  ['sample.pdf', 'pdf', /Hola PDF/]
+];
 
-  test('converts minimal epub to markdown offline', () => {
-    const bytes = new Uint8Array(readFileSync(join(dir, 'book.epub')));
-    const md = toMarkdownBytes(bytes, 'epub');
-    expect(md).toMatch(/Hola Epub/);
+describe('anydoc fixtures', () => {
+  test.each(cases)('converts minimal %s to markdown offline', (file, format, expected) => {
+    const bytes = new Uint8Array(readFileSync(join(dir, file)));
+    expect(toMarkdownBytes(bytes, format)).toMatch(expected);
   });
 });

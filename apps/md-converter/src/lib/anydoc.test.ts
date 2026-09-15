@@ -15,9 +15,15 @@ import {
 import { toMarkdownBytes } from '@firecrawl/anydoc-wasm';
 
 describe('anydoc', () => {
-  test('routes only docx/epub imports through anydoc', () => {
+  test('routes every import except html through anydoc', () => {
     expect(isAnydocMode('docx-to-markdown')).toBe(true);
     expect(isAnydocMode('epub-to-markdown')).toBe(true);
+    expect(isAnydocMode('pdf-to-markdown')).toBe(true);
+    expect(isAnydocMode('pptx-to-markdown')).toBe(true);
+    expect(isAnydocMode('xlsx-to-markdown')).toBe(true);
+    expect(isAnydocMode('odt-to-markdown')).toBe(true);
+    expect(isAnydocMode('rtf-to-markdown')).toBe(true);
+    expect(isAnydocMode('csv-to-markdown')).toBe(true);
     expect(isAnydocMode('html-to-markdown')).toBe(false);
     expect(isAnydocMode('markdown-to-epub')).toBe(false);
     expect(isAnydocMode('markdown-to-docx')).toBe(false);
@@ -26,7 +32,16 @@ describe('anydoc', () => {
 
   test('derives wasm hint from filename', () => {
     expect(getAnydocHint('draft.docx')).toBe('docx');
+    expect(getAnydocHint('draft.docm')).toBe('docx');
     expect(getAnydocHint('BOOK.EPUB')).toBe('epub');
+    expect(getAnydocHint('scan.pdf')).toBe('pdf');
+    expect(getAnydocHint('slides.pptx')).toBe('pptx');
+    expect(getAnydocHint('legacy.ppt')).toBe('ppt');
+    expect(getAnydocHint('data.xlsx')).toBe('xlsx');
+    expect(getAnydocHint('texto.odt')).toBe('odt');
+    expect(getAnydocHint('hoja.ods')).toBe('ods');
+    expect(getAnydocHint('nota.rtf')).toBe('rtf');
+    expect(getAnydocHint('tabla.csv')).toBe('csv');
     expect(getAnydocHint('notes.txt')).toBeUndefined();
   });
 

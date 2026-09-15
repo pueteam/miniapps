@@ -115,9 +115,9 @@ export function buildArgs(payload: WorkerJobInput, cover?: BinaryInput | null): 
       args.splice(args.length + outputArgIndex, 0, '--css=document.css');
     }
     if (payload.mathRendering === 'mathjax') {
-      args.splice(args.length + outputArgIndex, 0, '--mathjax');
+      args.splice(args.length + outputArgIndex, 0, '--math-method=mathjax');
     } else if (payload.mathRendering === 'katex') {
-      args.splice(args.length + outputArgIndex, 0, '--katex');
+      args.splice(args.length + outputArgIndex, 0, '--math-method=katex');
     }
   }
 

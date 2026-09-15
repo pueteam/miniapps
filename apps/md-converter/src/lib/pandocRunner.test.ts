@@ -97,7 +97,7 @@ describe('pandocRunner', () => {
     expect(args).toContain('--css=document.css');
     expect(args).toContain('--toc');
     expect(args).toContain('--toc-depth=3');
-    expect(args).toContain('--mathjax');
+    expect(args).toContain('--math-method=mathjax');
     expect(args).toContain('--highlight-style=zenburn');
     expect(args).not.toContain('--reference-doc');
   });
@@ -110,8 +110,8 @@ describe('pandocRunner', () => {
       wasmBytes: null
     } as never);
 
-    expect(args).toContain('--katex');
-    expect(args).not.toContain('--mathjax');
+    expect(args).toContain('--math-method=katex');
+    expect(args).not.toContain('--math-method=mathjax');
   });
 
   test('mounts reference-doc for docx conversions', () => {
