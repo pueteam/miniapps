@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'preact/hooks';
+import { isAnydocMode } from '../lib/anydoc';
+import { runAnydocInWorker } from '../lib/anydocClient';
 import { getConversionModeDefinition } from '../lib/conversionModes';
 import { downloadBlob, slugify } from '../lib/download';
 import { buildMetadataYaml } from '../lib/epubMetadata';
@@ -65,10 +67,34 @@ export function useConversionHandler(props: UseConversionHandlerProps): UseConve
     setIsRunning(true);
     setError('');
     setStatusState('running');
-    setLogs('Iniciando conversión con pandoc.wasm…');
+    setLogs(
+      isAnydocMode(conversionMode)
+        ? 'Iniciando conversión con AnyDoc (offline)…'
+        : 'Iniciando conversión con pandoc.wasm…'
+    );
 
     try {
       const sourceBinary = await toBinaryInput(sourceFile);
+      if (isAnydocMode(conversionMode)) {
+        if (!sourceBinary) {
+          setError('Selecciona un archivo compatible antes de convertir.');
+          setStatusState('error');
+          setLogs('No hay archivo fuente para la conversión actual.');
+          return;
+        }
+
+        const result = await runAnydocInWorker({
+          bytes: sourceBinary.bytes,
+          filename: sourceBinary.name,
+          outputBasename: slugify(getBaseFilename(sourceBinary.name)) || 'document'
+        });
+
+        downloadBlob(new Blob([new Uint8Array(result.outputBytes)], { type: result.mimeType }), result.outputFilename);
+        setLogs(result.logs || `Archivo generado correctamente → ${result.outputFilename}`);
+        setStatusState('success');
+        return;
+      }
+
       const cover = await toBinaryInput(coverFile);
       const referenceDocBinary = await toBinaryInput(referenceDoc);
       const metadataYaml = buildMetadataYaml({ title, author, lang });

@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "fetch:pandoc": "node scripts/fetch-pandoc-wasm.mjs",
+    "prebuild": "node scripts/fetch-pandoc-wasm.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -13,6 +15,7 @@
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "^0.4.2",
+    "@firecrawl/anydoc-wasm": "0.2.4",
     "preact": "^10.29.1"
   },
   "devDependencies": {
