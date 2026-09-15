@@ -1,0 +1,4 @@
+# Los fixtures de conversión deben conservar sus bytes exactos
+# (un PDF mínimo es casi todo ASCII y git lo trataría como texto,
+# rompiendo los offsets del xref con la conversión CRLF).
+tests/fixtures/* binary
