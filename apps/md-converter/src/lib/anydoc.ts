@@ -1,4 +1,4 @@
-import init, { toMarkdownBytes, type ConvertErrorCode } from '@firecrawl/anydoc-wasm';
+import init, { toMarkdownBytes, type ConvertErrorCode, type InitOutput } from '@firecrawl/anydoc-wasm';
 import type { ConversionMode } from './conversionModes';
 import { getBaseFilename } from './fileUtils';
 
@@ -39,9 +39,9 @@ export function anydocErrorToSpanish(error: unknown): string {
   }
 }
 
-let initPromise: Promise<unknown> | null = null;
+let initPromise: Promise<InitOutput> | null = null;
 
-export function ensureAnydocInit(): Promise<unknown> {
+export function ensureAnydocInit(): Promise<InitOutput> {
   if (!initPromise) {
     initPromise = init();
   }

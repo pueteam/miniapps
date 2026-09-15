@@ -17,7 +17,7 @@ describe('Config Modal Dynamic Sections', () => {
 
     render(<App />);
 
-    const configButton = screen.getByText('Configuración');
+    const configButton = screen.getByRole('button', { name: 'Configuración' });
     fireEvent.click(configButton);
 
     // Should show "Documento" section (not "Libro")
@@ -47,7 +47,7 @@ describe('Config Modal Dynamic Sections', () => {
 
     render(<App />);
 
-    const configButton = screen.getByText('Configuración');
+    const configButton = screen.getByRole('button', { name: 'Configuración' });
     fireEvent.click(configButton);
 
     // Should show both "Documento" and "Estilos" sections
@@ -82,7 +82,7 @@ describe('Config Modal Dynamic Sections', () => {
 
     render(<App />);
 
-    const configButton = screen.getByText('Configuración');
+    const configButton = screen.getByRole('button', { name: 'Configuración' });
     fireEvent.click(configButton);
 
     // Should load the saved document config

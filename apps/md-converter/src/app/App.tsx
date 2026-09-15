@@ -321,15 +321,11 @@ export function App() {
   const primaryConfigSection =
     modeDefinition.outputFormat === 'epub3' ? 'book' : 'document';
 
-  async function handleMarkdownImport(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-
+  async function processIncomingFile(file: File): Promise<void> {
     if (!isAcceptedFile(file.name, modeDefinition.importAccept)) {
       setError(
         'El archivo seleccionado no es compatible con la conversión activa.',
       );
-      (event.target as HTMLInputElement).value = '';
       return;
     }
 
@@ -346,8 +342,15 @@ export function App() {
         `Archivo cargado: ${file.name}. Listo para convertir a Markdown.`,
       );
     }
+  }
 
-    (event.target as HTMLInputElement).value = '';
+  async function handleMarkdownImport(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    await processIncomingFile(file);
+    input.value = '';
   }
 
   async function handleCssImport(event: Event) {
@@ -379,26 +382,7 @@ export function App() {
     const file = (e.dataTransfer as DataTransfer).files[0];
     if (!file) return;
 
-    if (!isAcceptedFile(file.name, modeDefinition.importAccept)) {
-      setError(
-        'El archivo seleccionado no es compatible con la conversión activa.',
-      );
-      return;
-    }
-
-    if (modeDefinition.sourceKind === 'markdown') {
-      const text = await readTextFile(file);
-      setMarkdown(text);
-      setSourceFile(null);
-      setError('');
-      setLogs(`Markdown importado desde ${file.name}.`);
-    } else {
-      setSourceFile(file);
-      setError('');
-      setLogs(
-        `Archivo cargado: ${file.name}. Listo para convertir a Markdown.`,
-      );
-    }
+    await processIncomingFile(file);
   }
 
   function renderConfigSection() {
@@ -715,12 +699,6 @@ export function App() {
   return (
     <AppShell>
       <section class="converter-page">
-        {/* <section class="hero-compact" aria-labelledby="converter-title">
-          <p class="hero-compact__eyebrow">MDconvertix</p>
-          <h2 id="converter-title">MDconvertix</h2>
-          <p>Convierte Markdown a DOCX, EPUB y HTML (y al revés)</p>
-        </section> */}
-
         <section class="grid">
           <article
             class={`panel panel--editor${isDragging ? ' is-dragging' : ''}`}
@@ -729,6 +707,11 @@ export function App() {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
+            <h3 class="visually-hidden">
+              {modeDefinition.sourceKind === 'markdown'
+                ? 'Contenido Markdown'
+                : 'Archivo de origen'}
+            </h3>
             <div class="panel-header panel-header--between">
               <div class="panel-actions">
                 <label>

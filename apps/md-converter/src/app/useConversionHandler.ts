@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { isAnydocMode } from '../lib/anydoc';
 import { runAnydocInWorker } from '../lib/anydocClient';
 import { getConversionModeDefinition } from '../lib/conversionModes';
@@ -37,7 +37,7 @@ export function useConversionHandler(props: UseConversionHandlerProps): UseConve
   const [isRunning, setIsRunning] = useState(false);
   const [statusState, setStatusState] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
 
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = async () => {
     const {
       conversionMode, markdown, sourceFile, coverFile, referenceDoc,
       css, title, author, lang, toc, tocDepth, splitLevel,
@@ -129,7 +129,7 @@ export function useConversionHandler(props: UseConversionHandlerProps): UseConve
     } finally {
       setIsRunning(false);
     }
-  }, [props]);
+  };
 
   return {
     isRunning,

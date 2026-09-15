@@ -115,24 +115,6 @@ test('pressing escape closes the dialog and discards unsaved settings changes', 
   expect((screen.getByRole('textbox', { name: 'Título' }) as HTMLInputElement).value).toBe('Mi libro');
 });
 
-test('pressing escape closes the dialog and discards unsaved settings changes', async () => {
-  const user = userEvent.setup();
-
-  render(<App />);
-
-  await user.click(screen.getByRole('button', { name: 'Configuración' }));
-  const titleInput = screen.getByRole('textbox', { name: 'Título' });
-  await user.clear(titleInput);
-  await user.type(titleInput, 'Cambio por escape');
-
-  await user.keyboard('{Escape}');
-
-  expect(screen.queryByRole('dialog', { name: 'Configuración EPUB' })).toBeNull();
-
-  await user.click(screen.getByRole('button', { name: 'Configuración' }));
-  expect((screen.getByRole('textbox', { name: 'Título' }) as HTMLInputElement).value).toBe('Mi libro');
-});
-
 test('shows a conversion selector with markdown to epub as the default mode and persists the selected mode', async () => {
   const user = userEvent.setup();
 
