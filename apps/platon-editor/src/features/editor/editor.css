@@ -23,7 +23,7 @@
 .platon-app .canvas-wrap.is-connecting .platon-node:hover .react-flow__handle.port-target,.platon-app .canvas-wrap.is-connecting .platon-node.is-selected .react-flow__handle.port-target{opacity:1;background:#086b88!important;box-shadow:0 0 0 4px #086b8826}
 /* Enlaces: resaltar origen y destinos válidos durante el arrastre */
 .platon-app .react-flow__handle{pointer-events:all}
-.platon-app .react-flow__handle.port-source{cursor:grab}
+.platon-app .react-flow__handle.port-source{cursor:crosshair}
 .platon-app .react-flow__handle.connectingfrom{opacity:1;background:#086b88!important;box-shadow:0 0 0 5px #086b8833}
 .platon-app .react-flow__handle.valid{opacity:1;background:#086b88!important;box-shadow:0 0 0 6px #086b8844}
 .platon-app .react-flow__handle.clickconnecting{opacity:1;background:#b7791f!important;box-shadow:0 0 0 5px #b7791f33}

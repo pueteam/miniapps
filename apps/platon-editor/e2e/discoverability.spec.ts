@@ -43,6 +43,7 @@ test('al pasar el ratón la caja destaca sus salidas', async ({ page }) => {
   await page.waitForTimeout(400);
   await expect.poll(async () => source.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
   await expect.poll(async () => target.evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
+  expect(await source.evaluate((el) => getComputedStyle(el).cursor)).toBe('crosshair');
 });
 
 test('al crear enlace la caja destino remarca sus entradas', async ({ page }) => {
@@ -84,8 +85,6 @@ test('duplicar o invertir un enlace avisa en vez de fallar en silencio', async (
   await page.getByRole('button', { name: 'Añadir JOB', exact: true }).dragTo(canvas, { targetPosition: { x: 220, y: 340 } });
   const from = await page.locator('.react-flow__node').first().locator('.source[data-handlepos="bottom"]').boundingBox();
   const to = await page.locator('.react-flow__node').nth(1).locator('.target[data-handlepos="top"]').boundingBox();
-  const backFrom = await page.locator('.react-flow__node').nth(1).locator('.source[data-handlepos="bottom"]').boundingBox();
-  const backTo = await page.locator('.react-flow__node').first().locator('.target[data-handlepos="top"]').boundingBox();
   const drag = async (a: { x: number; y: number }, b: { x: number; y: number }) => {
     await page.mouse.move(a.x + 4, a.y + 4);
     await page.mouse.down();
@@ -93,11 +92,16 @@ test('duplicar o invertir un enlace avisa en vez de fallar en silencio', async (
     await page.mouse.move(b.x + 4, b.y + 4, { steps: 20 });
     await page.mouse.up();
   };
+  const boxOf = (node: number, cls: string, pos: string) =>
+    page.locator('.react-flow__node').nth(node).locator(`.${cls}[data-handlepos="${pos}"]`).boundingBox();
   await drag({ x: from!.x, y: from!.y }, { x: to!.x, y: to!.y });
   await expect(page.locator('.react-flow__edge')).toHaveCount(1);
   await drag({ x: from!.x, y: from!.y }, { x: to!.x, y: to!.y });
   await expect(page.getByRole('alert')).toContainText('Ya existe ese enlace');
   await page.getByRole('button', { name: 'Cerrar aviso' }).click();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  const backFrom = await boxOf(1, 'source', 'bottom');
+  const backTo = await boxOf(0, 'target', 'top');
   await drag({ x: backFrom!.x, y: backFrom!.y }, { x: backTo!.x, y: backTo!.y });
   await expect(page.getByRole('alert')).toContainText('sentido contrario');
   await expect(page.locator('.react-flow__edge')).toHaveCount(1);
