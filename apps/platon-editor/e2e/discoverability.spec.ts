@@ -28,6 +28,18 @@ test('los puertos de conexión son visibles sin hover', async ({ page }) => {
   expect(Number(opacity)).toBeGreaterThan(0);
 });
 
+test('al pasar el ratón la caja destaca sus salidas', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Añadir JOB', exact: true }).click();
+  await page.locator('.react-flow__pane').click({ position: { x: 30, y: 30 } });
+  const node = page.locator('.react-flow__node').first();
+  await node.hover({ position: { x: 50, y: 20 } });
+  await page.waitForTimeout(400);
+  const source = node.locator('.port-source').first();
+  await expect.poll(async () => source.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+  expect(await source.evaluate((el) => getComputedStyle(el).width)).toBe('12px');
+});
+
 test('arrastrar desde un punto de entrada no crea flechas: solo las salidas originan', async ({ page }) => {
   await page.goto('./');
   const canvas = page.locator('.react-flow');
