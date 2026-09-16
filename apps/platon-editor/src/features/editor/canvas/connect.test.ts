@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { emptyDiagram } from '../model/document';
 import { createElement } from '../presets/elements';
-import { createEdgeFromConnection, getRejectionReason } from './connect';
+import { createEdgeFromConnection, getRejectionReason, nearestTargetPort, nodeAtPoint } from './connect';
 
 function docWithJobs() {
   const doc = emptyDiagram();
@@ -49,4 +49,20 @@ it('explica cada motivo de rechazo en lenguaje claro', () => {
   expect(getRejectionReason(doc, { source: 'a', target: 'a' })).toBe('self');
   expect(getRejectionReason(doc, { source: 'a', target: 't' })).toBe('not-connectable');
   expect(getRejectionReason(doc, { source: 'a', target: 'b' })).toBeNull();
+});
+
+it('elige la entrada más cercana al punto donde se suelta', () => {
+  const doc = docWithJobs();
+  expect(nearestTargetPort(doc, 'b', { x: 410, y: 10 })).toBe('top');
+  expect(nearestTargetPort(doc, 'b', { x: 600, y: 50 })).toBe('right');
+  expect(nearestTargetPort(doc, 'b', { x: 410, y: 200 })).toBe('bottom');
+  expect(nearestTargetPort(doc, 'b', { x: 200, y: 50 })).toBe('left');
+  expect(nearestTargetPort(doc, 'inexistente', { x: 0, y: 0 })).toBeNull();
+});
+
+it('encuentra la caja bajo el punto donde se suelta', () => {
+  const doc = docWithJobs();
+  expect(nodeAtPoint(doc, { x: 410, y: 50 }, 'a')).toBe('b');
+  expect(nodeAtPoint(doc, { x: 10, y: 10 }, 'a')).toBeNull();
+  expect(nodeAtPoint(doc, { x: 410, y: 50 })).toBe('b');
 });

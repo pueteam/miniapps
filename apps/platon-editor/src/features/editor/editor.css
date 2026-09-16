@@ -20,6 +20,8 @@
 /* Puntos: ocultos en reposo; la caja muestra salidas en hover y entradas al crear enlace */
 .platon-app .platon-node:hover .react-flow__handle.port-target,.platon-app .platon-node.is-selected .react-flow__handle.port-target{opacity:0}
 .platon-app .platon-node:hover .react-flow__handle.port-source,.platon-app .platon-node.is-selected .react-flow__handle.port-source{opacity:1;background:#2e9e63!important;box-shadow:0 0 0 4px #2e9e6333}
+.platon-app .canvas-wrap.is-connecting .platon-node:hover .react-flow__handle.port-source{opacity:0}
+.platon-app .canvas-wrap.is-connecting .platon-node .react-flow__handle.port-source.connectingfrom{opacity:1;background:#086b88!important;box-shadow:0 0 0 5px #086b8833}
 .platon-app .canvas-wrap.is-connecting .platon-node:hover .react-flow__handle.port-target,.platon-app .canvas-wrap.is-connecting .platon-node.is-selected .react-flow__handle.port-target{opacity:1;background:#086b88!important;box-shadow:0 0 0 4px #086b8826}
 /* Enlaces: resaltar origen y destinos válidos durante el arrastre */
 .platon-app .react-flow__handle{pointer-events:all}

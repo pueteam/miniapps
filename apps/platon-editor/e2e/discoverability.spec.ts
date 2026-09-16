@@ -59,10 +59,28 @@ test('al crear enlace la caja destino remarca sus entradas', async ({ page }) =>
   await page.mouse.move(destBox!.x + 4, destBox!.y + 4, { steps: 12 });
   await expect.poll(async () => destTarget.evaluate((el) => el.classList.contains('valid'))).toBe(true);
   await expect.poll(async () => destTarget.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+  const destNode = page.locator('.react-flow__node').nth(1);
+  await expect.poll(async () => destNode.locator('.port-source').first().evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
   await page.mouse.move(30, 30, { steps: 6 });
   await page.mouse.up();
   await page.waitForTimeout(500);
   await expect(page.locator('.react-flow__edge')).toHaveCount(0);
+});
+
+test('soltar en la caja crea el enlace en la entrada más cercana', async ({ page }) => {
+  await page.goto('./');
+  const canvas = page.locator('.react-flow');
+  await page.getByRole('button', { name: 'Añadir JOB', exact: true }).dragTo(canvas, { targetPosition: { x: 220, y: 70 } });
+  await page.getByRole('button', { name: 'Añadir JOB', exact: true }).dragTo(canvas, { targetPosition: { x: 220, y: 340 } });
+  const from = await page.locator('.react-flow__node').first().locator('.port-source[data-handlepos="bottom"]').boundingBox();
+  const destBox = await page.locator('.react-flow__node').nth(1).boundingBox();
+  await page.mouse.move(from!.x + 4, from!.y + 4);
+  await page.mouse.down();
+  await page.waitForTimeout(300);
+  await page.mouse.move(destBox!.x + destBox!.width / 2, destBox!.y + destBox!.height / 2, { steps: 20 });
+  await page.mouse.up();
+  await expect(page.locator('.react-flow__edge')).toHaveCount(1);
+  await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
 test('arrastrar desde un punto de entrada no crea flechas: solo las salidas originan', async ({ page }) => {

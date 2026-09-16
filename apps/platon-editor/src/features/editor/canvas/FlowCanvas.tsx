@@ -7,7 +7,7 @@ import { ElementView } from './ElementView';
 import { routeEdge, edgePath } from '../model/routes';
 import { diagramBounds } from '../export/bounds';
 import { orderElements } from './order';
-import { createEdgeFromConnection, getRejectionReason, REJECTION_MESSAGES } from './connect';
+import { createEdgeFromConnection, getRejectionReason, nearestTargetPort, nodeAtPoint, REJECTION_MESSAGES } from './connect';
 import { addWaypointAt } from './edgeEdit';
 import { applyTextEdit } from './editText';
 import { randomId } from '../../../lib/id';
@@ -120,7 +120,27 @@ function Canvas(props: Props) {
   };
   return <div className={`canvas-wrap${connecting ? ' is-connecting' : ''}`} onDragOver={event => { event.preventDefault(); if(event.dataTransfer) event.dataTransfer.dropEffect = 'copy'; }} onDrop={event => { event.preventDefault(); const kind = event.dataTransfer?.getData('application/platon-kind') as Kind; if (['job','action','text','group','header'].includes(kind)) onAdd(kind, screenToFlowPosition({ x: event.clientX, y: event.clientY })); }}>
     <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} viewport={viewport} onMoveEnd={(_, v) => onViewport(v)}
-      onConnectStart={() => setConnecting(true)} onConnectEnd={() => setConnecting(false)}
+      onConnectStart={() => setConnecting(true)}
+      onConnectEnd={(_event, state) => {
+        setConnecting(false);
+        if (state.toHandle || !state.fromNode) return;
+        const fromId = state.fromNode.id;
+        const fromHandleId = state.fromHandle?.id;
+        if (!fromHandleId?.startsWith('out-')) return;
+        const base = draftRef.current ?? doc;
+        const targetId = state.toNode?.id ?? nodeAtPoint(base, state.to, fromId);
+        if (!targetId) return;
+        const port = nearestTargetPort(base, targetId, state.to);
+        if (!port) return;
+        const input = { source: fromId, target: targetId, sourceHandle: fromHandleId, targetHandle: `in-${port}` };
+        const edge = createEdgeFromConnection(base, input, () => randomId());
+        if (!edge) {
+          const reason = getRejectionReason(base, input);
+          if (reason && onInvalid) onInvalid(REJECTION_MESSAGES[reason]);
+          return;
+        }
+        onCommit({ ...base, edges: [...base.edges, edge] });
+      }}
       onNodesChange={changes} onEdgesChange={changes => {
         const ids = new Set(selection.edgeIds);
         for (const change of changes) if (change.type === 'select') { if (change.selected) ids.add(change.id); else ids.delete(change.id); }
