@@ -2,18 +2,18 @@ import type { Kind, Point } from '../model/types';
 
 type PaletteProps = { onAdd: (kind: Kind, point?: Point) => void };
 
-const tiles: ReadonlyArray<{ kind: Kind; label: string }> = [
-  { kind: 'job', label: 'JOB' },
-  { kind: 'action', label: 'Actuación' },
-  { kind: 'text', label: 'Texto' },
-  { kind: 'group', label: 'Grupo' },
-  { kind: 'header', label: 'Cabecera' },
+const tiles: ReadonlyArray<{ kind: Kind; label: string; symbol: string }> = [
+  { kind: 'job', label: 'JOB', symbol: '▢' },
+  { kind: 'action', label: 'Actuación', symbol: '◇' },
+  { kind: 'text', label: 'Texto', symbol: 'T' },
+  { kind: 'group', label: 'Grupo', symbol: '▤' },
+  { kind: 'header', label: 'Cabecera', symbol: '☰' },
 ];
 
 export function Palette({ onAdd }: PaletteProps) {
   return (
     <div className="palette" aria-label="Paleta de elementos">
-      {tiles.map(({ kind, label }) => (
+      {tiles.map(({ kind, label, symbol }) => (
         <button
           key={kind}
           className="palette-tile"
@@ -28,6 +28,7 @@ export function Palette({ onAdd }: PaletteProps) {
             event.dataTransfer.effectAllowed = 'copy';
           }}
         >
+          <span className="tile-icon" aria-hidden="true">{symbol}</span>
           {label}
         </button>
       ))}

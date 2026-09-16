@@ -12,8 +12,9 @@ export function ExportDialog({doc,onClose}:{doc:Diagram;onClose:()=>void}) {
     <label className="field">Resolución<select value={scale} onChange={e=>setScale(Number(e.currentTarget.value) as 1|2)}><option value={1}>1× · Tamaño original</option><option value={2}>2× · Alta resolución</option></select></label>
     <label className="field">Fondo<select value={background} onChange={e=>setBackground(e.currentTarget.value as 'white'|'transparent')}><option value="white">Blanco</option><option value="transparent">Transparente</option></select></label>
     <div className="export-size">{Math.ceil(bounds.width*safe)} × {Math.ceil(bounds.height*safe)} px</div>
+    <p>Se descargará como {`${safeName(doc.metadata.title)}.png`}.</p>
     {safe<scale && <p>El diagrama necesita una escala menor para respetar los límites de la imagen.</p>}
     {error && <p role="alert" className="error">{error}</p>}
-    <div className="dialog-actions"><button disabled={busy} onClick={onClose}>Cancelar</button><button className="primary" disabled={busy} onClick={async()=>{setBusy(true);setError('');try{const blob=await exportPng(doc,{scale,background},safe);downloadBlob(blob,`${safeName(doc.metadata.title)}.png`);onClose();}catch(e){setError(e instanceof Error?e.message:'No se pudo exportar la imagen');}finally{setBusy(false);}}}>{busy?'Generando imagen…':safe<scale?'Exportar a esta resolución':'Descargar PNG'}</button></div>
+    <div className="dialog-actions"><button disabled={busy} onClick={onClose}>Cancelar</button><button className="primary" disabled={busy} onClick={async()=>{setBusy(true);setError('');try{const blob=await exportPng(doc,{scale,background},safe);downloadBlob(blob,`${safeName(doc.metadata.title)}.png`);onClose();}catch(e){setError(e instanceof Error?e.message:'No se pudo exportar la imagen');}finally{setBusy(false);}}}>{busy?'Generando imagen…':safe<scale?'Exportar a esta resolución':'Exportar PNG'}</button></div>
   </section></div>;
 }

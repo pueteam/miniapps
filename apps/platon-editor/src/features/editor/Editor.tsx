@@ -16,6 +16,7 @@ import { randomId } from '../../lib/id';
 import { isSameSelection } from './model/selection';
 import { useAutosave } from './persistence/useAutosave';
 import { InstallButton } from '../../components/InstallButton';
+import { ShortcutsDialog } from '../../components/ShortcutsDialog';
 import './editor.css';
 
 const none: Selection={elementIds:[],edgeIds:[]};
@@ -25,7 +26,7 @@ export function Editor() {
   const [selection,setSelection]=useState<Selection>(none);
   const [viewport,setViewport]=useState<Viewport>(initialViewport);
   const [ready,setReady]=useState(false); const [error,setError]=useState('');
-  const [exporting,setExporting]=useState(false); const [paletteOpen,setPaletteOpen]=useState(false); const [inspectorOpen,setInspectorOpen]=useState(false);
+  const [exporting,setExporting]=useState(false); const [shortcutsOpen,setShortcutsOpen]=useState(false); const [paletteOpen,setPaletteOpen]=useState(false); const [inspectorOpen,setInspectorOpen]=useState(false);
   const file=useRef<HTMLInputElement>(null); const doc=history.present;
   const { status: saved, retry: retrySave } = useAutosave(doc,viewport,ready);
   useEffect(()=>{let cancelled=false; loadDraft().then(draft=>{if(!cancelled && draft){setHistory(startHistory(draft.doc));setViewport(draft.viewport);}}).catch(()=>{if(!cancelled)setError('No se pudo recuperar el borrador local. Puedes abrir un archivo JSON.');}).finally(()=>{if(!cancelled)setReady(true);}); return()=>{cancelled=true;};},[]);
@@ -52,7 +53,7 @@ export function Editor() {
       <nav className="document-actions" aria-label="Documento"><button disabled={!ready} onClick={()=>replace(emptyDiagram())}>Nuevo</button><button disabled={!ready} onClick={()=>file.current?.click()}>Abrir JSON</button><button disabled={!ready} onClick={()=>safely(()=>downloadJson(doc))}>Guardar JSON</button><button className="primary" disabled={!ready} onClick={()=>setExporting(true)}>↗ Exportar PNG</button><InstallButton /></nav>
       <input ref={file} type="file" accept=".json,application/json" hidden aria-label="Abrir archivo JSON" onChange={async event=>{const input=event.currentTarget;const selected=input.files?.[0];if(!selected)return;try{const next=parseDiagram(await selected.text());replace(next);}catch(e){setError(e instanceof Error?e.message:'Archivo no válido');}finally{input.value='';}}} />
     </header>
-    <div className="editing-toolbar"><div className="toolbar-group"><button title="Ctrl+Z" aria-label="Deshacer" disabled={!history.past.length} onClick={()=>{setHistory(undo);setSelection(none);}}>↶</button><button title="Ctrl+Y" aria-label="Rehacer" disabled={!history.future.length} onClick={()=>{setHistory(redo);setSelection(none);}}>↷</button><span className="toolbar-divider"/><button disabled={!selection.elementIds.length} onClick={duplicate}>Duplicar</button><button aria-label="Eliminar selección" disabled={!hasSelection} onClick={remove}>Eliminar</button></div>
+    <div className="editing-toolbar"><div className="toolbar-group"><button title="Ctrl+Z" aria-label="Deshacer" disabled={!history.past.length} onClick={()=>{setHistory(undo);setSelection(none);}}>↶ Deshacer</button><button title="Ctrl+Y" aria-label="Rehacer" disabled={!history.future.length} onClick={()=>{setHistory(redo);setSelection(none);}}>↷ Rehacer</button><button title="Atajos de teclado" aria-label="Ver atajos de teclado" onClick={()=>setShortcutsOpen(true)}>?</button><span className="toolbar-divider"/><button disabled={!selection.elementIds.length} onClick={duplicate}>Duplicar</button><button aria-label="Eliminar selección" disabled={!hasSelection} onClick={remove}>Eliminar</button></div>
       <div className="toolbar-group"><button disabled={!selection.elementIds.length} onClick={()=>safely(()=>{const id=randomId();commit(groupElements(doc,selection.elementIds,id));setSelection({elementIds:[id],edgeIds:[]});})}>Agrupar</button><button disabled={!selectedGroup} onClick={()=>safely(()=>{commit(ungroup(doc,selectedGroup!.id));setSelection(none);})}>Desagrupar</button><button disabled={!selectedGroup} onClick={()=>safely(()=>commit(fitGroup(doc,selectedGroup!.id)))}>Autoajustar grupo</button>
       <select aria-label="Añadir selección a grupo" value="" disabled={!selection.elementIds.length} onChange={event=>{const id=event.currentTarget.value;if(id)safely(()=>commit(reparentElements(doc,selection.elementIds,id)));}}><option value="">Mover a grupo…</option>{doc.elements.filter(e=>e.kind==='group'&&!selection.elementIds.includes(e.id)).map(e=><option value={e.id} key={e.id}>{e.data.name||'Grupo'}</option>)}</select>
       <button disabled={!selection.elementIds.some(id=>doc.elements.find(e=>e.id===id)?.parentId)} onClick={()=>safely(()=>commit(reparentElements(doc,selection.elementIds)))}>Sacar del grupo</button></div>
@@ -64,5 +65,6 @@ export function Editor() {
       <aside className={`inspector-panel ${inspectorOpen?'panel-open':''}`}><div className="panel-heading"><span className="section-label">PROPIEDADES</span><h2>{hasSelection?'Personaliza el elemento':'Tu documento'}</h2></div><Inspector doc={doc} selection={selection} onChange={next=>safely(()=>commit(next))} /></aside>
     </main>
     {exporting&&<ExportDialog doc={doc} onClose={()=>setExporting(false)} />}
+    {shortcutsOpen&&<ShortcutsDialog onClose={()=>setShortcutsOpen(false)} />}
   </div>;
 }

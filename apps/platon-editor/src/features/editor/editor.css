@@ -9,3 +9,11 @@
 @media(max-width:1100px){.document-heading{display:none}.editor-layout{grid-template-columns:180px minmax(0,1fr) 250px}.panel-heading{padding:18px 14px 12px}.inspector{padding-inline:14px}.palette{padding-inline:12px}.editor-header{gap:15px;padding-inline:16px}.brand{font-size:16px}.document-actions{gap:5px}.document-actions button{font-size:11px}}
 @media(max-width:900px){.editor-layout{display:block}.canvas-wrap{height:100%;width:100%}.palette-panel,.inspector-panel{display:none;position:absolute;top:0;bottom:0;width:255px;box-shadow:0 6px 20px #12334820}.palette-panel{left:0}.inspector-panel{right:0}.panel-open{display:flex;flex-direction:column}.mobile-panel-actions{display:flex;margin-left:auto}.editing-toolbar{gap:12px}.editor-header{min-height:70px;flex-wrap:wrap;padding:10px 14px;gap:10px}.document-actions{flex-wrap:wrap}.brand small{font-size:7px}.brand-mark{width:30px;height:33px;font-size:20px}.document-actions .install-btn{display:none}}
 @media(max-width:550px){.editor-header{display:block}.brand{margin-bottom:10px;font-size:14px}.brand small{display:inline;margin-left:9px}.brand-mark{width:25px;height:27px;font-size:17px}.document-actions{justify-content:space-between}.document-actions button{padding:7px 8px;font-size:10px}.editing-toolbar{flex-wrap:wrap;padding:5px 10px;gap:2px}.toolbar-group:nth-child(2){max-width:100%;overflow-x:auto;order:3}.mobile-panel-actions{margin-left:auto}.canvas-empty h2{font-size:17px}.canvas-empty span{max-width:230px;margin-inline:auto}.react-flow__attribution{font-size:8px!important}}
+/* Paquete A: descubribilidad */
+.platon-app .react-flow__handle{opacity:.45;transition:opacity .15s}
+.platon-app .react-flow__handle:hover,.platon-app .react-flow__handle:focus-visible{opacity:1}
+.platon-app .group-drag-handle{cursor:grab}
+.platon-app .group-drag-handle::after{content:"⋮⋮";display:block;text-align:center;font-size:10px;color:#7d99ad;line-height:32px}
+.canvas-empty button{pointer-events:all;margin-top:12px}
+.palette-tile{display:flex;align-items:center;gap:10px;text-align:left}
+.palette-tile .tile-icon{font-size:22px;line-height:1;color:#0e4a68}

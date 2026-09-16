@@ -62,7 +62,7 @@ function PlatonEdge({ data, selected }: EdgeProps<Edge<EdgeData>>) {
 }
 const nodeTypes = { platon: PlatonNode };
 const edgeTypes = { platon: PlatonEdge };
-type Props = { doc: Diagram; selection: Selection; viewport: Viewport; onCommit: (doc: Diagram) => void; onSelection: (selection: Selection) => void; onViewport: (viewport: Viewport) => void; onAdd: (kind: Kind, point: Point) => void };
+type Props = { doc: Diagram; selection: Selection; viewport: Viewport; onCommit: (doc: Diagram) => void; onSelection: (selection: Selection) => void; onViewport: (viewport: Viewport) => void; onAdd: (kind: Kind, point?: Point) => void };
 
 function Canvas(props: Props) {
   const { doc, selection, viewport, onCommit, onSelection, onViewport, onAdd } = props;
@@ -117,7 +117,7 @@ function Canvas(props: Props) {
       <Background gap={24} size={1} color="#cdd8e1" /><Controls showFitView={false} showInteractive={false} />
     </ReactFlow>
     <button className="fit-button" onClick={() => fitBounds(diagramBounds(doc), { padding:0.15, duration:200 })}>Ajustar contenido</button>
-    {!doc.elements.length && <div className="canvas-empty"><div className="empty-diagram">▢ → ◇</div><h2>Tu próxima cadena empieza aquí</h2><p>Arrastra un elemento al lienzo o pulsa Añadir JOB.</p><span>Espacio + arrastrar para desplazarte · Ctrl + rueda para ampliar</span></div>}
+    {!doc.elements.length && <div className="canvas-empty"><div className="empty-diagram">▢ → ◇</div><h2>Tu próxima cadena empieza aquí</h2><p>Arrastra un elemento al lienzo o empieza con un JOB.</p><button type="button" onClick={() => onAdd('job')}>Empezar con un JOB</button><span>Espacio + arrastrar para desplazarte · Ctrl + rueda para ampliar</span></div>}
     <div className="canvas-status">{Math.round(viewport.zoom * 100)}% <span>·</span> {doc.elements.length} elementos <span>·</span> {doc.edges.length} enlaces</div>
   </div>;
 }
