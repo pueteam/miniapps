@@ -33,11 +33,32 @@ test('al pasar el ratón la caja destaca sus salidas', async ({ page }) => {
   await page.getByRole('button', { name: 'Añadir JOB', exact: true }).click();
   await page.locator('.react-flow__pane').click({ position: { x: 30, y: 30 } });
   const node = page.locator('.react-flow__node').first();
+  const target = node.locator('.port-target').first();
+  const source = node.locator('.port-source').first();
+  await expect.poll(async () => target.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+  await expect.poll(async () => source.evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
   await node.hover({ position: { x: 50, y: 20 } });
   await page.waitForTimeout(400);
-  const source = node.locator('.port-source').first();
   await expect.poll(async () => source.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
-  expect(await source.evaluate((el) => getComputedStyle(el).width)).toBe('12px');
+  expect(await source.evaluate((el) => getComputedStyle(el).width)).toBe('14px');
+});
+
+test('al crear enlace la caja destino remarca sus entradas', async ({ page }) => {
+  await page.goto('./');
+  const canvas = page.locator('.react-flow');
+  await page.getByRole('button', { name: 'Añadir JOB', exact: true }).dragTo(canvas, { targetPosition: { x: 220, y: 70 } });
+  await page.getByRole('button', { name: 'Añadir JOB', exact: true }).dragTo(canvas, { targetPosition: { x: 220, y: 340 } });
+  const from = await page.locator('.react-flow__node').first().locator('.port-source[data-handlepos="bottom"]').boundingBox();
+  const destTarget = page.locator('.react-flow__node').nth(1).locator('.port-target[data-handlepos="top"]');
+  const destBox = await destTarget.boundingBox();
+  await page.mouse.move(from!.x + 4, from!.y + 4);
+  await page.mouse.down();
+  await page.mouse.move(destBox!.x + 4, destBox!.y + 4, { steps: 12 });
+  await expect.poll(async () => destTarget.evaluate((el) => el.classList.contains('valid'))).toBe(true);
+  await page.mouse.move(30, 30, { steps: 6 });
+  await page.mouse.up();
+  await page.waitForTimeout(500);
+  await expect(page.locator('.react-flow__edge')).toHaveCount(0);
 });
 
 test('arrastrar desde un punto de entrada no crea flechas: solo las salidas originan', async ({ page }) => {

@@ -17,12 +17,16 @@
 .canvas-empty button{pointer-events:all;margin-top:12px}
 .palette-tile{display:flex;align-items:center;gap:10px;text-align:left}
 .palette-tile .tile-icon{font-size:22px;line-height:1;color:#0e4a68}
-/* Origen: al pasar el ratón la caja destaca sus salidas */
-.platon-app .platon-node:hover .react-flow__handle.port-source{opacity:1;width:12px!important;height:12px!important;background:#086b88!important;box-shadow:0 0 0 4px #086b8826}
+/* Origen: al pasar el ratón la caja muestra sus salidas (+) */
+.platon-app .react-flow__handle.port-source{opacity:0}
+.platon-app .platon-node:hover .react-flow__handle.port-source,.platon-app .platon-node.is-selected .react-flow__handle.port-source{opacity:1;width:14px!important;height:14px!important;background:#2e9e63!important;box-shadow:0 0 0 4px #2e9e6333;color:#fff;font-size:10px;line-height:1;display:grid;place-items:center}
+.platon-app .platon-node:hover .react-flow__handle.port-source::after,.platon-app .platon-node.is-selected .react-flow__handle.port-source::after{content:"+";font-weight:800}
 .platon-app .platon-node:hover .react-flow__handle.port-target{opacity:.55}
+/* Destino: entradas siempre azules con halo; al crear enlace se remarcan */
+.platon-app .react-flow__handle.port-target{opacity:1;background:#086b88!important;box-shadow:0 0 0 4px #086b8826}
 /* Enlaces: resaltar origen y destinos válidos durante el arrastre */
 .platon-app .react-flow__handle{pointer-events:all}
 .platon-app .react-flow__handle.port-source{cursor:grab}
 .platon-app .react-flow__handle.connectingfrom{opacity:1;background:#086b88!important;box-shadow:0 0 0 5px #086b8833}
-.platon-app .react-flow__handle.valid{opacity:1;background:#2e9e63!important;box-shadow:0 0 0 5px #2e9e6333}
+.platon-app .react-flow__handle.valid{opacity:1;background:#086b88!important;box-shadow:0 0 0 6px #086b8844}
 .platon-app .react-flow__handle.clickconnecting{opacity:1;background:#b7791f!important;box-shadow:0 0 0 5px #b7791f33}
