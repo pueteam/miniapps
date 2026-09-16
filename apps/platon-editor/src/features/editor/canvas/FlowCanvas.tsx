@@ -6,6 +6,7 @@ import { moveElements } from '../model/operations';
 import { ElementView } from './ElementView';
 import { routeEdge, edgePath } from './routes';
 import { diagramBounds } from '../export/bounds';
+import { randomId } from '../../../lib/id';
 
 type NodeData = { element: DiagramElement; edit: (id: string, text: string) => void };
 type EdgeData = { doc: Diagram; edge: DiagramEdge; commit: (doc: Diagram) => void };
@@ -97,7 +98,7 @@ function Canvas(props: Props) {
       }}
       onNodeDragStart={() => { startRef.current = doc; }} onNodeDrag={(_, n) => { const base = startRef.current; if (!base) return; const origin = base.elements.find(e=>e.id===n.id); if (!origin) return; const ids = selection.elementIds.includes(n.id) ? selection.elementIds : [n.id]; preview(moveElements(base, ids, { x:n.position.x-origin.position.x, y:n.position.y-origin.position.y })); }} onNodeDragStop={finish}
       onConnect={connection => { if (!connection.source || !connection.target || connection.source === connection.target) return;
-        const edge: DiagramEdge = { id: crypto.randomUUID(), source: connection.source, target: connection.target, sourcePort: (connection.sourceHandle?.replace('out-','') ?? 'bottom') as Port, targetPort: (connection.targetHandle?.replace('in-','') ?? 'top') as Port, routing:'orthogonal', waypoints:[], color:'#334155', width:1.5 };
+        const edge: DiagramEdge = { id: randomId(), source: connection.source, target: connection.target, sourcePort: (connection.sourceHandle?.replace('out-','') ?? 'bottom') as Port, targetPort: (connection.targetHandle?.replace('in-','') ?? 'top') as Port, routing:'orthogonal', waypoints:[], color:'#334155', width:1.5 };
         onCommit({ ...doc, edges: [...doc.edges, edge] }); }}
       deleteKeyCode={null} multiSelectionKeyCode="Shift" selectionOnDrag panOnDrag={[1,2]} panActivationKeyCode="Space" zoomOnScroll={false} zoomActivationKeyCode="Control" minZoom={0.15} maxZoom={3} onlyRenderVisibleElements={false} proOptions={{ hideAttribution: false }}>
       <Background gap={24} size={1} color="#cdd8e1" /><Controls showFitView={false} showInteractive={false} />
