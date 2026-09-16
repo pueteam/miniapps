@@ -19,22 +19,33 @@ type NodeData = { element: DiagramElement; edit: (id: string, text: string) => v
 type EdgeData = { doc: Diagram; edge: DiagramEdge; commit: (doc: Diagram) => void };
 const ports = { top: Position.Top, right: Position.Right, bottom: Position.Bottom, left: Position.Left };
 
-function PlatonNode({ data, selected }: NodeProps<Node<NodeData>>) {
+export function PlatonNode({ data, selected }: NodeProps<Node<NodeData>>) {
   const e = data.element;
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const cancelled = useRef(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const finish = () => { if (!editing) return; setEditing(false); if (cancelled.current) { cancelled.current = false; return; } data.edit(e.id, text); };
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+  useEffect(() => {
+    if (!editing) return;
+    const onOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && inputRef.current && !inputRef.current.contains(event.target)) finishRef.current();
+    };
+    window.addEventListener('pointerdown', onOutside);
+    return () => window.removeEventListener('pointerdown', onOutside);
+  }, [editing]);
   const cancel = () => { cancelled.current = true; setEditing(false); };
   return <div className={`platon-node ${e.kind === 'group' ? 'platon-group' : ''} ${selected ? 'is-selected' : ''}`} style={{ width: '100%', height: '100%' }}
     onDblClick={event => { event.stopPropagation(); cancelled.current = false; setText(e.kind === 'text' ? e.data.text : e.kind === 'header' ? e.data.description : e.data.name); setEditing(true); }}>
     <NodeResizer isVisible={selected} minWidth={MIN_NODE_WIDTH} minHeight={MIN_NODE_HEIGHT} />
     <ElementView element={e} />
     {e.kind === 'group' && <div className="group-drag-handle" title="Mover grupo" aria-label="Mover grupo" />}
-    {editing && <input className="nodrag inline-edit" aria-label="Editar texto" autoFocus value={text} onInput={event => setText(event.currentTarget.value)} onBlur={finish} onKeyDown={event => { event.stopPropagation(); if (event.key === 'Enter') finish(); if (event.key === 'Escape') cancel(); }} />}
+    {editing && <input ref={inputRef} className="nodrag inline-edit" aria-label="Editar texto" autoFocus value={text} onInput={event => setText(event.currentTarget.value)} onBlur={finish} onKeyDown={event => { event.stopPropagation(); if (event.key === 'Enter') finish(); if (event.key === 'Escape') cancel(); }} />}
     {(e.kind === 'job' || e.kind === 'action') && Object.entries(ports).map(([port, position]) => <span key={port}>
-      <Handle type="target" position={position} id={`in-${port}`} className="port-target" title={`Entrada ${port}`} />
-      <Handle type="source" position={position} id={`out-${port}`} className="port-source" title={`Salida ${port}`} />
+      <Handle type="target" position={position} id={`in-${port}`} className="port-target" title={`Entrada ${port}`} isConnectableStart={false} />
+      <Handle type="source" position={position} id={`out-${port}`} className="port-source" title={`Salida ${port}`} isConnectableEnd={false} />
     </span>)}
   </div>;
 }

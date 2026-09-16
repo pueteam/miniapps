@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { emptyDiagram } from './model/document';
 import { startHistory, commitHistory, undo, redo } from './model/history';
 import { createElement } from './presets/elements';
+import { nextName, withAutoName } from './presets/autoName';
 import { deleteSelection, duplicateSelection } from './model/operations';
 import { groupElements, ungroup, reparentElements, fitGroup } from './model/groups';
 import { parseDiagram, validateDiagram } from './model/validation';
@@ -34,7 +35,7 @@ export function Editor() {
   const safely=(action:()=>void)=>{try{action();}catch(e){setError(e instanceof Error?e.message:'No se pudo completar la acción');}};
   const select=(next:Selection)=>setSelection(current=>isSameSelection(current,next)?current:next);
   const changeViewport=(next:Viewport)=>setViewport(current=>current.x===next.x&&current.y===next.y&&current.zoom===next.zoom?current:next);
-  const add=(kind:Kind,point?:Point)=>{const rect=document.querySelector('.canvas-wrap')?.getBoundingClientRect();const position=point??{x:((rect?.width??800)/2-viewport.x)/viewport.zoom-70,y:((rect?.height??500)/2-viewport.y)/viewport.zoom-40}; const e=createElement(kind,randomId(),position);commit({...doc,elements:[...doc.elements,e]});setSelection({elementIds:[e.id],edgeIds:[]});setInspectorOpen(true);};
+  const add=(kind:Kind,point?:Point)=>{const rect=document.querySelector('.canvas-wrap')?.getBoundingClientRect();const position=point??{x:((rect?.width??800)/2-viewport.x)/viewport.zoom-70,y:((rect?.height??500)/2-viewport.y)/viewport.zoom-40}; const e=withAutoName(createElement(kind,randomId(),position),nextName(doc.elements,kind));commit({...doc,elements:[...doc.elements,e]});setSelection({elementIds:[e.id],edgeIds:[]});setInspectorOpen(true);};
   const remove=()=>safely(()=>{commit(deleteSelection(doc,selection));setSelection(none);});
   const duplicate=()=>safely(()=>{const next=duplicateSelection(doc,selection.elementIds,()=>randomId());commit(next);setSelection({elementIds:next.elements.filter(e=>!doc.elements.some(old=>old.id===e.id)).map(e=>e.id),edgeIds:[]});});
   useEffect(()=>{const handler=(event:KeyboardEvent)=>{if(!ready)return; const target=event.target as HTMLElement; if(target.closest('input,textarea,select,[contenteditable="true"]') || exporting)return;

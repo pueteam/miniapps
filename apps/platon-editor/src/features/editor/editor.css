@@ -18,6 +18,7 @@
 .palette-tile{display:flex;align-items:center;gap:10px;text-align:left}
 .palette-tile .tile-icon{font-size:22px;line-height:1;color:#0e4a68}
 /* Enlaces: resaltar origen y destinos válidos durante el arrastre */
+.platon-app .react-flow__handle{pointer-events:all}
 .platon-app .react-flow__handle.port-source{cursor:grab}
 .platon-app .react-flow__handle.connectingfrom{opacity:1;background:#086b88!important;box-shadow:0 0 0 5px #086b8833}
 .platon-app .react-flow__handle.valid{opacity:1;background:#2e9e63!important;box-shadow:0 0 0 5px #2e9e6333}
