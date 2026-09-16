@@ -17,7 +17,9 @@ export function downloadBlob(blob: Blob, name: string): void {
     anchor.click();
   } finally {
     anchor.remove();
-    URL.revokeObjectURL(url);
+    const revoke = () => URL.revokeObjectURL(url);
+    if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') window.setTimeout(revoke, 1000);
+    else revoke();
   }
 }
 

@@ -1,4 +1,7 @@
+import { useEffect } from 'preact/hooks';
 import { Editor } from '../features/editor/Editor';
 import { registerSW } from './registerSW';
-registerSW();
-export function App() { return <Editor />; }
+export function App() {
+  useEffect(() => { registerSW(); }, []);
+  return <Editor />;
+}
