@@ -1,5 +1,5 @@
-import { absolutePosition } from '../model/geometry';
-import type { Diagram, DiagramEdge, DiagramElement, Point, Port } from '../model/types';
+import { absolutePosition } from './geometry';
+import type { Diagram, DiagramEdge, DiagramElement, Point, Port } from './types';
 
 function portPoint(doc: Diagram, element: DiagramElement, port: Port): Point {
   const position = absolutePosition(doc, element.id);

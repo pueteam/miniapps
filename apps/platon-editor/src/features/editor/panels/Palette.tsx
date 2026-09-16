@@ -1,6 +1,6 @@
-import type { Kind } from '../model/types';
+import type { Kind, Point } from '../model/types';
 
-type PaletteProps = { onAdd: (kind: Kind) => void };
+type PaletteProps = { onAdd: (kind: Kind, point?: Point) => void };
 
 const tiles: ReadonlyArray<{ kind: Kind; label: string }> = [
   { kind: 'job', label: 'JOB' },
@@ -12,11 +12,11 @@ const tiles: ReadonlyArray<{ kind: Kind; label: string }> = [
 
 export function Palette({ onAdd }: PaletteProps) {
   return (
-    <div class="palette" aria-label="Paleta de elementos">
+    <div className="palette" aria-label="Paleta de elementos">
       {tiles.map(({ kind, label }) => (
         <button
           key={kind}
-          class="palette-tile"
+          className="palette-tile"
           type="button"
           draggable
           aria-label={`Añadir ${label}`}

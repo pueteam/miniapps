@@ -1,6 +1,6 @@
 import type { DiagramElement, Kind, Point } from '../model/types';
 export function createElement(kind: Kind, id: string, position: Point): DiagramElement {
-  const names = { job: 'JOB', action: 'Actuación', text: '', group: 'Etiqueta', header: '' };
+  const names = { job: 'JOB', action: 'Actuación', text: '', group: 'Grupo', header: '' };
   return {
     id, kind, position: { ...position }, width: kind === 'group' ? 420 : kind === 'header' ? 400 : 220,
     height: kind === 'group' ? 280 : kind === 'header' ? 110 : 100,

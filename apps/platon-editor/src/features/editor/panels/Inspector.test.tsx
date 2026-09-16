@@ -51,7 +51,7 @@ describe('editor panels', () => {
     expect(screen.getByRole('alert').textContent).toContain('http');
   });
   it('edits and adds orthogonal waypoints without mutating the edge', () => {
-    const edgeDoc: Diagram = { ...doc, edges: [{ id: 'e', source: 'job1', target: 'job2', sourcePort: 'bottom', targetPort: 'top', routing: 'orthogonal', waypoints: [{ x: 5, y: 7 }], color: '#000000', width: 2 }] };
+    const edgeDoc: Diagram = { ...doc, elements: [...doc.elements, { ...node, id: 'job2' }], edges: [{ id: 'e', source: 'job1', target: 'job2', sourcePort: 'bottom', targetPort: 'top', routing: 'orthogonal', waypoints: [{ x: 5, y: 7 }], color: '#000000', width: 2 }] };
     const change = vi.fn();
     render(<Inspector doc={edgeDoc} selection={{ elementIds: [], edgeIds: ['e'] }} onChange={change} />);
     fireEvent.input(screen.getByLabelText('Punto 1 X'), { target: { value: '42' } });
@@ -90,7 +90,7 @@ describe('editor panels', () => {
     expect(screen.getByLabelText('Descripción')).toBeTruthy();
   });
   it('edits edge routing and removes a waypoint without mutation', () => {
-    const edgeDoc: Diagram = { ...doc, edges: [{ id: 'e', source: 'job1', target: 'job2', sourcePort: 'bottom', targetPort: 'top', routing: 'orthogonal', waypoints: [{ x: 5, y: 7 }], color: '#000000', width: 2 }] };
+    const edgeDoc: Diagram = { ...doc, elements: [...doc.elements, { ...node, id: 'job2' }], edges: [{ id: 'e', source: 'job1', target: 'job2', sourcePort: 'bottom', targetPort: 'top', routing: 'orthogonal', waypoints: [{ x: 5, y: 7 }], color: '#000000', width: 2 }] };
     const change = vi.fn();
     render(<Inspector doc={edgeDoc} selection={{ elementIds: [], edgeIds: ['e'] }} onChange={change} />);
     fireEvent.change(screen.getByLabelText('Recorrido'), { target: { value: 'straight' } });

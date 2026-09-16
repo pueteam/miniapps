@@ -1,6 +1,6 @@
 import { absolutePosition } from '../model/geometry';
 import type { Diagram, Point } from '../model/types';
-import { routeEdge } from '../canvas/routes';
+import { routeEdge } from '../model/routes';
 
 export type Bounds = { x: number; y: number; width: number; height: number };
 const MARGIN = 24;

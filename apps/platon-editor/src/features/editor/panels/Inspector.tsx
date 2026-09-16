@@ -38,7 +38,7 @@ function DraftField({ id, label, value, multiline, inputMode, onCommit }: DraftF
   };
 
   return (
-    <div class="field">
+    <div className="field">
       <label for={id}>{label}</label>
       {multiline
         ? <textarea {...controlProps} />
@@ -96,7 +96,7 @@ export function Inspector({ doc, selection, onChange }: InspectorProps) {
   };
 
   return (
-    <aside class="inspector" aria-label="Inspector">
+    <aside className="inspector" aria-label="Inspector">
       {selection.elementIds.length > 1 && <p role="note">{selection.elementIds.length} seleccionados · se edita el primero</p>}
       {element
         ? <ElementInspector
@@ -205,12 +205,12 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
   return (
     <>
       <h2>Elemento</h2>
-      <div class="section-label">Contenido</div>
+      <div className="section-label">Contenido</div>
       {(element.kind === 'job' || element.kind === 'action' || element.kind === 'group') && dataField('name', 'Nombre')}
       {(element.kind === 'job' || element.kind === 'action') && dataField('schedule', 'Horario')}
       {element.kind === 'job' && (
         <>
-          <div class="field-row">
+          <div className="field-row">
             <label for={`element-${element.id}-repetitive`}>R</label>
             <input
               id={`element-${element.id}-repetitive`}
@@ -234,8 +234,8 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
       {(element.kind === 'job' || element.kind === 'action') && dataField('annotations', 'Anotaciones', true)}
       {(element.kind === 'job' || element.kind === 'action' || element.kind === 'group') && urlField}
 
-      <div class="section-label">Apariencia</div>
-      <div class="field">
+      <div className="section-label">Apariencia</div>
+      <div className="field">
         <label for={`element-${element.id}-preset`}>Preset</label>
         <select
           id={`element-${element.id}-preset`}
@@ -250,7 +250,7 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
           {presets.map((preset) => <option key={preset.id} value={preset.id}>{preset.category}: {preset.label}</option>)}
         </select>
       </div>
-      <div class="field">
+      <div className="field">
         <label for={`element-${element.id}-shape`}>Forma</label>
         <select id={`element-${element.id}-shape`} value={element.style.shape} onChange={(event) => manualStyle({ shape: event.currentTarget.value as Style['shape'] })}>
           <option value="rectangle">Rectángulo</option>
@@ -264,11 +264,11 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
       {numericField(`element-${element.id}-radius`, 'Redondeo', element.style.radius, 0, (radius) => setManualStyle(element, { radius }))}
       <StyleColorField id={`element-${element.id}-color`} label="Color del texto" value={element.style.color} onChange={(color) => manualStyle({ color })} setError={setError} />
       {numericField(`element-${element.id}-font-size`, 'Tamaño del texto', element.style.fontSize, Number.EPSILON, (fontSize) => setManualStyle(element, { fontSize }))}
-      <div class="field-row">
+      <div className="field-row">
         <label for={`element-${element.id}-bold`}>Negrita</label>
         <input id={`element-${element.id}-bold`} type="checkbox" checked={element.style.bold} onChange={(event) => manualStyle({ bold: event.currentTarget.checked })} />
       </div>
-      <div class="field">
+      <div className="field">
         <label for={`element-${element.id}-align`}>Alineación</label>
         <select id={`element-${element.id}-align`} value={element.style.align} onChange={(event) => manualStyle({ align: event.currentTarget.value as Style['align'] })}>
           <option value="left">Izquierda</option>
@@ -277,7 +277,7 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
         </select>
       </div>
 
-      <div class="section-label">Geometría</div>
+      <div className="section-label">Geometría</div>
       {numericField(`element-${element.id}-width`, 'Ancho', element.width, Number.EPSILON, (width) => ({ ...element, width }))}
       {numericField(`element-${element.id}-height`, 'Alto', element.height, Number.EPSILON, (height) => ({ ...element, height }))}
       {numericField(`element-${element.id}-x`, 'X', element.position.x, -Infinity, (x) => ({ ...element, position: { ...element.position, x } }))}
@@ -310,7 +310,7 @@ function EdgeInspector({ doc, edge, onChange, numberCommit, setError }: { doc: D
   return (
     <>
       <h2>Enlace</h2>
-      {(['source', 'target'] as const).map(endpoint => <div class="field" key={endpoint}>
+      {(['source', 'target'] as const).map(endpoint => <div className="field" key={endpoint}>
         <label for={`edge-${edge.id}-${endpoint}`}>{endpoint === 'source' ? 'Origen' : 'Destino'}</label>
         <select id={`edge-${edge.id}-${endpoint}`} value={edge[endpoint]} onChange={event => update({...edge, [endpoint]: event.currentTarget.value})}>
           {doc.elements.filter(item => (item.kind === 'job' || item.kind === 'action') && item.id !== edge[endpoint === 'source' ? 'target' : 'source']).map(item => <option key={item.id} value={item.id}>{item.data.name || item.id}</option>)}
@@ -320,7 +320,7 @@ function EdgeInspector({ doc, edge, onChange, numberCommit, setError }: { doc: D
           <option value="top">Superior</option><option value="right">Derecho</option><option value="bottom">Inferior</option><option value="left">Izquierdo</option>
         </select>
       </div>)}
-      <div class="field">
+      <div className="field">
         <label for={`edge-${edge.id}-routing`}>Recorrido</label>
         <select id={`edge-${edge.id}-routing`} value={edge.routing} onChange={(event) => update({ ...edge, routing: event.currentTarget.value as DiagramEdge['routing'] })}>
           <option value="straight">Recto</option>
@@ -337,9 +337,9 @@ function EdgeInspector({ doc, edge, onChange, numberCommit, setError }: { doc: D
       />
       {edge.routing === 'orthogonal' && (
         <>
-          <div class="section-label">Puntos intermedios</div>
+          <div className="section-label">Puntos intermedios</div>
           {edge.waypoints.map((point, index) => (
-            <div class="field-row" key={index}>
+            <div className="field-row" key={index}>
               <DraftField
                 id={`edge-${edge.id}-waypoint-${index}-x`}
                 label={`Punto ${index + 1} X`}

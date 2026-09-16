@@ -4,7 +4,7 @@ import '@xyflow/react/dist/style.css';
 import type { Diagram, DiagramElement, DiagramEdge, Kind, Point, Selection, Viewport } from '../model/types';
 import { moveElements } from '../model/operations';
 import { ElementView } from './ElementView';
-import { routeEdge, edgePath } from './routes';
+import { routeEdge, edgePath } from '../model/routes';
 import { diagramBounds } from '../export/bounds';
 import { orderElements } from './order';
 import { createEdgeFromConnection } from './connect';

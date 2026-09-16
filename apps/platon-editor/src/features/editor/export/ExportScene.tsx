@@ -1,7 +1,7 @@
 import { absolutePosition, ancestors } from '../model/geometry';
 import type { Diagram } from '../model/types';
 import { ElementView } from '../canvas/ElementView';
-import { edgePath, routeEdge } from '../canvas/routes';
+import { edgePath, routeEdge } from '../model/routes';
 import type { Bounds } from './bounds';
 
 export function ExportScene({ doc, bounds }: { doc: Diagram; bounds: Bounds }) {

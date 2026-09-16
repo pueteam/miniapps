@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
-import { emptyDiagram } from '../model/document';
+import { emptyDiagram } from './document';
 import { createElement } from '../presets/elements';
-import type { DiagramEdge } from '../model/types';
+import type { DiagramEdge } from './types';
 import { edgePath, routeEdge } from './routes';
 
 function fixture() {

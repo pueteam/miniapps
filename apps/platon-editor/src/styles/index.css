@@ -5,21 +5,21 @@
   /* App accent token (customizable) */
   --app-accent: #004F87;
 
-  /* App semantic tokens (local mapping) */
-  --color-bg-page: var(--color-background-default);
-  --color-bg-surface: var(--color-background-default);
-  --color-text-primary: var(--color-brand-blue-900);
-  --color-text-secondary: var(--color-neutral-700);
-  --color-text-muted: var(--color-neutral-500);
-  --color-border-subtle: var(--color-neutral-100);
-  --color-border-default: var(--color-neutral-300);
+  /* App semantic tokens (local mapping with fallbacks for isolated builds) */
+  --color-bg-page: var(--color-background-default, #ffffff);
+  --color-bg-surface: var(--color-background-default, #ffffff);
+  --color-text-primary: var(--color-brand-blue-900, #172b3a);
+  --color-text-secondary: var(--color-neutral-700, #334155);
+  --color-text-muted: var(--color-neutral-500, #64748b);
+  --color-border-subtle: var(--color-neutral-100, #e2e8f0);
+  --color-border-default: var(--color-neutral-300, #cbd5e1);
   --color-accent-primary: var(--app-accent);
   --color-accent-hover: var(--app-accent);
 
-  --card-radius: var(--radius-md);
-  --card-padding: var(--space-6);
+  --card-radius: var(--radius-md, 12px);
+  --card-padding: var(--space-6, 24px);
   --button-height-md: 48px;
-  --button-radius: var(--radius-pill);
+  --button-radius: var(--radius-pill, 999px);
   --input-height: 48px;
-  --input-radius: var(--radius-md);
+  --input-radius: var(--radius-md, 12px);
 }
