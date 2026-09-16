@@ -16,6 +16,7 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['pwa-192.png', 'pwa-512.png', 'pwa-maskable-512.png'],
       manifest: {
         id: base,
@@ -41,7 +42,7 @@ export default defineConfig({
         lang: 'es'
       },
       workbox: {
-        navigateFallback: 'index.html'
+        navigateFallback: `${base}index.html`
       }
     })
   ]

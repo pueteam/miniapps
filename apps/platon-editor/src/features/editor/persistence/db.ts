@@ -8,6 +8,7 @@ export const DEFAULT_VIEWPORT: Viewport = { x: 60, y: 50, zoom: 1 };
 
 export const db = new Dexie('miniapps:platon-editor');
 db.version(1).stores({ drafts: 'id' });
+db.on('versionchange', () => { void db.close(); });
 
 function validViewport(value: unknown): Viewport {
   if (!value || typeof value !== 'object') throw new Error('Viewport local inválido');

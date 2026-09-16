@@ -27,7 +27,7 @@ export function Editor() {
   const [ready,setReady]=useState(false); const [error,setError]=useState('');
   const [exporting,setExporting]=useState(false); const [paletteOpen,setPaletteOpen]=useState(false); const [inspectorOpen,setInspectorOpen]=useState(false);
   const file=useRef<HTMLInputElement>(null); const doc=history.present;
-  const saved=useAutosave(doc,viewport,ready);
+  const { status: saved, retry: retrySave } = useAutosave(doc,viewport,ready);
   useEffect(()=>{let cancelled=false; loadDraft().then(draft=>{if(!cancelled && draft){setHistory(startHistory(draft.doc));setViewport(draft.viewport);}}).catch(()=>{if(!cancelled)setError('No se pudo recuperar el borrador local. Puedes abrir un archivo JSON.');}).finally(()=>{if(!cancelled)setReady(true);}); return()=>{cancelled=true;};},[]);
   const commit=(next:Diagram)=>{const checked=validateDiagram(next);setHistory(h=>commitHistory(h,checked));setError('');};
   const safely=(action:()=>void)=>{try{action();}catch(e){setError(e instanceof Error?e.message:'No se pudo completar la acción');}};
@@ -48,7 +48,7 @@ export function Editor() {
   const replace=(next:Diagram)=>{if(doc.elements.length && !window.confirm('¿Sustituir la cadena actual? Guarda un JSON si quieres conservarla por separado.'))return;setHistory(startHistory(next));setSelection(none);setViewport(initialViewport);};
   return <div className="platon-app">
     <header className="editor-header"><a className="brand" href="../" title="Volver a miniapps"><span className="brand-mark">P</span><span>PLATON <small>FLOW EDITOR</small></span></a>
-      <div className="document-heading"><strong>{doc.metadata.title||'Nueva cadena'}</strong><span className={`save-status ${saved==='error'?'error':''}`}><i />{!ready?'Recuperando…':saved==='saving'?'Guardando…':saved==='error'?'Error de guardado':'Guardado local'}</span></div>
+      <div className="document-heading"><strong>{doc.metadata.title||'Nueva cadena'}</strong><span className={`save-status ${saved==='error'?'error':''}`}><i />{!ready?'Recuperando…':saved==='saving'?'Guardando…':saved==='error'?<button type="button" className="save-retry" onClick={retrySave}>Error de guardado · Reintentar</button>:'Guardado local'}</span></div>
       <nav className="document-actions" aria-label="Documento"><button disabled={!ready} onClick={()=>replace(emptyDiagram())}>Nuevo</button><button disabled={!ready} onClick={()=>file.current?.click()}>Abrir JSON</button><button disabled={!ready} onClick={()=>safely(()=>downloadJson(doc))}>Guardar JSON</button><button className="primary" disabled={!ready} onClick={()=>setExporting(true)}>↗ Exportar PNG</button><InstallButton /></nav>
       <input ref={file} type="file" accept=".json,application/json" hidden aria-label="Abrir archivo JSON" onChange={async event=>{const input=event.currentTarget;const selected=input.files?.[0];if(!selected)return;try{const next=parseDiagram(await selected.text());replace(next);}catch(e){setError(e instanceof Error?e.message:'Archivo no válido');}finally{input.value='';}}} />
     </header>

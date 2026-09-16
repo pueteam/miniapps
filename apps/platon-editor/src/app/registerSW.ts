@@ -17,6 +17,20 @@ function notify() {
   for (const listener of listeners) listener();
 }
 
+function isStandalone(): boolean {
+  if (installed) return true;
+  if (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) return true;
+  return (navigator as Navigator & { standalone?: boolean }).standalone === true;
+}
+
+function doRegister(): void {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, {
+    scope: import.meta.env.BASE_URL
+  }).catch((error) => {
+    console.error('[registerSW] service worker registration failed', error);
+  });
+}
+
 export function registerSW(): void {
   if (hasRegistered) return;
   hasRegistered = true;
@@ -34,20 +48,15 @@ export function registerSW(): void {
   });
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, {
-        scope: import.meta.env.BASE_URL
-      }).catch((error) => {
-        console.error('[registerSW] service worker registration failed', error);
-      });
-    }, { once: true });
+    if (document.readyState === 'complete') doRegister();
+    else window.addEventListener('load', doRegister, { once: true });
   }
 }
 
 export function getInstallState(): InstallState {
   return {
     canInstall: installPrompt !== null,
-    isInstalled: installed
+    isInstalled: isStandalone()
   };
 }
 
@@ -56,13 +65,19 @@ export function subscribeInstallState(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-export function triggerInstall(): void {
+export async function triggerInstall(): Promise<'accepted' | 'dismissed' | null> {
   const prompt = installPrompt;
-  if (!prompt) return;
+  if (!prompt) return null;
 
-  prompt.prompt();
-  void prompt.userChoice.then(() => {
-    installPrompt = null;
-    notify();
-  });
+  try {
+    await prompt.prompt();
+    const choice = await prompt.userChoice;
+    if (choice.outcome === 'accepted') {
+      installPrompt = null;
+      notify();
+    }
+    return choice.outcome;
+  } catch {
+    return null;
+  }
 }

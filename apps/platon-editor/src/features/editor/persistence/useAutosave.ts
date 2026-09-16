@@ -4,8 +4,11 @@ import { saveDraft } from './db';
 
 export type AutosaveStatus = 'saving' | 'saved' | 'error';
 
-export function useAutosave(doc: Diagram, viewport: Viewport, enabled: boolean): AutosaveStatus {
+export const AUTOSAVE_MS = 300;
+
+export function useAutosave(doc: Diagram, viewport: Viewport, enabled: boolean): { status: AutosaveStatus; retry: () => void } {
   const [status, setStatus] = useState<AutosaveStatus>('saved');
+  const [attempt, setAttempt] = useState(0);
   const writes = useRef<Promise<void>>(Promise.resolve());
   const revision = useRef(0);
 
@@ -20,9 +23,9 @@ export function useAutosave(doc: Diagram, viewport: Viewport, enabled: boolean):
         () => { if (active && revision.current === currentRevision) setStatus('saved'); },
         () => { if (active && revision.current === currentRevision) setStatus('error'); },
       );
-    }, 300);
+    }, AUTOSAVE_MS);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [doc, viewport, enabled]);
+  }, [doc, viewport, enabled, attempt]);
 
-  return status;
+  return { status, retry: () => setAttempt((n) => n + 1) };
 }
