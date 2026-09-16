@@ -24,6 +24,7 @@ export function Palette({ onAdd }: PaletteProps) {
           onDragStart={(event) => {
             if (!event.dataTransfer) return;
             event.dataTransfer.setData('application/platon-kind', kind);
+            event.dataTransfer.setData('text/plain', kind);
             event.dataTransfer.effectAllowed = 'copy';
           }}
         >

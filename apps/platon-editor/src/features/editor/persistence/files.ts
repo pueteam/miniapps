@@ -1,7 +1,7 @@
 import type { Diagram } from '../model/types';
 import { serializeDiagram } from '../model/validation';
 
-function safeName(name: string): string {
+export function safeName(name: string): string {
   const cleaned = name.trim().replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-').replace(/[. ]+$/g, '');
   return cleaned || 'cadena-platon';
 }

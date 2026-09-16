@@ -67,7 +67,8 @@ describe('editor panels', () => {
     for (const label of ['Nombre', 'Horario', 'R', 'Preset', 'Forma', 'Relleno', 'Borde', 'Grosor del borde', 'Color del texto', 'Tamaño del texto', 'Negrita', 'Alineación', 'Ancho', 'Alto', 'X', 'Y', 'Anotaciones', 'Parámetros', 'URL']) {
       expect(screen.getByLabelText(label)).toBeTruthy();
     }
-    fireEvent.change(screen.getByLabelText('Relleno'), { target: { value: '#123456' } });
+    fireEvent.input(screen.getByLabelText('Relleno'), { target: { value: '#123456' } });
+    fireEvent.blur(screen.getByLabelText('Relleno'));
     expect(change.mock.calls[0][0].elements[0].style.fill).toBe('#123456');
     fireEvent.change(screen.getByLabelText('Preset'), { target: { value: 'monitor-abort-warning' } });
     expect(change.mock.calls[1][0].elements[0].style.presetId).toBe('monitor-abort-warning');

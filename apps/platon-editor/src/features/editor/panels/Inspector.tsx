@@ -56,13 +56,19 @@ function replaceEdge(doc: Diagram, id: string, next: DiagramEdge): Diagram {
 }
 
 function isHttpUrl(value: string) {
-  if (!value) return true;
+  const trimmed = value.trim();
+  if (!trimmed) return true;
   try {
-    const protocol = new URL(value).protocol;
+    const protocol = new URL(trimmed).protocol;
     return protocol === 'http:' || protocol === 'https:';
   } catch {
     return false;
   }
+}
+
+function isColor(value: string, allowTransparent: boolean): boolean {
+  if (allowTransparent && value === 'transparent') return true;
+  return /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(value);
 }
 
 export function Inspector({ doc, selection, onChange }: InspectorProps) {
@@ -91,6 +97,7 @@ export function Inspector({ doc, selection, onChange }: InspectorProps) {
 
   return (
     <aside class="inspector" aria-label="Inspector">
+      {selection.elementIds.length > 1 && <p role="note">{selection.elementIds.length} seleccionados · se edita el primero</p>}
       {element
         ? <ElementInspector
             doc={doc}
@@ -101,7 +108,7 @@ export function Inspector({ doc, selection, onChange }: InspectorProps) {
             numberCommit={numberCommit}
           />
         : edge
-          ? <EdgeInspector doc={doc} edge={edge} onChange={onChange} numberCommit={numberCommit} />
+          ? <EdgeInspector doc={doc} edge={edge} onChange={onChange} numberCommit={numberCommit} setError={setError} />
           : <MetadataInspector doc={doc} onChange={onChange} validText={validText} />}
       {error && <p role="alert">{error}</p>}
     </aside>
@@ -175,12 +182,13 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
         label="URL"
         value={element.data.url}
         onCommit={(value) => {
-          if (!isHttpUrl(value)) {
+          const trimmed = value.trim();
+          if (!isHttpUrl(trimmed)) {
             setError('La URL debe usar http o https.');
             return false;
           }
           setError('');
-          update({ ...element, data: { ...element.data, url: value } });
+          update({ ...element, data: { ...element.data, url: trimmed } });
           return true;
         }}
       />
@@ -232,7 +240,11 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
         <select
           id={`element-${element.id}-preset`}
           value={element.style.presetId ?? ''}
-          onChange={(event) => update(event.currentTarget.value ? applyPreset(element, event.currentTarget.value) : setManualStyle(element, {}))}
+          onChange={(event) => {
+            const next = event.currentTarget.value;
+            if (!next && !element.style.presetId) return;
+            update(next ? applyPreset(element, next) : setManualStyle(element, {}));
+          }}
         >
           <option value="">Personalizado</option>
           {presets.map((preset) => <option key={preset.id} value={preset.id}>{preset.category}: {preset.label}</option>)}
@@ -246,11 +258,11 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
           <option value="hexagon">Hexágono</option>
         </select>
       </div>
-      <StyleTextField id={`element-${element.id}-fill`} label="Relleno" value={element.style.fill} onChange={(fill) => manualStyle({ fill })} />
-      <StyleTextField id={`element-${element.id}-stroke`} label="Borde" value={element.style.stroke} onChange={(stroke) => manualStyle({ stroke })} />
+      <StyleColorField id={`element-${element.id}-fill`} label="Relleno" value={element.style.fill} allowTransparent onChange={(fill) => manualStyle({ fill })} setError={setError} />
+      <StyleColorField id={`element-${element.id}-stroke`} label="Borde" value={element.style.stroke} onChange={(stroke) => manualStyle({ stroke })} setError={setError} />
       {numericField(`element-${element.id}-stroke-width`, 'Grosor del borde', element.style.strokeWidth, 0, (strokeWidth) => setManualStyle(element, { strokeWidth }))}
       {numericField(`element-${element.id}-radius`, 'Redondeo', element.style.radius, 0, (radius) => setManualStyle(element, { radius }))}
-      <StyleTextField id={`element-${element.id}-color`} label="Color del texto" value={element.style.color} onChange={(color) => manualStyle({ color })} />
+      <StyleColorField id={`element-${element.id}-color`} label="Color del texto" value={element.style.color} onChange={(color) => manualStyle({ color })} setError={setError} />
       {numericField(`element-${element.id}-font-size`, 'Tamaño del texto', element.style.fontSize, Number.EPSILON, (fontSize) => setManualStyle(element, { fontSize }))}
       <div class="field-row">
         <label for={`element-${element.id}-bold`}>Negrita</label>
@@ -274,16 +286,26 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
   );
 }
 
-function StyleTextField({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
+function StyleColorField({ id, label, value, allowTransparent = false, onChange, setError }: { id: string; label: string; value: string; allowTransparent?: boolean; onChange: (value: string) => void; setError: (message: string) => void }) {
   return (
-    <div class="field">
-      <label for={id}>{label}</label>
-      <input id={id} value={value} onChange={(event) => onChange(event.currentTarget.value)} />
-    </div>
+    <DraftField
+      id={id}
+      label={label}
+      value={value}
+      onCommit={(draft) => {
+        if (!isColor(draft.trim(), allowTransparent)) {
+          setError(`El color de ${label.toLowerCase()} debe ser hexadecimal (#rgb, #rrggbb…).`);
+          return false;
+        }
+        setError('');
+        onChange(draft.trim());
+        return true;
+      }}
+    />
   );
 }
 
-function EdgeInspector({ doc, edge, onChange, numberCommit }: { doc: Diagram; edge: DiagramEdge; onChange: (doc: Diagram) => void; numberCommit: NumberCommit }) {
+function EdgeInspector({ doc, edge, onChange, numberCommit, setError }: { doc: Diagram; edge: DiagramEdge; onChange: (doc: Diagram) => void; numberCommit: NumberCommit; setError: (message: string) => void }) {
   const update = (next: DiagramEdge) => onChange(replaceEdge(doc, edge.id, next));
   return (
     <>
@@ -305,7 +327,7 @@ function EdgeInspector({ doc, edge, onChange, numberCommit }: { doc: Diagram; ed
           <option value="orthogonal">Ortogonal</option>
         </select>
       </div>
-      <StyleTextField id={`edge-${edge.id}-color`} label="Color" value={edge.color} onChange={(color) => update({ ...edge, color })} />
+      <StyleColorField id={`edge-${edge.id}-color`} label="Color" value={edge.color} onChange={(color) => update({ ...edge, color })} setError={setError} />
       <DraftField
         id={`edge-${edge.id}-width`}
         label="Grosor"

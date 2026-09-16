@@ -84,7 +84,7 @@ function Canvas(props: Props) {
       style: { width: e.width, height: e.height }, dragHandle: e.kind === 'group' ? '.group-drag-handle' : undefined,
       zIndex: e.kind === 'group' ? 0 : 20, selected: selection.elementIds.includes(e.id), data: { element: e, edit } }));
   }, [scene, selection, edit]);
-  const edges = scene.edges.map(edge => ({ ...edge, type: 'platon', sourceHandle: `out-${edge.sourcePort}`, targetHandle: `in-${edge.targetPort}`, zIndex: 10, selected: selection.edgeIds.includes(edge.id), data: { doc: scene, edge, commit: onCommit } }));
+  const edges = useMemo(() => scene.edges.map(edge => ({ ...edge, type: 'platon' as const, sourceHandle: `out-${edge.sourcePort}`, targetHandle: `in-${edge.targetPort}`, zIndex: 10, selected: selection.edgeIds.includes(edge.id), data: { doc: scene, edge, commit: onCommit } })), [scene, selection.edgeIds, onCommit]);
   const finish = () => { if (draftRef.current) onCommit(draftRef.current); preview(null); startRef.current = null; };
   const changes = (list: NodeChange[]) => {
     const selected = list.filter(c => c.type === 'select');

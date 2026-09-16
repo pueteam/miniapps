@@ -20,9 +20,15 @@ export async function exportPng(doc: Diagram, options: ExportOptions, scaleOverr
   document.body.append(host);
   try {
     render(<ExportScene doc={doc} bounds={bounds} />, host);
-    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
-    if (fonts) await fonts.ready;
-    await new Promise<void>(resolve => window.setTimeout(resolve, 0));
+    try {
+      const fonts = (document as Document & { fonts?: FontFaceSet }).fonts;
+      if (fonts) await fonts.ready;
+    } catch { /* las fuentes no deben abortar la exportación */ }
+    if (typeof window.requestAnimationFrame === 'function') {
+      await new Promise<void>((resolve) => window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve())));
+    } else {
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    }
     const scene = host.querySelector<HTMLElement>('[data-export-scene]');
     if (!scene) throw new Error('No se pudo preparar la escena de exportación');
     const blob = await toBlob(scene, { pixelRatio: scale, backgroundColor: options.background === 'white' ? '#ffffff' : undefined });
