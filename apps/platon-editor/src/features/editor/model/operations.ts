@@ -13,7 +13,8 @@ export function moveElements(doc: Diagram, ids: string[], delta: Point): Diagram
     const sourceBefore = absolutePosition(doc, e.source), sourceAfter = absolutePosition(result, e.source);
     const targetBefore = absolutePosition(doc, e.target), targetAfter = absolutePosition(result, e.target);
     const dx = sourceAfter.x - sourceBefore.x, dy = sourceAfter.y - sourceBefore.y;
-    return dx === targetAfter.x - targetBefore.x && dy === targetAfter.y - targetBefore.y ? { ...e, waypoints: e.waypoints.map(p => ({ x: p.x + dx, y: p.y + dy })) } : e;
+    const tdx = targetAfter.x - targetBefore.x, tdy = targetAfter.y - targetBefore.y;
+    return Math.abs(dx - tdx) < 1e-9 && Math.abs(dy - tdy) < 1e-9 ? { ...e, waypoints: e.waypoints.map(p => ({ x: p.x + dx, y: p.y + dy })) } : e;
   }); return validateDiagram(result);
 }
 export function patchElement(doc: Diagram, id: string, patch: Partial<Omit<DiagramElement, 'id' | 'kind'>>): Diagram {

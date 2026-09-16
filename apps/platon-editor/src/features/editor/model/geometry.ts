@@ -9,7 +9,11 @@ export function ancestors(doc: Diagram, id: string): string[] {
 }
 export function absolutePosition(doc: Diagram, id: string): Point {
   const chain = [id, ...ancestors(doc, id)];
-  return chain.reduce((sum, key) => { const p = doc.elements.find(e => e.id === key)!.position; return { x: sum.x + p.x, y: sum.y + p.y }; }, { x: 0, y: 0 });
+  return chain.reduce((sum, key) => {
+    const found = doc.elements.find(e => e.id === key);
+    if (!found) throw new Error('Elemento inexistente');
+    return { x: sum.x + found.position.x, y: sum.y + found.position.y };
+  }, { x: 0, y: 0 });
 }
 export function selectedRoots(doc: Diagram, ids: string[]): string[] {
   const selected = new Set(ids); return [...selected].filter(id => !ancestors(doc, id).some(p => selected.has(p)));
