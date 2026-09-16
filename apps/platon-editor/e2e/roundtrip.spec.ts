@@ -25,7 +25,7 @@ test('JSON conserva grupos, exporta PNG completo y recupera borrador',async({pag
   const json=await jsonDownload; const stream=await json.createReadStream();const chunks:Buffer[]=[];for await(const chunk of stream!)chunks.push(chunk);
   expect(JSON.parse(Buffer.concat(chunks).toString())).toEqual(fixture());
   await page.getByRole('button',{name:'Exportar PNG'}).click();
-  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Descargar PNG',exact:true}).click();const png=await download;
+  const download=page.waitForEvent('download');await page.getByRole('button',{name:'Exportar PNG',exact:true}).click();const png=await download;
   const imagePath=testInfo.outputPath('cadena.png');await png.saveAs(imagePath);
   const pngStream=await png.createReadStream();const bytes:Buffer[]=[];for await(const chunk of pngStream!)bytes.push(chunk);const data=Buffer.concat(bytes);
   expect(data.subarray(1,4).toString()).toBe('PNG');expect(data.readUInt32BE(16)).toBeGreaterThan(1200);expect(data.readUInt32BE(20)).toBeGreaterThan(900);

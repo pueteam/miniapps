@@ -80,6 +80,7 @@ type Props = { doc: Diagram; selection: Selection; viewport: Viewport; onCommit:
 function Canvas(props: Props) {
   const { doc, selection, viewport, onCommit, onSelection, onViewport, onAdd, onInvalid } = props;
   const [draft, setDraft] = useState<Diagram | null>(null);
+  const [connecting, setConnecting] = useState(false);
   const draftRef = useRef<Diagram | null>(null);
   const startRef = useRef<Diagram | null>(null);
   const { screenToFlowPosition, fitBounds } = useReactFlow();
@@ -117,8 +118,9 @@ function Canvas(props: Props) {
     preview({ ...base, elements: base.elements.map(e => { const change = sizes.find(c => c.id === e.id); return change?.type === 'dimensions' && change.dimensions ? { ...e, width: Math.max(MIN_NODE_WIDTH, change.dimensions.width), height: Math.max(MIN_NODE_HEIGHT, change.dimensions.height) } : e; }) });
     if (sizes.some(c => c.type === 'dimensions' && c.resizing === false)) finish();
   };
-  return <div className="canvas-wrap" onDragOver={event => { event.preventDefault(); if(event.dataTransfer) event.dataTransfer.dropEffect = 'copy'; }} onDrop={event => { event.preventDefault(); const kind = event.dataTransfer?.getData('application/platon-kind') as Kind; if (['job','action','text','group','header'].includes(kind)) onAdd(kind, screenToFlowPosition({ x: event.clientX, y: event.clientY })); }}>
+  return <div className={`canvas-wrap${connecting ? ' is-connecting' : ''}`} onDragOver={event => { event.preventDefault(); if(event.dataTransfer) event.dataTransfer.dropEffect = 'copy'; }} onDrop={event => { event.preventDefault(); const kind = event.dataTransfer?.getData('application/platon-kind') as Kind; if (['job','action','text','group','header'].includes(kind)) onAdd(kind, screenToFlowPosition({ x: event.clientX, y: event.clientY })); }}>
     <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes} viewport={viewport} onMoveEnd={(_, v) => onViewport(v)}
+      onConnectStart={() => setConnecting(true)} onConnectEnd={() => setConnecting(false)}
       onNodesChange={changes} onEdgesChange={changes => {
         const ids = new Set(selection.edgeIds);
         for (const change of changes) if (change.type === 'select') { if (change.selected) ids.add(change.id); else ids.delete(change.id); }
