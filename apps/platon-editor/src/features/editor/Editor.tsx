@@ -61,7 +61,7 @@ export function Editor() {
     </div>
     {error && <div className="error-banner" role="alert">{error}<button aria-label="Cerrar aviso" onClick={()=>setError('')}>×</button></div>}
     <main className="editor-layout"><aside className={`palette-panel ${paletteOpen?'panel-open':''}`}><div className="panel-heading"><span className="section-label">ELEMENTOS</span><h2>Construye tu cadena</h2><p>Arrastra al lienzo para empezar.</p></div>{ready&&<Palette onAdd={add} />}<div className="palette-note"><span>DISEÑO MANUAL</span><p>Cada objeto es editable. Los colores documentan tu flujo.</p></div></aside>
-      {ready?<FlowCanvas doc={doc} selection={selection} viewport={viewport} onCommit={next=>safely(()=>commit(next))} onSelection={select} onViewport={changeViewport} onAdd={add} />:<div className="loading">Recuperando tu espacio de trabajo…</div>}
+      {ready?<FlowCanvas doc={doc} selection={selection} viewport={viewport} onCommit={next=>safely(()=>commit(next))} onSelection={select} onViewport={changeViewport} onAdd={add} onInvalid={(message)=>setError(message)} />:<div className="loading">Recuperando tu espacio de trabajo…</div>}
       <aside className={`inspector-panel ${inspectorOpen?'panel-open':''}`}><div className="panel-heading"><span className="section-label">PROPIEDADES</span><h2>{hasSelection?'Personaliza el elemento':'Tu documento'}</h2></div><Inspector doc={doc} selection={selection} onChange={next=>safely(()=>commit(next))} /></aside>
     </main>
     {exporting&&<ExportDialog doc={doc} onClose={()=>setExporting(false)} />}

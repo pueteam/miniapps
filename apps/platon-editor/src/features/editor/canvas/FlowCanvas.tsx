@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { ReactFlow, ReactFlowProvider, Background, Controls, Handle, Position, NodeResizer, EdgeLabelRenderer, useReactFlow, type NodeChange, type Node, type Edge, type NodeProps, type EdgeProps } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, Handle, Position, NodeResizer, EdgeLabelRenderer, ConnectionLineType, useReactFlow, type NodeChange, type Node, type Edge, type NodeProps, type EdgeProps, type Connection } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import type { Diagram, DiagramElement, DiagramEdge, Kind, Point, Selection, Viewport } from '../model/types';
 import { moveElements } from '../model/operations';
@@ -7,7 +7,8 @@ import { ElementView } from './ElementView';
 import { routeEdge, edgePath } from '../model/routes';
 import { diagramBounds } from '../export/bounds';
 import { orderElements } from './order';
-import { createEdgeFromConnection } from './connect';
+import { createEdgeFromConnection, getRejectionReason, REJECTION_MESSAGES } from './connect';
+import { addWaypointAt } from './edgeEdit';
 import { applyTextEdit } from './editText';
 import { randomId } from '../../../lib/id';
 
@@ -32,8 +33,8 @@ function PlatonNode({ data, selected }: NodeProps<Node<NodeData>>) {
     {e.kind === 'group' && <div className="group-drag-handle" title="Mover grupo" aria-label="Mover grupo" />}
     {editing && <input className="nodrag inline-edit" aria-label="Editar texto" autoFocus value={text} onInput={event => setText(event.currentTarget.value)} onBlur={finish} onKeyDown={event => { event.stopPropagation(); if (event.key === 'Enter') finish(); if (event.key === 'Escape') cancel(); }} />}
     {(e.kind === 'job' || e.kind === 'action') && Object.entries(ports).map(([port, position]) => <span key={port}>
-      <Handle type="target" position={position} id={`in-${port}`} className="port-target" />
-      <Handle type="source" position={position} id={`out-${port}`} className="port-source" />
+      <Handle type="target" position={position} id={`in-${port}`} className="port-target" title={`Entrada ${port}`} />
+      <Handle type="source" position={position} id={`out-${port}`} className="port-source" title={`Salida ${port}`} />
     </span>)}
   </div>;
 }
@@ -44,9 +45,10 @@ function PlatonEdge({ data, selected }: EdgeProps<Edge<EdgeData>>) {
   const { doc, edge, commit } = data;
   const path = edgePath(routeEdge(doc, edge));
   return <>
-    <defs><marker id={`arrow-${edge.id}`} markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 Z" fill={edge.color} /></marker></defs>
+    <defs><marker id={`arrow-${edge.id}`} markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill={edge.color} /></marker></defs>
     <path d={path} fill="none" stroke="transparent" strokeWidth={18} className="react-flow__edge-interaction" />
-    <path d={path} fill="none" stroke={selected ? '#2487bc' : edge.color} strokeWidth={edge.width + (selected ? 1 : 0)} markerEnd={`url(#arrow-${edge.id})`} className="react-flow__edge-path" />
+    <path d={path} fill="none" stroke={selected ? '#2487bc' : edge.color} strokeWidth={edge.width + (selected ? 1 : 0)} markerEnd={`url(#arrow-${edge.id})`} className="react-flow__edge-path"
+      onDblClick={(event: MouseEvent) => { event.stopPropagation(); const p = screenToFlowPosition({ x: event.clientX, y: event.clientY }); commit({ ...doc, edges: doc.edges.map(e => e.id === edge.id ? addWaypointAt(e, p) : e) }); }} />
     {selected && <EdgeLabelRenderer>{edge.waypoints.map((p, index) => <button key={index} className="waypoint nodrag nopan" aria-label={`Mover punto ${index + 1}`} style={{ transform: `translate(-50%, -50%) translate(${p.x}px, ${p.y}px)` }}
       onPointerDown={event => {
         event.stopPropagation(); event.preventDefault();
@@ -62,10 +64,10 @@ function PlatonEdge({ data, selected }: EdgeProps<Edge<EdgeData>>) {
 }
 const nodeTypes = { platon: PlatonNode };
 const edgeTypes = { platon: PlatonEdge };
-type Props = { doc: Diagram; selection: Selection; viewport: Viewport; onCommit: (doc: Diagram) => void; onSelection: (selection: Selection) => void; onViewport: (viewport: Viewport) => void; onAdd: (kind: Kind, point?: Point) => void };
+type Props = { doc: Diagram; selection: Selection; viewport: Viewport; onCommit: (doc: Diagram) => void; onSelection: (selection: Selection) => void; onViewport: (viewport: Viewport) => void; onAdd: (kind: Kind, point?: Point) => void; onInvalid?: (message: string) => void };
 
 function Canvas(props: Props) {
-  const { doc, selection, viewport, onCommit, onSelection, onViewport, onAdd } = props;
+  const { doc, selection, viewport, onCommit, onSelection, onViewport, onAdd, onInvalid } = props;
   const [draft, setDraft] = useState<Diagram | null>(null);
   const draftRef = useRef<Diagram | null>(null);
   const startRef = useRef<Diagram | null>(null);
@@ -85,6 +87,9 @@ function Canvas(props: Props) {
       zIndex: e.kind === 'group' ? 0 : 20, selected: selection.elementIds.includes(e.id), data: { element: e, edit } }));
   }, [scene, selection, edit]);
   const edges = useMemo(() => scene.edges.map(edge => ({ ...edge, type: 'platon' as const, sourceHandle: `out-${edge.sourcePort}`, targetHandle: `in-${edge.targetPort}`, zIndex: 10, selected: selection.edgeIds.includes(edge.id), data: { doc: scene, edge, commit: onCommit } })), [scene, selection.edgeIds, onCommit]);
+  const isValidConnection = useCallback((connection: Connection) => {
+    return createEdgeFromConnection(draftRef.current ?? doc, connection, () => 'validación') !== null;
+  }, [doc]);
   const finish = () => { if (draftRef.current) onCommit(draftRef.current); preview(null); startRef.current = null; };
   const changes = (list: NodeChange[]) => {
     const selected = list.filter(c => c.type === 'select');
@@ -111,8 +116,13 @@ function Canvas(props: Props) {
       onNodeDragStart={() => { startRef.current = doc; }} onNodeDrag={(_, n) => { const base = startRef.current; if (!base) return; const origin = base.elements.find(e=>e.id===n.id); if (!origin) return; const ids = selection.elementIds.includes(n.id) ? selection.elementIds : [n.id]; preview(moveElements(base, ids, { x:n.position.x-origin.position.x, y:n.position.y-origin.position.y })); }} onNodeDragStop={finish}
       onConnect={connection => { const base = draftRef.current ?? doc;
         const edge = createEdgeFromConnection(base, connection, () => randomId());
-        if (!edge) return;
+        if (!edge) {
+          const reason = getRejectionReason(base, connection);
+          if (reason && onInvalid) onInvalid(REJECTION_MESSAGES[reason]);
+          return;
+        }
         onCommit({ ...base, edges: [...base.edges, edge] }); }}
+      connectionRadius={32} connectionLineStyle={{ stroke: '#086b88', strokeWidth: 2 }} connectionLineType={ConnectionLineType.Step}
       deleteKeyCode={null} multiSelectionKeyCode="Shift" selectionOnDrag panOnDrag={[1,2]} panActivationKeyCode="Space" zoomOnScroll={false} zoomActivationKeyCode="Control" minZoom={0.15} maxZoom={3} onlyRenderVisibleElements={false} proOptions={{ hideAttribution: false }}>
       <Background gap={24} size={1} color="#cdd8e1" /><Controls showFitView={false} showInteractive={false} />
     </ReactFlow>
