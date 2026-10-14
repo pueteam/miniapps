@@ -81,3 +81,5 @@ skills-lock.json
 !/.agents/skills/
 !/.agents/skills/miniapp-monorepo-builder/
 !/.agents/skills/miniapp-monorepo-builder/**
+
+/.superdesign/tmp/

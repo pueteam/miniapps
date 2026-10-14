@@ -25,7 +25,7 @@ test('home stylesheet exposes semantic tokens and uses soft page background', ()
 test('home stylesheet keeps responsive grid behavior', () => {
   const styles = readFileSync('apps/home/src/styles/index.css', 'utf8');
 
-  assert.match(styles, /grid-template-columns:\s*repeat\(auto-fit, minmax\(240px, 1fr\)\)/);
+  assert.match(styles, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media\s*\(max-width:\s*767px\)/);
   assert.match(styles, /\.grid\s*\{[^}]*gap:\s*var\(--space-4\)[^}]*margin-top:\s*var\(--space-8\)/s);
 });

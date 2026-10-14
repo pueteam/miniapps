@@ -1,0 +1,52 @@
+{
+  "targets": {
+    "/": {
+      "components": [],
+      "designSystemPath": ".superdesign/design-system.md",
+      "activeDraftId": "db839c46-6fcc-46a6-9f07-3463bee7b088",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "apps/home/src/app/App.tsx",
+        "apps/home/src/components/AppCard.tsx",
+        "apps/home/src/generated/apps-registry.ts",
+        "apps/home/src/styles/index.css",
+        "styles/base.css",
+        "apps/home/src/components/AppPreview.tsx"
+      ],
+      "targetKind": "existing-ui",
+      "baselineDraftId": "f6d884ad-ea74-4b8b-ad12-546d50d23131",
+      "drafts": {
+        "f6d884ad-ea74-4b8b-ad12-546d50d23131": {
+          "title": "Miniapps Directory Redesign",
+          "visualDirection": "Blue professional directory with compact welcome hero; cards unchanged",
+          "baselineVersion": 1,
+          "currentVersion": 4
+        },
+        "db839c46-6fcc-46a6-9f07-3463bee7b088": {
+          "title": "Miniapps - Tarjetas con vista previa",
+          "visualDirection": "Cards with decorative SVG tool previews",
+          "parentDraftId": "f6d884ad-ea74-4b8b-ad12-546d50d23131",
+          "currentVersion": 2
+        },
+        "e0e7c9e7-a2e8-41ef-8624-9185bec22c36": {
+          "title": "Miniapps Directory - Catálogo en filas",
+          "visualDirection": "Horizontal linked cards with strong icon tiles",
+          "parentDraftId": "f6d884ad-ea74-4b8b-ad12-546d50d23131",
+          "currentVersion": 1
+        }
+      },
+      "projectId": "d7d482f9-b88b-4e28-8737-df09f72d953b",
+      "updatedAt": "2026-10-14T11:50:31.997Z",
+      "fingerprints": {
+        "apps/home/src/app/App.tsx": "801550477bbab3f53ca4bfb9176fd758305bb56e94cc0e0707af59b56419b555",
+        "apps/home/src/components/AppCard.tsx": "cb5171faf39a374d89a2ed7e33cbebf92945d0382f7d4195795fe237a8db26ee",
+        "apps/home/src/styles/index.css": "3bf55eead80b4b4f0b25a8cb1e2a3444748cb051bf585a714ef303b123562902",
+        ".superdesign/design-system.md": "506f568dfa3f16aac3c2292f35ac6c5f344d39bef82aca094be00052046e3a0d",
+        "apps/home/src/generated/apps-registry.ts": "3bb9206a6ad60343e701265d1c2dde1011695bfa1ba464c068d33e9248a30636",
+        "styles/base.css": "0030ce945e80a79a723e85b8324e791df3bf395bde7421f91f3fc607b5794a47",
+        "apps/home/src/components/AppPreview.tsx": "2b362517d7820df00c0039a240615391774ebe10cdd9cdeb95e6bf053d66294d"
+      }
+    }
+  },
+  "schemaVersion": 1
+}
