@@ -9,6 +9,14 @@ test('home config uses BASE manifest defaults', () => {
   assert.strictEqual(appConfig.backgroundColor, '#FFFFFF');
 });
 
+test('home HTML and PWA manifest configuration use the same theme color', () => {
+  const appConfig = JSON.parse(readFileSync('apps/home/app.config.json', 'utf8'));
+  const html = readFileSync('apps/home/index.html', 'utf8');
+  const themeColor = html.match(/<meta\s+name="theme-color"\s+content="([^"]+)"/i)?.[1];
+
+  assert.strictEqual(themeColor?.toLowerCase(), appConfig.themeColor.toLowerCase());
+});
+
 test('home stylesheet exposes semantic tokens and uses soft page background', () => {
   const styles = readFileSync('apps/home/src/styles/index.css', 'utf8');
 
@@ -27,5 +35,5 @@ test('home stylesheet keeps responsive grid behavior', () => {
 
   assert.match(styles, /grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
   assert.match(styles, /@media\s*\(max-width:\s*767px\)/);
-  assert.match(styles, /\.grid\s*\{[^}]*gap:\s*var\(--space-4\)[^}]*margin-top:\s*var\(--space-8\)/s);
+  assert.match(styles, /\.grid\s*\{[^}]*gap:\s*var\(--space-4\)[^}]*margin-top:\s*var\(--space-5\)/s);
 });

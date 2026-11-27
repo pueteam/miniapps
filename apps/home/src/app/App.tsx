@@ -2,6 +2,8 @@ import { appsRegistry } from '../generated/apps-registry';
 import { AppCard } from '../components/AppCard';
 
 export function App() {
+  const appCount: number = appsRegistry.length;
+
   return (
     <div class="home-page">
       <header class="site-header">
@@ -17,10 +19,10 @@ export function App() {
       </header>
 
       <main class="home-layout">
-        <header class="hero" aria-labelledby="home-heading">
+        <section class="hero" aria-labelledby="home-heading">
           <div class="hero__content">
-            {/* <p class="hero__eyebrow">Miniapps: espacio de herramientas</p> */}
-            <h1 id="home-heading">MINIAPPS - Espacio de Herramientas</h1>
+            <p class="hero__eyebrow">Directorio local</p>
+            <h1 id="home-heading">Espacio de herramientas</h1>
             <p class="hero__description">Aplicaciones locales y ligeras para editar documentos, planificar recursos y organizar tus ideas.</p>
           </div>
           <svg class="hero__decoration" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -28,12 +30,12 @@ export function App() {
             <rect x="3" y="14" width="7" height="7" rx="1" />
             <rect x="14" y="14" width="7" height="7" rx="1" />
           </svg>
-        </header>
+        </section>
 
         <section class="catalog" aria-labelledby="applications-heading">
           <div class="catalog__header">
             <h2 id="applications-heading">Todas las aplicaciones</h2>
-            <span class="catalog__count">{appsRegistry.length} aplicaciones</span>
+            <span class="catalog__count">{appCount} {appCount === 1 ? 'aplicación' : 'aplicaciones'}</span>
           </div>
           <div class="grid">
             {appsRegistry.map((app) => (
