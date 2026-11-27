@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { ReactFlow, ReactFlowProvider, Background, Controls, Handle, Position, NodeResizer, EdgeLabelRenderer, ConnectionLineType, useReactFlow, type NodeChange, type Node, type Edge, type NodeProps, type EdgeProps, type Connection } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, Handle, Position, NodeResizer, EdgeLabelRenderer, ConnectionLineType, useReactFlow, type NodeChange, type Node, type Edge, type NodeProps, type EdgeProps } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import type { Diagram, DiagramElement, DiagramEdge, Kind, Point, Selection, Viewport } from '../model/types';
 import { moveElements } from '../model/operations';
@@ -99,9 +99,6 @@ function Canvas(props: Props) {
       zIndex: e.kind === 'group' ? 0 : 20, selected: selection.elementIds.includes(e.id), data: { element: e, edit } }));
   }, [scene, selection, edit]);
   const edges = useMemo(() => scene.edges.map(edge => ({ ...edge, type: 'platon' as const, sourceHandle: `out-${edge.sourcePort}`, targetHandle: `in-${edge.targetPort}`, zIndex: 10, selected: selection.edgeIds.includes(edge.id), data: { doc: scene, edge, commit: onCommit } })), [scene, selection.edgeIds, onCommit]);
-  const isValidConnection = useCallback((connection: Connection) => {
-    return createEdgeFromConnection(draftRef.current ?? doc, connection, () => 'validación') !== null;
-  }, [doc]);
   const finish = () => { if (draftRef.current) onCommit(draftRef.current); preview(null); startRef.current = null; };
   const changes = (list: NodeChange[]) => {
     const selected = list.filter(c => c.type === 'select');
@@ -159,7 +156,10 @@ function Canvas(props: Props) {
       deleteKeyCode={null} multiSelectionKeyCode="Shift" selectionOnDrag panOnDrag={[1,2]} panActivationKeyCode="Space" zoomOnScroll={false} zoomActivationKeyCode="Control" minZoom={0.15} maxZoom={3} onlyRenderVisibleElements={false} proOptions={{ hideAttribution: false }}>
       <Background gap={24} size={1} color="#cdd8e1" /><Controls showFitView={false} showInteractive={false} />
     </ReactFlow>
-    <button className="fit-button" onClick={() => fitBounds(diagramBounds(doc), { padding:0.15, duration:200 })}>Ajustar contenido</button>
+    <button className="fit-button" onClick={() => fitBounds(diagramBounds(doc), {
+      padding: 0.15,
+      duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 200,
+    })}>Ajustar contenido</button>
     {!doc.elements.length && <div className="canvas-empty"><div className="empty-diagram">▢ → ◇</div><h2>Tu próxima cadena empieza aquí</h2><p>Arrastra un elemento al lienzo o empieza con un JOB.</p><button type="button" onClick={() => onAdd('job')}>Empezar con un JOB</button><span>Espacio + arrastrar para desplazarte · Ctrl + rueda para ampliar</span></div>}
     <div className="canvas-status">{Math.round(viewport.zoom * 100)}% <span>·</span> {doc.elements.length} elementos <span>·</span> {doc.edges.length} enlaces</div>
   </div>;

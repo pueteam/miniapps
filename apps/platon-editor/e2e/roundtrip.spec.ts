@@ -39,3 +39,30 @@ test('archivo inválido conserva documento abierto',async({page})=>{
   await page.locator('input[type=file]').setInputFiles({name:'error.json',mimeType:'application/json',buffer:Buffer.from('{"version":99}')});
   await expect(page.getByRole('alert')).toBeVisible();await expect(page.locator('.react-flow__node')).toHaveCount(1);
 });
+
+test('descarga un SVG con el diagrama completo y conserva PNG como formato inicial', async ({ page }) => {
+  await page.goto('./');
+  await expect(page.getByRole('button', { name: 'Abrir JSON', exact: true })).toBeEnabled();
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'cadena.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fixture())),
+  });
+  await expect(page.locator('.react-flow__node')).toHaveCount(5);
+  await page.getByRole('button', { name: 'Exportar PNG' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Formato')).toHaveValue('png');
+  await expect(dialog.getByLabel('Resolución')).toBeVisible();
+  await dialog.getByLabel('Formato').selectOption('svg');
+  await expect(dialog.getByLabel('Resolución')).toHaveCount(0);
+  const pendingDownload = page.waitForEvent('download');
+  await dialog.getByRole('button', { name: 'Exportar SVG', exact: true }).click();
+  const download = await pendingDownload;
+  expect(download.suggestedFilename()).toBe('Cadena de integración.svg');
+  const stream = await download.createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream!) chunks.push(chunk);
+  const contents = Buffer.concat(chunks).toString();
+  expect(contents).toContain('<svg');
+  expect(contents).toContain('EXTRAER_DATOS');
+  expect(contents).toContain('PUBLICAR');
+  expect(contents).toContain('marker-end=');
+});

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { alignElements, type ElementAlignment } from '../model/operations';
 import type { Diagram, DiagramEdge, DiagramElement, Selection, Style } from '../model/types';
 import { applyPreset, presets, setManualStyle } from '../presets/catalog';
 
@@ -17,7 +18,7 @@ type DraftFieldProps = {
   onCommit: (value: string) => boolean;
 };
 
-function DraftField({ id, label, value, multiline, inputMode, onCommit }: DraftFieldProps) {
+function useDraftField(id: string, value: string, onCommit: DraftFieldProps['onCommit']) {
   const [draft, setDraft] = useState(value);
   const [committed, setCommitted] = useState(value);
 
@@ -26,17 +27,26 @@ function DraftField({ id, label, value, multiline, inputMode, onCommit }: DraftF
     setCommitted(value);
   }, [id, value]);
 
-  const commit = () => {
-    if (draft === committed) return;
-    if (onCommit(draft)) setCommitted(draft);
+  const commit = (next: string) => {
+    if (next === committed) return true;
+    if (!onCommit(next)) return false;
+    setCommitted(next);
+    return true;
   };
   const controlProps = {
     id,
     value: draft,
     onInput: (event: Event) => setDraft((event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value),
-    onBlur: commit,
+    onBlur: () => commit(draft),
   };
+  const replaceDraft = (next: string) => {
+    if (commit(next)) setDraft(next);
+  };
+  return { controlProps, replaceDraft };
+}
 
+function DraftField({ id, label, value, multiline, inputMode, onCommit }: DraftFieldProps) {
+  const { controlProps } = useDraftField(id, value, onCommit);
   return (
     <div className="field">
       <label for={id}>{label}</label>
@@ -71,10 +81,19 @@ function isColor(value: string, allowTransparent: boolean): boolean {
   return /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(value);
 }
 
+function pickerColor(value: string): string {
+  if (value === 'transparent') return '#000000';
+  const hex = value.slice(1).toLowerCase();
+  if (hex.length <= 4) return `#${hex.slice(0, 3).replace(/./g, (digit) => digit.repeat(2))}`;
+  return `#${hex.slice(0, 6)}`;
+}
+
 export function Inspector({ doc, selection, onChange }: InspectorProps) {
   const [error, setError] = useState('');
+  const [alignment, setAlignment] = useState<ElementAlignment | ''>('');
   const element = doc.elements.find((item) => item.id === selection.elementIds[0]);
   const edge = element ? undefined : doc.edges.find((item) => item.id === selection.edgeIds[0]);
+  const currentPresetId = presets.find((preset) => preset.id === element?.style.presetId)?.id;
 
   useEffect(() => setError(''), [element?.id, edge?.id]);
 
@@ -95,9 +114,54 @@ export function Inspector({ doc, selection, onChange }: InspectorProps) {
     return true;
   };
 
+  const alignSelection = () => {
+    if (!alignment) return;
+    try {
+      onChange(alignElements(doc, selection.elementIds, alignment));
+      setError('');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'No se pudo alinear la selección.');
+    }
+  };
+
+  const applyPresetToSelection = () => {
+    if (!currentPresetId) return;
+    const selectedIds = new Set(selection.elementIds);
+    setError('');
+    onChange({
+      ...doc,
+      elements: doc.elements.map((item) => selectedIds.has(item.id) ? applyPreset(item, currentPresetId) : item),
+    });
+  };
+
   return (
-    <aside className="inspector" aria-label="Inspector">
-      {selection.elementIds.length > 1 && <p role="note">{selection.elementIds.length} seleccionados · se edita el primero</p>}
+    <div className="inspector" aria-label="Inspector">
+      {selection.elementIds.length > 1 && (
+        <>
+          <p role="note">{selection.elementIds.length} seleccionados · se edita el primero</p>
+          <div className="selection-actions">
+            <div className="field-row">
+              <div className="field">
+                <select
+                  aria-label="Alinear selección"
+                  value={alignment}
+                  onChange={(event) => setAlignment(event.currentTarget.value as ElementAlignment | '')}
+                >
+                  <option value="">Alinear selección…</option>
+                  <option value="left">Izquierda</option>
+                  <option value="center">Centro horizontal</option>
+                  <option value="right">Derecha</option>
+                  <option value="top">Arriba</option>
+                  <option value="middle">Centro vertical</option>
+                  <option value="bottom">Abajo</option>
+                </select>
+              </div>
+              <button type="button" disabled={!alignment} onClick={alignSelection}>Alinear</button>
+            </div>
+            <button type="button" disabled={!currentPresetId} onClick={applyPresetToSelection}>Aplicar preset a la selección</button>
+          </div>
+        </>
+      )}
       {element
         ? <ElementInspector
             doc={doc}
@@ -111,7 +175,7 @@ export function Inspector({ doc, selection, onChange }: InspectorProps) {
           ? <EdgeInspector doc={doc} edge={edge} onChange={onChange} numberCommit={numberCommit} setError={setError} />
           : <MetadataInspector doc={doc} onChange={onChange} validText={validText} />}
       {error && <p role="alert">{error}</p>}
-    </aside>
+    </div>
   );
 }
 
@@ -130,7 +194,6 @@ function MetadataInspector({ doc, onChange, validText }: { doc: Diagram; onChang
   );
   return (
     <>
-      <h2>Documento</h2>
       {field('title', 'Título')}
       {field('lote', 'Lote')}
       {field('cadena', 'Cadena')}
@@ -204,7 +267,6 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
 
   return (
     <>
-      <h2>Elemento</h2>
       <div className="section-label">Contenido</div>
       {(element.kind === 'job' || element.kind === 'action' || element.kind === 'group') && dataField('name', 'Nombre')}
       {(element.kind === 'job' || element.kind === 'action') && dataField('schedule', 'Horario')}
@@ -247,7 +309,13 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
           }}
         >
           <option value="">Personalizado</option>
-          {presets.map((preset) => <option key={preset.id} value={preset.id}>{preset.category}: {preset.label}</option>)}
+          {['Monitorización', 'Planificación'].map((category) => (
+            <optgroup key={category} label={category}>
+              {presets.filter((preset) => preset.category === category).map((preset) => (
+                <option key={preset.id} value={preset.id}>{preset.label}</option>
+              ))}
+            </optgroup>
+          ))}
         </select>
       </div>
       <div className="field">
@@ -260,8 +328,10 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
       </div>
       <StyleColorField id={`element-${element.id}-fill`} label="Relleno" value={element.style.fill} allowTransparent onChange={(fill) => manualStyle({ fill })} setError={setError} />
       <StyleColorField id={`element-${element.id}-stroke`} label="Borde" value={element.style.stroke} onChange={(stroke) => manualStyle({ stroke })} setError={setError} />
-      {numericField(`element-${element.id}-stroke-width`, 'Grosor del borde', element.style.strokeWidth, 0, (strokeWidth) => setManualStyle(element, { strokeWidth }))}
-      {numericField(`element-${element.id}-radius`, 'Redondeo', element.style.radius, 0, (radius) => setManualStyle(element, { radius }))}
+      <div className="field-row">
+        {numericField(`element-${element.id}-stroke-width`, 'Grosor del borde', element.style.strokeWidth, 0, (strokeWidth) => setManualStyle(element, { strokeWidth }))}
+        {numericField(`element-${element.id}-radius`, 'Redondeo', element.style.radius, 0, (radius) => setManualStyle(element, { radius }))}
+      </div>
       <StyleColorField id={`element-${element.id}-color`} label="Color del texto" value={element.style.color} onChange={(color) => manualStyle({ color })} setError={setError} />
       {numericField(`element-${element.id}-font-size`, 'Tamaño del texto', element.style.fontSize, Number.EPSILON, (fontSize) => setManualStyle(element, { fontSize }))}
       <div className="field-row">
@@ -278,30 +348,48 @@ function ElementInspector({ doc, element, onChange, setError, validText, numberC
       </div>
 
       <div className="section-label">Geometría</div>
-      {numericField(`element-${element.id}-width`, 'Ancho', element.width, Number.EPSILON, (width) => ({ ...element, width }))}
-      {numericField(`element-${element.id}-height`, 'Alto', element.height, Number.EPSILON, (height) => ({ ...element, height }))}
-      {numericField(`element-${element.id}-x`, 'X', element.position.x, -Infinity, (x) => ({ ...element, position: { ...element.position, x } }))}
-      {numericField(`element-${element.id}-y`, 'Y', element.position.y, -Infinity, (y) => ({ ...element, position: { ...element.position, y } }))}
+      <div className="field-row">
+        {numericField(`element-${element.id}-width`, 'Ancho', element.width, Number.EPSILON, (width) => ({ ...element, width }))}
+        {numericField(`element-${element.id}-height`, 'Alto', element.height, Number.EPSILON, (height) => ({ ...element, height }))}
+      </div>
+      <div className="field-row">
+        {numericField(`element-${element.id}-x`, 'X', element.position.x, -Infinity, (x) => ({ ...element, position: { ...element.position, x } }))}
+        {numericField(`element-${element.id}-y`, 'Y', element.position.y, -Infinity, (y) => ({ ...element, position: { ...element.position, y } }))}
+      </div>
     </>
   );
 }
 
 function StyleColorField({ id, label, value, allowTransparent = false, onChange, setError }: { id: string; label: string; value: string; allowTransparent?: boolean; onChange: (value: string) => void; setError: (message: string) => void }) {
+  const { controlProps, replaceDraft } = useDraftField(id, value, (draft) => {
+    const color = draft.trim();
+    if (!isColor(color, allowTransparent)) {
+      setError(`El color de ${label.toLowerCase()} debe ser hexadecimal (#rgb, #rrggbb…).`);
+      return false;
+    }
+    setError('');
+    onChange(color);
+    return true;
+  });
+  const draft = controlProps.value.trim();
+  const pickerValue = pickerColor(isColor(draft, allowTransparent) ? draft : value);
+
   return (
-    <DraftField
-      id={id}
-      label={label}
-      value={value}
-      onCommit={(draft) => {
-        if (!isColor(draft.trim(), allowTransparent)) {
-          setError(`El color de ${label.toLowerCase()} debe ser hexadecimal (#rgb, #rrggbb…).`);
-          return false;
-        }
-        setError('');
-        onChange(draft.trim());
-        return true;
-      }}
-    />
+    <div className="field">
+      <label for={id}>{label}</label>
+      <div className="color-field-controls">
+        <input {...controlProps} />
+        <input
+          type="color"
+          aria-label={`Selector de color de ${label.toLowerCase()}`}
+          value={pickerValue}
+          onChange={(event) => {
+            setError('');
+            replaceDraft(event.currentTarget.value);
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -309,7 +397,6 @@ function EdgeInspector({ doc, edge, onChange, numberCommit, setError }: { doc: D
   const update = (next: DiagramEdge) => onChange(replaceEdge(doc, edge.id, next));
   return (
     <>
-      <h2>Enlace</h2>
       {(['source', 'target'] as const).map(endpoint => <div className="field" key={endpoint}>
         <label for={`edge-${edge.id}-${endpoint}`}>{endpoint === 'source' ? 'Origen' : 'Destino'}</label>
         <select id={`edge-${edge.id}-${endpoint}`} value={edge[endpoint]} onChange={event => update({...edge, [endpoint]: event.currentTarget.value})}>

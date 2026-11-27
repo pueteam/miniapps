@@ -8,14 +8,44 @@ export function deleteSelection(doc: Diagram, selection: Selection): Diagram {
 }
 export function moveElements(doc: Diagram, ids: string[], delta: Point): Diagram {
   const roots = new Set(selectedRoots(doc, ids));
-  const result = { ...doc, elements: doc.elements.map(e => roots.has(e.id) ? { ...e, position: { x: e.position.x + delta.x, y: e.position.y + delta.y } } : e) };
-  result.edges = doc.edges.map(e => {
+  const elements = doc.elements.map(e => roots.has(e.id) ? { ...e, position: { x: e.position.x + delta.x, y: e.position.y + delta.y } } : e);
+  return withMovedElements(doc, elements);
+}
+
+export type ElementAlignment = 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom';
+
+export function alignElements(doc: Diagram, ids: string[], alignment: ElementAlignment): Diagram {
+  const roots = new Set(selectedRoots(doc, ids));
+  if (roots.size < 2) return validateDiagram(doc);
+
+  const horizontal = alignment === 'left' || alignment === 'center' || alignment === 'right';
+  const axis = horizontal ? 'x' : 'y';
+  const size = horizontal ? 'width' : 'height';
+  const selected = doc.elements.filter(e => roots.has(e.id))
+    .map(e => ({ id: e.id, start: absolutePosition(doc, e.id)[axis], size: e[size] }));
+  const start = Math.min(...selected.map(e => e.start));
+  const end = Math.max(...selected.map(e => e.start + e.size));
+  const fraction = alignment === 'center' || alignment === 'middle' ? 0.5 : alignment === 'right' || alignment === 'bottom' ? 1 : 0;
+  const anchor = fraction === 0 ? start : fraction === 1 ? end : start / 2 + end / 2;
+
+  const deltas = new Map(selected.map(e => [e.id, anchor - (e.start + e.size * fraction)]));
+  const elements = doc.elements.map(e => {
+    const delta = deltas.get(e.id);
+    return delta === undefined ? e : { ...e, position: { ...e.position, [axis]: e.position[axis] + delta } };
+  });
+  return withMovedElements(doc, elements);
+}
+
+function withMovedElements(doc: Diagram, elements: DiagramElement[]): Diagram {
+  const result = { ...doc, elements };
+  const edges = doc.edges.map(e => {
     const sourceBefore = absolutePosition(doc, e.source), sourceAfter = absolutePosition(result, e.source);
     const targetBefore = absolutePosition(doc, e.target), targetAfter = absolutePosition(result, e.target);
     const dx = sourceAfter.x - sourceBefore.x, dy = sourceAfter.y - sourceBefore.y;
     const tdx = targetAfter.x - targetBefore.x, tdy = targetAfter.y - targetBefore.y;
     return Math.abs(dx - tdx) < 1e-9 && Math.abs(dy - tdy) < 1e-9 ? { ...e, waypoints: e.waypoints.map(p => ({ x: p.x + dx, y: p.y + dy })) } : e;
-  }); return validateDiagram(result);
+  });
+  return validateDiagram({ ...result, edges });
 }
 export function patchElement(doc: Diagram, id: string, patch: Partial<Omit<DiagramElement, 'id' | 'kind'>>): Diagram {
   if (!doc.elements.some(e => e.id === id)) throw new Error('Elemento inexistente');

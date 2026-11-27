@@ -1,3 +1,5 @@
+import { useDialogFocus } from './useDialogFocus';
+
 const shortcuts: ReadonlyArray<{ keys: string; action: string }> = [
   { keys: 'Supr', action: 'Eliminar selección' },
   { keys: 'Ctrl+Z', action: 'Deshacer' },
@@ -8,9 +10,11 @@ const shortcuts: ReadonlyArray<{ keys: string; action: string }> = [
 ];
 
 export function ShortcutsDialog({ onClose }: { onClose: () => void }) {
+  const { dialogRef, onBackdropClick, onDialogKeyDown } = useDialogFocus(onClose);
+
   return (
-    <div className="modal-backdrop">
-      <section className="export-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+    <div className="modal-backdrop" onClick={onBackdropClick}>
+      <section ref={dialogRef} className="export-dialog" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" tabIndex={-1} onKeyDown={onDialogKeyDown}>
         <span className="section-label">AYUDA RÁPIDA</span>
         <h2 id="shortcuts-title">Atajos de teclado</h2>
         <ul>

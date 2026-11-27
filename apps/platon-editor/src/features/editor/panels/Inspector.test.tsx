@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/preact';
+import { useState } from 'preact/hooks';
 import { describe, expect, it, vi } from 'vitest';
 import type { Diagram, DiagramElement } from '../model/types';
 import { Inspector } from './Inspector';
@@ -72,6 +73,96 @@ describe('editor panels', () => {
     expect(change.mock.calls[0][0].elements[0].style.fill).toBe('#123456');
     fireEvent.change(screen.getByLabelText('Preset'), { target: { value: 'monitor-abort-warning' } });
     expect(change.mock.calls[1][0].elements[0].style.presetId).toBe('monitor-abort-warning');
+  });
+  it('leaves the panel landmark and heading to the editor', () => {
+    render(<Inspector doc={doc} selection={selected} onChange={vi.fn()} />);
+    expect(screen.queryByRole('complementary')).toBeNull();
+    expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
+  });
+  it.each([['Grosor del borde', 'Redondeo'], ['Ancho', 'Alto'], ['X', 'Y']])('pairs %s with %s', (first, second) => {
+    render(<Inspector doc={doc} selection={selected} onChange={vi.fn()} />);
+    const row = screen.getByLabelText(first).closest('.field-row');
+    expect(row?.contains(screen.getByLabelText(second))).toBe(true);
+  });
+  it('groups presets by category', () => {
+    render(<Inspector doc={doc} selection={selected} onChange={vi.fn()} />);
+    const preset = screen.getByLabelText<HTMLSelectElement>('Preset');
+    expect(Array.from(preset.querySelectorAll('optgroup'), (group) => group.label)).toEqual(['Monitorización', 'Planificación']);
+    expect(preset.querySelector('optgroup[label="Monitorización"] option[value="monitor-abort-warning"]')).toBeTruthy();
+    expect(preset.querySelector('optgroup[label="Planificación"] option[value="planning-planned"]')).toBeTruthy();
+  });
+  it.each([
+    ['transparent', '#000000'],
+    ['#aB3', '#aabb33'],
+    ['#aB37', '#aabb33'],
+    ['#aAbB3377', '#aabb33'],
+  ])('shows %s in the picker as %s without saving that conversion', (fill, pickerValue) => {
+    const change = vi.fn();
+    const colored = { ...doc, elements: [{ ...node, style: { ...node.style, fill } }] };
+    render(<Inspector doc={colored} selection={selected} onChange={change} />);
+    expect(screen.getByLabelText<HTMLInputElement>('Selector de color de relleno').value).toBe(pickerValue);
+    expect(screen.getByLabelText<HTMLInputElement>('Relleno').value).toBe(fill);
+    expect(change).not.toHaveBeenCalled();
+  });
+  it('synchronizes color text and picker while committing only deliberate edits', () => {
+    const change = vi.fn();
+    function StatefulInspector() {
+      const [current, setCurrent] = useState(doc);
+      return <Inspector doc={current} selection={selected} onChange={(next) => { change(next); setCurrent(next); }} />;
+    }
+    render(<StatefulInspector />);
+    const hex = screen.getByLabelText<HTMLInputElement>('Relleno');
+    const picker = screen.getByLabelText<HTMLInputElement>('Selector de color de relleno');
+
+    fireEvent.input(hex, { target: { value: '#0a8' } });
+    expect(picker.value).toBe('#00aa88');
+    expect(change).not.toHaveBeenCalled();
+    fireEvent.blur(hex);
+    expect(change.mock.calls[0][0].elements[0].style.fill).toBe('#0a8');
+
+    fireEvent.input(hex, { target: { value: 'invalido' } });
+    fireEvent.blur(hex);
+    expect(screen.getByRole('alert')).toBeTruthy();
+    expect(picker.value).toBe('#00aa88');
+    fireEvent.change(picker, { target: { value: '#112233' } });
+    expect(hex.value).toBe('#112233');
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(change.mock.calls[1][0].elements[0].style.fill).toBe('#112233');
+  });
+  it('aligns the selected elements in one update after explicit confirmation', () => {
+    const two = { ...doc, elements: [node, { ...node, id: 'job2', position: { x: 90, y: 55 } }] };
+    const change = vi.fn();
+    render(<Inspector doc={two} selection={{ elementIds: ['job1', 'job2'], edgeIds: [] }} onChange={change} />);
+    const alignment = screen.getByLabelText<HTMLSelectElement>('Alinear selección');
+    const apply = screen.getByRole<HTMLButtonElement>('button', { name: 'Alinear', exact: true });
+    expect(apply.disabled).toBe(true);
+    fireEvent.change(alignment, { target: { value: 'left' } });
+    fireEvent.change(alignment, { target: { value: 'right' } });
+    expect(change).not.toHaveBeenCalled();
+    expect(alignment.value).toBe('right');
+    expect(apply.disabled).toBe(false);
+    fireEvent.click(apply);
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(change.mock.calls[0][0].elements.map((element: DiagramElement) => element.position)).toEqual([{ x: 90, y: 20 }, { x: 90, y: 55 }]);
+  });
+  it('applies the first element’s preset to every selected element in one update', () => {
+    const palette = { fill: '#ffff00', stroke: '#000000', color: '#000000', presetId: 'monitor-wait' };
+    const first = { ...node, style: { ...node.style, ...palette } };
+    const second = { ...node, id: 'job2', style: { ...node.style, bold: true } };
+    const third = { ...node, id: 'job3' };
+    const multiple = { ...doc, elements: [first, second, third] };
+    const change = vi.fn();
+    render(<Inspector doc={multiple} selection={{ elementIds: ['job1', 'job2'], edgeIds: [] }} onChange={change} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Aplicar preset a la selección' }));
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(change.mock.calls[0][0].elements).toEqual([first, { ...second, style: { ...second.style, ...palette } }, third]);
+  });
+  it.each([undefined, 'unknown-v1-preset'])('disables bulk styling when the first preset is %s', (presetId) => {
+    const first = { ...node, style: { ...node.style, ...(presetId ? { presetId } : {}) } };
+    const two = { ...doc, elements: [first, { ...node, id: 'job2' }] };
+    render(<Inspector doc={two} selection={{ elementIds: ['job1', 'job2'], edgeIds: [] }} onChange={vi.fn()} />);
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Aplicar preset a la selección' }).disabled).toBe(true);
   });
   it('shows fields specific to action, text and header elements', () => {
     const action = { ...node, id: 'action1', kind: 'action' as const };

@@ -3,7 +3,7 @@ import { emptyDiagram } from './document';
 import { createElement } from '../presets/elements';
 import { groupElements, ungroup, reparentElements, fitGroup } from './groups';
 import { absolutePosition } from './geometry';
-import { moveElements, deleteSelection, duplicateSelection, patchElement } from './operations';
+import { alignElements, moveElements, deleteSelection, duplicateSelection, patchElement } from './operations';
 import { startHistory, commitHistory, undo, redo } from './history';
 
 function fixture() {
@@ -25,6 +25,54 @@ it('mueve raíces seleccionadas una vez y puntos solo si ambos extremos se mueve
   expect(absolutePosition(moved, 'a')).toEqual({ x: 130, y: 200 });
   expect(moved.edges[0].waypoints).toEqual([{ x: 360, y: 420 }]);
   expect(moveElements(g, ['a'], { x: 10, y: 20 }).edges[0].waypoints).toEqual(g.edges[0].waypoints);
+});
+it.each([
+  ['left', 120, 120, 180, 200],
+  ['center', 220, 260, 180, 200],
+  ['right', 320, 400, 180, 200],
+  ['top', 120, 400, 180, 180],
+  ['middle', 120, 400, 180, 200],
+  ['bottom', 120, 400, 180, 220],
+] as const)('alinea %s según los bordes de la selección, sin mutar el origen', (alignment, ax, bx, ay, by) => {
+  const doc = fixture();
+  Object.assign(doc.elements[0], { width: 160, height: 80 });
+  Object.assign(doc.elements[1], { width: 80, height: 40 });
+
+  const aligned = alignElements(doc, ['a', 'b'], alignment);
+
+  expect(absolutePosition(aligned, 'a')).toEqual({ x: ax, y: ay });
+  expect(absolutePosition(aligned, 'b')).toEqual({ x: bx, y: by });
+  expect(doc.elements.map(e => e.position)).toEqual([{ x: 120, y: 180 }, { x: 400, y: 200 }]);
+});
+
+it('alinea raíces en coordenadas del lienzo y conserva posiciones locales y puntos de enlace', () => {
+  const original = fixture();
+  let doc = groupElements(original, ['a'], 'g1');
+  doc = groupElements(doc, ['b'], 'g2');
+  const childPosition = doc.elements.find(e => e.id === 'a')!.position;
+  const groupPosition = absolutePosition(doc, 'g2');
+
+  const acrossGroups = alignElements(doc, ['a', 'b'], 'left');
+  expect(absolutePosition(acrossGroups, 'b').x).toBe(120);
+  expect(absolutePosition(acrossGroups, 'g2')).toEqual(groupPosition);
+  expect(acrossGroups.edges[0].waypoints).toEqual(original.edges[0].waypoints);
+
+  const withAncestor = alignElements(doc, ['g1', 'a', 'g2'], 'right');
+  expect(withAncestor.elements.find(e => e.id === 'a')!.position).toEqual(childPosition);
+  expect(absolutePosition(withAncestor, 'a').x).toBe(400);
+  expect(absolutePosition(withAncestor, 'b').x).toBe(400);
+});
+
+it('traslada los puntos de un enlace si sus dos extremos se desplazan juntos al alinear', () => {
+  const original = fixture();
+  const grouped = groupElements(original, ['a', 'b'], 'g');
+  const target = createElement('text', 'guide', { x: -100, y: 0 });
+  const doc = { ...grouped, elements: [...grouped.elements, target] };
+  const dx = target.position.x - absolutePosition(doc, 'g').x;
+
+  const aligned = alignElements(doc, ['g', 'guide'], 'left');
+
+  expect(aligned.edges[0].waypoints).toEqual(original.edges[0].waypoints.map(point => ({ x: point.x + dx, y: point.y })));
 });
 it('rechaza ciclos y referencias inválidas', () => {
   const g = groupElements(groupElements(fixture(), ['a'], 'g'), ['g'], 'h');
